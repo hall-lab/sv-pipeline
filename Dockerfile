@@ -96,6 +96,9 @@ ENV SHELL /bin/bash
 
 RUN pip install --upgrade pip numpy scipy pysam svtools
 
+ENV REF_PATH /data/.cache/%2s/%2s/%s
+ENV REF_CACHE /data/.cache/%2s/%2s/%s
+
 #####################################
 # svtools
 
