@@ -33,14 +33,10 @@ RUN export EXTRACT_SV_READS_VERSION=1.1.0 \
     && apt-get -y install \
         --no-install-recommends \
         $runDeps \
-    && rm -rf /var/lib/apt/lists/*
-
-# speedseq
-RUN cd /opt \
-    && git clone --recursive https://github.com/ernfrid/speedseq.git
-
-# cnvnator
-RUN echo "deb [trusted=yes] https://gitlab.com/hall-lab/ccdg-apt-repo/raw/master ccdg main" | tee -a /etc/apt/sources.list \
+    && rm -rf /var/lib/apt/lists/* \
+    \
+    \ # cnvnator
+    && echo "deb [trusted=yes] https://gitlab.com/hall-lab/ccdg-apt-repo/raw/master ccdg main" | tee -a /etc/apt/sources.list \
     && runDeps=' \
        libc6 \
        libgomp1 \
@@ -53,15 +49,14 @@ RUN echo "deb [trusted=yes] https://gitlab.com/hall-lab/ccdg-apt-repo/raw/master
     && apt-get -y install \
         --no-install-recommends \
         $runDeps \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN cd /opt \
+    && rm -rf /var/lib/apt/lists/* \
+    \
+    && cd /opt \
     && wget http://colbychiang.com/hall/ccdg-cnvnator-0.3.3_0.3.3-1ubuntu14.04.deb \
     && dpkg --install ccdg-cnvnator-0.3.3_0.3.3-1ubuntu14.04.deb \
-    && rm ccdg-cnvnator-0.3.3_0.3.3-1ubuntu14.04.deb
-
-# samtools v.14
-RUN cd /opt \
+    && rm ccdg-cnvnator-0.3.3_0.3.3-1ubuntu14.04.deb \
+    \
+    && cd /opt \
     &&  wget --no-check-certificate https://github.com/samtools/samtools/releases/download/1.4/samtools-1.4.tar.bz2 \
     && tar -xf samtools-1.4.tar.bz2 && rm samtools-1.4.tar.bz2 \
     && cd samtools-1.4 \
@@ -74,14 +69,21 @@ ENV PATH /opt/ccdg/python-2.7.12/bin:${PATH}
 
 ############################################
 
+# speedseq
 
-RUN cd /opt/speedseq \
+RUN cd /opt \
+    && git clone https://github.com/ernfrid/speedseq.git \
+    && cd /opt/speedseq \
     && git checkout v0.1.2_cram_support \
     && git submodule sync \
     && git submodule update --init \
-    \
-    && cd /opt/speedseq \
-    && make align \
+        src/bamkit \
+	src/lumpy-sv \
+	src/parallel \
+	src/samblaster \
+	src/svtyper \
+	src/tabix \
+	src/vawk \
     \
     && cd /opt/speedseq \
     && make sv \
