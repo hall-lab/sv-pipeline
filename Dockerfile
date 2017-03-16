@@ -92,7 +92,13 @@ RUN cd /opt/speedseq \
 
 
 ENV PATH /opt/speedseq/bin:${PATH}
+ENV SHELL /bin/bash
 
-RUN pip install --upgrade pip numpy scipy pysam
+RUN pip install --upgrade pip numpy scipy pysam svtools
+
+#####################################
+# svtools
+
+
 
 CMD ["/bin/bash"]
