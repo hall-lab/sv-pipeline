@@ -89,8 +89,8 @@ RUN cd /opt \
     && make sv \
     \
     && cd /opt/speedseq/bin \
-    && scp /usr/local/bin/cnvnator . \
-    && ln -s /usr/local/bin/cnvnator cnvnator-multi
+    && scp /opt/ccdg/cnvnator-0.3.3/bin/cnvnator . \
+    && ln -s /opt/ccdg/cnvnator-0.3.3/bin/cnvnator cnvnator-multi
 
 
 ENV PATH /opt/speedseq/bin:${PATH}
