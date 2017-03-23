@@ -1,7 +1,7 @@
 
 {
-  "Lumpy.input_cram": "NA12878",
-  "Lumpy.input_cram": "NA12878",
+  "Lumpy.input_cram": "gs://ccdg-100-samples-trios-pilot-crams/WashU/WashU/Coriell_Trios_1/H_IJ-NA12878-NA12878_K10/v1/H_IJ-NA12878-NA12878_K10.cram",
+  "Lumpy.input_cram_index": "NA12878",
   "Lumpy.input_splitters_bam": "this",
   "Lumpy.input_splitters_bam_index": "this",
   "Lumpy.input_discordants_bam": "this",
@@ -9,7 +9,7 @@
   "Lumpy.ref_fasta": "this",
   "Lumpy.exclude_regions": "exclude.bed",
   "Lumpy.output_basename": "output",
-  "Lumpy.disk_size": 10,
+  "Lumpy.disk_size": 10
 
 
   "Lumpy.refIndex": "/path/to/SimpleVariantDiscovery/ref/human_g1k_b37_20.fasta.fai",

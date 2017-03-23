@@ -1,0 +1,6 @@
+
+{
+  "SV_Detect.input_cram": "gs://ccdg-100-samples-trios-pilot-crams/WashU/WashU/Coriell_Trios_1/H_IJ-NA12878-NA12878_K10/v1/H_IJ-NA12878-NA12878_K10.cram",
+  "SV_Detect.disk_size": 100,
+  "SV_Detect.preemptible_tries": 3
+}
