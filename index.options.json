@@ -1,7 +1,4 @@
 
 {
-  "read_from_cache":false,
-  "defaultRuntimeOptions": {
-    "zones": "us-central1-b us-central1-c"
-  }
+  "read_from_cache":false
 }
