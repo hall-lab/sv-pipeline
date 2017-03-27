@@ -65,7 +65,7 @@ task Lumpy {
   File input_cram
   File input_cram_index
   File input_splitters_bam
-  File input_spittlers_bam_index
+  File input_splitters_bam_index
   File input_discordants_bam
   File input_discordants_bam_index
   
@@ -143,15 +143,17 @@ workflow SV_Detect {
   # input_discordants_bam = Extract_Reads.output_discordants_bam,
   # input_discordants_bam_index = Extract_Reads.output_discordants_bam_index,
 
+  # File input_cram
+  # File input_cram_index
+  # File input_splitters_bam
+  # File input_splitters_bam_index
+  # File input_discordants_bam
+  # File input_discordants_bam_index
+
+
   call Lumpy {
     input:
     basename = basename,
-    input_cram = input_cram,
-    input_cram_index = input_cram_index,
-    input_splitters_bam = input_splitters_bam,
-    input_splitters_bam_index = input_splitters_bam_index,
-    input_discordants_bam = input_discordants_bam,
-    input_discordants_bam_index = input_discordants_bam_index,
     ref_fasta = ref_fasta,
     exclude_regions = exclude_regions,
     disk_size = disk_size,
