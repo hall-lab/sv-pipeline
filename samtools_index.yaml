@@ -1,0 +1,28 @@
+name: samtools_index
+description: Run samtools index to generate a BAM index file
+inputParameters:
+- name: INPUT_FILE
+  localCopy:
+    disk: datadisk
+    path: input.bam
+outputParameters:
+- name: OUTPUT_FILE
+  localCopy:
+    disk: datadisk
+    path: input.bam.bai
+resources:
+  minimumCpuCores: 1
+  minimumRamGb: 1
+  zones:
+  - us-central1-a
+  - us-central1-b
+  - us-central1-c
+  - us-central1-f
+  disks:
+  - name: datadisk
+    type: PERSISTENT_HDD
+    sizeGb: 100
+    mountPoint: /mnt/data
+docker:
+  imageName: quay.io/cancercollaboratory/dockstore-tool-samtools-index
+  cmd: "samtools index ${INPUT_FILE}"

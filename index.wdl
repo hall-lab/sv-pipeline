@@ -136,6 +136,56 @@ task SV_Genotype {
   }
 }
 
+task CNVnator_Histogram {
+  String basename
+  File input_cram
+  File input_cram_index
+  File ref_fasta
+  File ref_fasta_index
+  String ref_chrom_dir = "cnvnator_chroms"
+  Int disk_size
+  Int preemptible_tries
+  Int threads = 4
+  
+  command <<<
+    mv ${input_cram} ${basename}.cram
+    mv ${input_cram_index} ${basename}.cram.crai
+
+    # Create REF_CACHE for reading a CRAM file
+    seq_cache_populate.pl -root ./ref/cache ${ref_fasta}
+    export REF_PATH=./ref/cache/%2s/%2s/%s
+    export REF_CACHE=./ref/cache/%2s/%2s/%s
+    
+    # Create directory of chromosome FASTA files for CNVnator
+    CHROM_DIR=cnvnator_chroms
+    mkdir -p ${ref_chrom_dir}
+    awk -v CHROM_DIR=${ref_chrom_dir} 'BEGIN { CHROM="" } { if ($1~"^>") CHROM=substr($1,2); print $0 > CHROM_DIR"/"CHROM".fa" }' ${ref_fasta}
+
+    cnvnator_wrapper.py \
+      -T cnvnator.out \
+      -o ${basename}.cn \
+      -t ${threads} \
+      -w 100 \
+      -b ${basename}.cram \
+      -c $CHROM_DIR \
+      -g GRCh38
+  >>>
+
+  runtime {
+    docker: "cc2qe/lumpy:v1"
+    cpu: threads
+    memory: "26 GB"
+    disks: "local-disk " + disk_size + " HDD" 
+  }
+
+  output {
+    File output_cn_root = "${basename}.cram.root"
+    File output_cn_hist_root = "${basename}.cram.hist.root"
+    File output_cn_txt = "${basename}.cn.txt"
+    File output_cn_bed = "${basename}.cn.bed"
+  }
+}
+
 # SV detection workflow
 workflow SV_Detect {
   File aligned_cram
@@ -186,7 +236,16 @@ workflow SV_Detect {
   #   preemptible_tries = preemptible_tries
   # }
 
-  call SV_Genotype {
+  # call SV_Genotype {
+  #   input:
+  #   basename = basename,
+  #   ref_fasta = ref_fasta,
+  #   ref_fasta_index = ref_fasta_index,
+  #   disk_size = disk_size,
+  #   preemptible_tries = preemptible_tries
+  # }
+  
+  call CNVnator_Histogram {
     input:
     basename = basename,
     ref_fasta = ref_fasta,

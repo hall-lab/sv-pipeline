@@ -20,5 +20,8 @@
   
   "SV_Detect.SV_Genotype.input_cram": "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.cram",
   "SV_Detect.SV_Genotype.input_cram_index": "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.cram.crai",
-  "SV_Detect.SV_Genotype.input_vcf": "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/lumpy/H_IJ-NA12878-NA12878_K10.vcf"
+  "SV_Detect.SV_Genotype.input_vcf": "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/lumpy/H_IJ-NA12878-NA12878_K10.vcf",
+
+  "SV_Detect.CNVnator_Histogram.input_cram": "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.cram",
+  "SV_Detect.CNVnator_Histogram.input_cram_index": "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.cram.crai"
 }
