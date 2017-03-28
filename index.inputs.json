@@ -11,10 +11,14 @@
   "SV_Detect.ref_alt": "gs://human-b38/GRCh38DH/all_sequences.fa.alt",
   "SV_Detect.exclude_regions": "gs://human-b38/GRCh38DH/annotations/exclude.cnvnator_100bp.GRCh38.20170131.bed",
 
-  "SV_Detect.Lumpy.input_cram" = "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.cram",
-  "SV_Detect.Lumpy.input_cram_index" = "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.cram.crai",
-  "SV_Detect.Lumpy.input_splitters_bam" = "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.splitters.bam",
-  "SV_Detect.Lumpy.input_splitters_bam_index" = "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.splitters.bam.bai",
-  "SV_Detect.Lumpy.input_discordants_bam" = "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.discordants.bam",
-  "SV_Detect.Lumpy.input_discordants_bam_index" = "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.discordants.bam.bai"
+  "SV_Detect.Lumpy.input_cram": "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.cram",
+  "SV_Detect.Lumpy.input_cram_index": "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.cram.crai",
+  "SV_Detect.Lumpy.input_splitters_bam": "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.splitters.bam",
+  "SV_Detect.Lumpy.input_splitters_bam_index": "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.splitters.bam.bai",
+  "SV_Detect.Lumpy.input_discordants_bam": "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.discordants.bam",
+  "SV_Detect.Lumpy.input_discordants_bam_index": "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.discordants.bam.bai",
+  
+  "SV_Detect.SV_Genotype.input_cram": "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.cram",
+  "SV_Detect.SV_Genotype.input_cram_index": "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/H_IJ-NA12878-NA12878_K10.cram.crai",
+  "SV_Detect.SV_Genotype.input_vcf": "gs://ccdg-100-samples-trios-pilot-crams-mgi/outputs/lumpy/H_IJ-NA12878-NA12878_K10.vcf"
 }

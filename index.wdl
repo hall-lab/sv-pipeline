@@ -59,7 +59,6 @@ task Extract_Reads {
 }
 
 # run LUMPY
-# change this to lumpyexpress + svtyper --cc
 task Lumpy {
   String basename
   File input_cram
@@ -69,29 +68,28 @@ task Lumpy {
   File input_discordants_bam
   File input_discordants_bam_index
   
-  # ref_fasta unnecessary with lumpyexpress
   File ref_fasta
+  File ref_fasta_index
   File exclude_regions
   Int disk_size
   Int preemptible_tries
 
   command {
-    speedseq sv \
+    lumpyexpress \
       -P \
-      -g \
       -T ${basename}.temp \
-      -o ${basename} \
+      -o ${basename}.vcf \
       -B ${input_cram} \
       -S ${input_splitters_bam} \
       -D ${input_discordants_bam} \
       -R ${ref_fasta} \
       -x ${exclude_regions} \
-      -v \
-      -k
+      -k \
+      -v
   }
   
   runtime {
-    docker: "cc2qe/sv-pipeline:v1"
+    docker: "cc2qe/lumpy:v1"
     cpu: "1"
     memory: "8 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -99,8 +97,42 @@ task Lumpy {
   
   # after convert to lumpy express, output the library JSON file as well
   output {
-    File output_sv_vcf = "${basename}.sv.vcf.gz"
-    File output_sv_vcf_index = "${basename}.sv.vcf.gz.tbi"
+    File output_sv_vcf = "${basename}.vcf"
+  }
+}
+
+task SV_Genotype {
+  String basename
+  File input_cram
+  File input_cram_index
+  File input_vcf
+  File ref_fasta
+  File ref_fasta_index
+  Int disk_size
+  Int preemptible_tries
+  
+  command {
+    mv ${input_cram} ${basename}.cram
+    mv ${input_cram_index} ${basename}.cram.crai
+    rm -f ${basename}.cram.json
+    svtyper \
+      -i ${input_vcf} \
+      -B ${basename}.cram \
+      -T ${ref_fasta} \
+      -l ${basename}.cram.json \
+      > ${basename}.gt.vcf
+  }
+  
+  runtime {
+    docker: "cc2qe/lumpy:v1"
+    cpu: "1"
+    memory: "8 GB"
+    disks: "local-disk " + disk_size + " HDD"
+  }
+
+  output {
+    File output_vcf = "${basename}.gt.vcf"
+    File output_lib = "${basename}.cram.json"
   }
 }
 
@@ -115,6 +147,7 @@ workflow SV_Detect {
 
   File ref_fasta
   File ref_fasta_index
+  File exclude_regions
 
   # Because of a wdl/cromwell bug this is not currently valid so we have to sub(sub()) in each task
   # String basename = sub(sub(unmapped_bam, "gs://.*/", ""), unmapped_bam_suffix + "$", "")
@@ -143,19 +176,21 @@ workflow SV_Detect {
   # input_discordants_bam = Extract_Reads.output_discordants_bam,
   # input_discordants_bam_index = Extract_Reads.output_discordants_bam_index,
 
-  # File input_cram
-  # File input_cram_index
-  # File input_splitters_bam
-  # File input_splitters_bam_index
-  # File input_discordants_bam
-  # File input_discordants_bam_index
+  # call Lumpy {
+  #   input:
+  #   basename = basename,
+  #   ref_fasta = ref_fasta,
+  #   ref_fasta_index = ref_fasta_index,
+  #   exclude_regions = exclude_regions,
+  #   disk_size = disk_size,
+  #   preemptible_tries = preemptible_tries
+  # }
 
-
-  call Lumpy {
+  call SV_Genotype {
     input:
     basename = basename,
     ref_fasta = ref_fasta,
-    exclude_regions = exclude_regions,
+    ref_fasta_index = ref_fasta_index,
     disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
