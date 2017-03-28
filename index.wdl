@@ -157,7 +157,6 @@ task CNVnator_Histogram {
     export REF_CACHE=./ref/cache/%2s/%2s/%s
     
     # Create directory of chromosome FASTA files for CNVnator
-    CHROM_DIR=cnvnator_chroms
     mkdir -p ${ref_chrom_dir}
     awk -v CHROM_DIR=${ref_chrom_dir} 'BEGIN { CHROM="" } { if ($1~"^>") CHROM=substr($1,2); print $0 > CHROM_DIR"/"CHROM".fa" }' ${ref_fasta}
 
@@ -167,12 +166,12 @@ task CNVnator_Histogram {
       -t ${threads} \
       -w 100 \
       -b ${basename}.cram \
-      -c $CHROM_DIR \
+      -c ${ref_chrom_dir} \
       -g GRCh38
   >>>
 
   runtime {
-    docker: "cc2qe/lumpy:v1"
+    docker: "cc2qe/cnvnator:v1"
     cpu: threads
     memory: "26 GB"
     disks: "local-disk " + disk_size + " HDD" 
