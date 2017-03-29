@@ -158,7 +158,7 @@ task CNVnator_Histogram {
 
     # infer the sex of the sample
     samtools idxstats ${basename}.cram \
-      | awk '$1=="chrX" { print $1":0-"$2 } END { print "exit"}'
+      | awk '$1=="chrX" { print $1":0-"$2 } END { print "exit"}' \
       | cnvnator -root cnvnator.out/${basename}.cram.hist.root -genotype 100 \
       | grep -v "^Assuming male" \
       | awk -v SAMPLE=${basename} '{ printf(SAMPLE"\t%.0f\t%f\n", $4,$4); }' \
