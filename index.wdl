@@ -1,42 +1,28 @@
-# index
-task Index_Cram {
-  File input_cram
-  String basename
-  Int disk_size
-  Int preemptible_tries
-  
-  command {
-    mv ${input_cram} ${basename}.cram
-    samtools index ${basename}.cram
-  }
-
-  runtime {
-    docker: "cc2qe/samtools:v1"
-    cpu: "1"
-    memory: "1 GB"
-    disks: "local-disk " + disk_size + " HDD"
-  }
-
-  output {
-    File output_cram = "${basename}.cram"
-    File output_cram_index = "${basename}.cram.crai"
-  }
-}
-
 # extract split/discordant reads
 task Extract_Reads {
   File input_cram
   String basename
   File ref_fasta
+  File ref_fasta_index
   Int disk_size
   Int preemptible_tries
 
   command {
+    mv ${input_cram} ${basename}.cram
+    
+    # Create REF_CACHE for reading a CRAM file
+    seq_cache_populate.pl -root ./ref/cache ${ref_fasta}
+    export REF_PATH=./ref/cache/%2s/%2s/%s
+    export REF_CACHE=./ref/cache/%2s/%2s/%s
+
+    # index the CRAM
+    samtools index ${basename}.cram
+
     extract-sv-reads \
       -e \
       -r \
       -T ${ref_fasta} \
-      -i ${input_cram} \
+      -i ${basename}.cram \
       -s ${basename}.splitters.bam \
       -d ${basename}.discordants.bam
     samtools index ${basename}.splitters.bam
@@ -51,6 +37,8 @@ task Extract_Reads {
   }
 
   output {
+    File output_cram = "${basename}.cram"
+    File output_cram_index = "${basename}.cram.crai"
     File output_splitters_bam = "${basename}.splitters.bam"
     File output_splitters_bam_index = "${basename}.splitters.bam.bai"
     File output_discordants_bam = "${basename}.discordants.bam"
@@ -58,7 +46,7 @@ task Extract_Reads {
   }
 }
 
-# run LUMPY
+# LUMPY SV discovery
 task Lumpy {
   String basename
   File input_cram
@@ -95,9 +83,8 @@ task Lumpy {
     disks: "local-disk " + disk_size + " HDD"
   }
   
-  # after convert to lumpy express, output the library JSON file as well
   output {
-    File output_sv_vcf = "${basename}.vcf"
+    File output_vcf = "${basename}.vcf"
   }
 }
 
@@ -167,7 +154,16 @@ task CNVnator_Histogram {
       -w 100 \
       -b ${basename}.cram \
       -c ${ref_chrom_dir} \
-      -g GRCh38
+      -g GRCh38 \
+      --cnvnator cnvnator
+
+    # infer the sex of the sample
+    samtools idxstats ${basename}.cram \
+      | awk '$1=="chrX" { print $1":0-"$2 } END { print "exit"}'
+      | cnvnator -root cnvnator.out/${basename}.cram.hist.root -genotype 100 \
+      | grep -v "^Assuming male" \
+      | awk -v SAMPLE=${basename} '{ printf(SAMPLE"\t%.0f\t%f\n", $4,$4); }' \
+      > ${basename}.sex.txt
   >>>
 
   runtime {
@@ -178,18 +174,31 @@ task CNVnator_Histogram {
   }
 
   output {
-    File output_cn_root = "${basename}.cram.root"
-    File output_cn_hist_root = "${basename}.cram.hist.root"
+    File output_cn_root = "cnvnator.out/${basename}.cram.root"
+    File output_cn_hist_root = "cnvnator.out/${basename}.cram.hist.root"
     File output_cn_txt = "${basename}.cn.txt"
     File output_cn_bed = "${basename}.cn.bed"
+    File output_sex = "${basename}.sex.txt"
+  }
+}
+
+task Merge_Cohort_VCFs {
+  Array[File] input_vcfs
+  Int disk_size
+  Int preemptible_tries
+
+  command {
+    svtools lsort \
+      ${basename}.vcf \
+      | bgzip -c \
+      > /data/sorted.vcf.gz
   }
 }
 
 # SV detection workflow
 workflow SV_Detect {
-  File aligned_cram
+  Array[File] aligned_crams
   String aligned_cram_suffix
-  String basename = sub(sub(aligned_cram, "gs://.*/", ""), aligned_cram_suffix + "$", "")
 
   Int disk_size
   Int preemptible_tries
@@ -198,58 +207,64 @@ workflow SV_Detect {
   File ref_fasta_index
   File exclude_regions
 
-  # Because of a wdl/cromwell bug this is not currently valid so we have to sub(sub()) in each task
-  # String basename = sub(sub(unmapped_bam, "gs://.*/", ""), unmapped_bam_suffix + "$", "")
+  scatter (aligned_cram in aligned_crams) {
+    
+    # Because of a wdl/cromwell bug this is not currently valid so we have to sub(sub()) in each task
+    # String basename = sub(sub(aligned_cram, "gs://.*/", ""), aligned_cram_suffix + "$", "")
 
-  # call Index_Cram {
-  #   input:
-  #   input_cram = aligned_cram,
-  #   basename = basename,
-  #   disk_size = disk_size,
-  #   preemptible_tries = preemptible_tries
-  # }
-  
-  # call Extract_Reads {
-  #   input:
-  #   input_cram = Index_Cram.output_cram,
-  #   basename = basename,
-  #   disk_size = disk_size,
-  #   preemptible_tries = preemptible_tries,
-  #   ref_fasta = ref_fasta
-  # }
-
-  # input_cram = Index_Cram.output_cram,
-  # input_cram_index = Index_Cram.output_cram_index,
-  # input_splitters_bam = Extract_Reads.output_splitters_bam,
-  # input_splitters_bam_index = Extract_Reads.output_splitters_bam_index,
-  # input_discordants_bam = Extract_Reads.output_discordants_bam,
-  # input_discordants_bam_index = Extract_Reads.output_discordants_bam_index,
-
-  # call Lumpy {
-  #   input:
-  #   basename = basename,
-  #   ref_fasta = ref_fasta,
-  #   ref_fasta_index = ref_fasta_index,
-  #   exclude_regions = exclude_regions,
-  #   disk_size = disk_size,
-  #   preemptible_tries = preemptible_tries
-  # }
-
-  # call SV_Genotype {
-  #   input:
-  #   basename = basename,
-  #   ref_fasta = ref_fasta,
-  #   ref_fasta_index = ref_fasta_index,
-  #   disk_size = disk_size,
-  #   preemptible_tries = preemptible_tries
-  # }
-  
-  call CNVnator_Histogram {
-    input:
-    basename = basename,
-    ref_fasta = ref_fasta,
-    ref_fasta_index = ref_fasta_index,
-    disk_size = disk_size,
-    preemptible_tries = preemptible_tries
+    String basename = sub(sub(aligned_cram, "gs://.*/", ""), aligned_cram_suffix + "$", "")
+    
+    call Extract_Reads {
+      input:
+      input_cram = aligned_cram,
+      basename = basename,
+      disk_size = disk_size,
+      preemptible_tries = preemptible_tries,
+      ref_fasta = ref_fasta,
+      ref_fasta_index = ref_fasta_index
+    }
+    
+    call Lumpy {
+      input:
+      basename = basename,
+      input_cram = Extract_Reads.output_cram,
+      input_cram_index = Extract_Reads.output_cram_index,
+      input_splitters_bam = Extract_Reads.output_splitters_bam,
+      input_splitters_bam_index = Extract_Reads.output_splitters_bam_index,
+      input_discordants_bam = Extract_Reads.output_discordants_bam,
+      input_discordants_bam_index = Extract_Reads.output_discordants_bam_index,
+      ref_fasta = ref_fasta,
+      ref_fasta_index = ref_fasta_index,
+      exclude_regions = exclude_regions,
+      disk_size = disk_size,
+      preemptible_tries = preemptible_tries
+    }
+    
+    call SV_Genotype {
+      input:
+      basename = basename,
+      input_cram = Extract_Reads.output_cram,
+      input_cram_index = Extract_Reads.output_cram_index,
+      input_vcf = Lumpy.output_vcf,
+      ref_fasta = ref_fasta,
+      ref_fasta_index = ref_fasta_index,
+      disk_size = disk_size,
+      preemptible_tries = preemptible_tries
+    }
+    
+    call CNVnator_Histogram {
+      input:
+      basename = basename,
+      input_cram = Extract_Reads.output_cram,
+      input_cram_index = Extract_Reads.output_cram_index,
+      ref_fasta = ref_fasta,
+      ref_fasta_index = ref_fasta_index,
+      disk_size = disk_size,
+      preemptible_tries = preemptible_tries
+    }
   }
+  
+  # call Merge_Cohort_VCFs {
+  #   input:
+  # }
 }
