@@ -8,6 +8,7 @@ RUN apt-get update -qq \
     && echo "deb [trusted=yes] https://gitlab.com/hall-lab/ccdg-apt-repo/raw/master ccdg main" | tee -a /etc/apt/sources.list \
     && runDeps=' \
 	ccdg-python-2.7.12 \
+	ccdg-samtools-1.3.1 \
         ' \
     && apt-get update -qq \
     && apt-get -y install \
@@ -17,6 +18,7 @@ RUN apt-get update -qq \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PATH /opt/ccdg/python-2.7.12/bin:${PATH}
+ENV PATH /opt/ccdg/samtools-1.3.1/bin:${PATH}
 
 ENV SHELL /bin/bash
 
