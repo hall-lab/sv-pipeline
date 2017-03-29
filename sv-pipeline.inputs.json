@@ -1,9 +1,16 @@
 {
-  "SV_Detect.aligned_crams": [
+  "SV_Detect.aligned_crams_trio": [
     "gs://ccdg-100-samples-trios-pilot-crams/WashU/WashU/Coriell_Trios_1/H_IJ-NA12878-NA12878_K10/v1/H_IJ-NA12878-NA12878_K10.cram",
     "gs://ccdg-100-samples-trios-pilot-crams/WashU/WashU/Coriell_Trios_1/H_IJ-NA12891-NA12891_D2/v1/H_IJ-NA12891-NA12891_D2.cram",
     "gs://ccdg-100-samples-trios-pilot-crams/WashU/WashU/Coriell_Trios_1/H_IJ-NA12892-NA12892_E1/v1/H_IJ-NA12892-NA12892_E1.cram"
   ],
+  "SV_Detect.aligned_crams": [
+    "gs://ccdg-100-samples-trios-pilot-crams/WashU/WashU/Coriell_Trios_1/H_IJ-NA12878-NA12878_K10/v1/H_IJ-NA12878-NA12878_K10.cram",
+    "gs://ccdg-100-samples-trios-pilot-crams/WashU/WashU/Coriell_Trios_1/H_IJ-NA12891-NA12891_D2/v1/H_IJ-NA12891-NA12891_D2.cram"
+  ],
+
+  "SV_Detect.cohort_name": "pilot-01",
+  "SV_Detect.final_vcf_name": "cohort.vcf.gz",
   "SV_Detect.aligned_cram_suffix": ".cram",
   "SV_Detect.disk_size": 50,
   "SV_Detect.preemptible_tries": 3,
