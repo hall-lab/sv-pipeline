@@ -1,10 +1,10 @@
 {
-  "SV_Detect.aligned_crams_trio": [
+  "SV_Detect.aligned_crams": [
     "gs://ccdg-100-samples-trios-pilot-crams/WashU/WashU/Coriell_Trios_1/H_IJ-NA12878-NA12878_K10/v1/H_IJ-NA12878-NA12878_K10.cram",
     "gs://ccdg-100-samples-trios-pilot-crams/WashU/WashU/Coriell_Trios_1/H_IJ-NA12891-NA12891_D2/v1/H_IJ-NA12891-NA12891_D2.cram",
     "gs://ccdg-100-samples-trios-pilot-crams/WashU/WashU/Coriell_Trios_1/H_IJ-NA12892-NA12892_E1/v1/H_IJ-NA12892-NA12892_E1.cram"
   ],
-  "SV_Detect.aligned_crams": [
+  "SV_Detect.aligned_crams_duo": [
     "gs://ccdg-100-samples-trios-pilot-crams/WashU/WashU/Coriell_Trios_1/H_IJ-NA12878-NA12878_K10/v1/H_IJ-NA12878-NA12878_K10.cram",
     "gs://ccdg-100-samples-trios-pilot-crams/WashU/WashU/Coriell_Trios_1/H_IJ-NA12891-NA12891_D2/v1/H_IJ-NA12891-NA12891_D2.cram"
   ],
@@ -21,5 +21,6 @@
   "SV_Detect.ref_cache": "gs://human-b38/cache.tar.gz",
   "SV_Detect.ref_dict": "gs://human-b38/GRCh38DH/all_sequences.dict",
   "SV_Detect.ref_alt": "gs://human-b38/GRCh38DH/all_sequences.fa.alt",
-  "SV_Detect.exclude_regions": "gs://human-b38/GRCh38DH/annotations/exclude.cnvnator_100bp.GRCh38.20170131.bed"
+  "SV_Detect.exclude_regions": "gs://human-b38/GRCh38DH/annotations/exclude.cnvnator_100bp.GRCh38.20170131.bed",
+  "SV_Detect.mei_annotation_bed": "gs://human-b38/GRCh38DH/annotations/repeatMasker.recent.lt200millidiv.LINE_SINE_SVA.GRCh38.sorted.bed.gz"
 }

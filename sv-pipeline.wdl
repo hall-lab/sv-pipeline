@@ -1,3 +1,80 @@
+# get the sample (SM) field from a CRAM file
+task Get_Sample_Name {
+  File input_cram
+  Int disk_size
+  Int preemptible_tries
+
+  command {
+    samtools view -H ${input_cram} \
+      | grep '^@RG' | head -n 1 | tr '\t' '\n' \
+      | grep '^SM:' | sed 's/^SM://g'
+  }
+
+  runtime {
+    docker: "cc2qe/extract-sv-reads:v1"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + disk_size + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    String sample = read_string(stdout())
+  }
+}
+
+# infer the sex of a sample based on chrom X copy number
+task Get_Sex {
+  File input_cn_hist_root
+  File ref_fasta_index
+  Int disk_size
+  Int preemptible_tries
+  
+  command <<<
+    cat ${ref_fasta_index} \
+      | awk '$1=="chrX" { print $1":0-"$2 } END { print "exit"}' \
+      | cnvnator -root ${input_cn_hist_root} -genotype 100 \
+      | grep -v "^Assuming male" \
+      | awk '{ printf("%.0f\n",$4); }'
+  >>>
+
+  runtime {
+    docker: "cc2qe/cnvnator:v1"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + disk_size + " HDD" 
+    preemptible: preemptible_tries
+  }
+
+  output {
+    String sex = read_string(stdout())
+  }
+}
+
+task Make_Pedigree_File {
+  Array[String] sample_array
+  Array[String] sex_array
+  String output_ped_basename
+  Int disk_size
+
+  command <<<
+    paste ${write_lines(sample_array)} ${write_lines(sex_array)} \
+      | awk '{ print $1,$1,-9,-9,$2,-9 }' OFS='\t' \
+      > ${output_ped_basename}.ped
+  >>>
+
+  runtime {
+    docker: "ubuntu:14.04"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + disk_size + " HDD"
+  }
+
+  output {
+    File output_ped = "${output_ped_basename}.ped"
+  }
+}
+
 # extract split/discordant reads
 task Extract_Reads {
   File input_cram
@@ -32,6 +109,7 @@ task Extract_Reads {
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + disk_size + " HDD"
+    preemptible: preemptible_tries
   }
 
   output {
@@ -79,6 +157,7 @@ task Lumpy {
     cpu: "1"
     memory: "8 GB"
     disks: "local-disk " + disk_size + " HDD"
+    preemptible: preemptible_tries
   }
   
   output {
@@ -111,8 +190,9 @@ task SV_Genotype {
   runtime {
     docker: "cc2qe/lumpy:v1"
     cpu: "1"
-    memory: "1 GB"
+    memory: "4 GB"
     disks: "local-disk " + disk_size + " HDD"
+    preemptible: preemptible_tries
   }
 
   output {
@@ -152,6 +232,7 @@ task SV_Copy_Number {
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + disk_size + " HDD"
+    preemptible: preemptible_tries
   }
 
   output {
@@ -193,14 +274,6 @@ task CNVnator_Histogram {
       -c ${ref_chrom_dir} \
       -g GRCh38 \
       --cnvnator cnvnator
-
-    # infer the sex of the sample
-    samtools idxstats ${basename}.cram \
-      | awk '$1=="chrX" { print $1":0-"$2 } END { print "exit"}' \
-      | cnvnator -root cnvnator.out/${basename}.cram.hist.root -genotype 100 \
-      | grep -v "^Assuming male" \
-      | awk -v SAMPLE=${basename} '{ printf(SAMPLE"\t%.0f\t%f\n", $4,$4); }' \
-      > ${basename}.sex.txt
   >>>
 
   runtime {
@@ -208,12 +281,12 @@ task CNVnator_Histogram {
     cpu: threads
     memory: "26 GB"
     disks: "local-disk " + disk_size + " HDD" 
+    preemptible: preemptible_tries
   }
 
   output {
     File output_cn_root = "cnvnator.out/${basename}.cram.root"
     File output_cn_hist_root = "cnvnator.out/${basename}.cram.hist.root"
-    File output_sex = "${basename}.sex.txt"
   }
 }
 
@@ -235,6 +308,7 @@ task Sort_VCF_Variants {
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + disk_size + " HDD"
+    preemptible: preemptible_tries
   }
 
   output {
@@ -260,6 +334,7 @@ task Merge_VCF_Variants {
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + disk_size + " HDD"
+    preemptible: preemptible_tries
   }
 
   output {
@@ -267,15 +342,113 @@ task Merge_VCF_Variants {
   }
 }
 
-task VCF_Paste {
+task Paste_VCF {
+  Array[File] input_vcfs
+  String output_vcf_basename
+  Int disk_size
+  Int preemptible_tries
 
   command {
+    svtools vcfpaste \
+      -f ${write_lines(input_vcfs)} \
+      -q \
+      | bgzip -c \
+      > ${output_vcf_basename}.vcf.gz
   }
 
   runtime {
+    docker: "cc2qe/svtools:v1"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + disk_size + " HDD"
+    preemptible: preemptible_tries
   }
 
   output {
+    File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
+  }
+}
+
+task Prune_VCF {
+  File input_vcf_gz
+  String output_vcf_basename
+  Int disk_size
+  Int preemptible_tries
+
+  command {
+    zcat ${input_vcf_gz} \
+      | svtools afreq \
+      | svtools vcftobedpe \
+      | svtools bedpesort \
+      | svtools prune -s -d 100 -e 'AF' \
+      | svtools bedpetovcf \
+      | bgzip -c \
+      > ${output_vcf_basename}.vcf.gz
+  }
+
+  runtime {
+    docker: "cc2qe/svtools:v1"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + disk_size + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
+  }
+}
+
+task SV_Classify {
+  File input_vcf_gz
+  String output_vcf_basename
+  File mei_annotation_bed
+  Int disk_size
+  Int preemptible_tries
+
+  command {
+    zcat ${input_vcf_gz} \
+      | svtools classify \
+      -g ceph.sex.txt \
+      -a ${mei_annotation_bed} \
+      -m large_sample \
+      | bgzip -c \
+      > ${output_vcf_basename}.vcf.gz
+  }
+
+  runtime {
+    docker: "cc2qe/svtools:v1"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + disk_size + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
+  }
+}
+
+task Sort_Index_VCF {
+  File input_vcf_gz
+  File output_vcf_name
+  Int disk_size
+  Int preemptible_tries
+
+  command {
+    touch ${output_vcf_name}
+  }
+
+  runtime {
+    docker: "cc2qe/svtools:v1"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + disk_size + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_vcf_gz = "${output_vcf_name}"
   }
 }
 
@@ -293,6 +466,7 @@ workflow SV_Detect {
   File ref_fasta_index
   File ref_cache
   File exclude_regions
+  File mei_annotation_bed
 
   # system inputs
   Int disk_size
@@ -350,6 +524,29 @@ workflow SV_Detect {
       disk_size = disk_size,
       preemptible_tries = preemptible_tries
     }
+
+    call Get_Sample_Name {
+      input:
+      input_cram = Extract_Reads.output_cram,
+      disk_size = disk_size,
+      preemptible_tries = preemptible_tries
+    }
+
+    call Get_Sex {
+      input:
+      input_cn_hist_root = CNVnator_Histogram.output_cn_hist_root,
+      ref_fasta_index = ref_fasta_index,
+      disk_size = disk_size,
+      preemptible_tries = preemptible_tries
+    }
+  }
+
+  call Make_Pedigree_File {
+    input:
+    sample_array = Get_Sample_Name.sample,
+    sex_array = Get_Sex.sex,
+    output_ped_basename = cohort_name,
+    disk_size = 1    
   }
 
   call Sort_VCF_Variants {
@@ -389,6 +586,7 @@ workflow SV_Detect {
 
     call SV_Copy_Number {
       input:
+      basename = basename,
       input_vcf = SV_Genotype_Merged.output_vcf,
       input_cn_hist_root = CNVnator_Histogram.output_cn_hist_root[i],
       ref_cache = ref_cache,
@@ -396,4 +594,37 @@ workflow SV_Detect {
       preemptible_tries = preemptible_tries
     }
   }
+
+  call Paste_VCF {
+    input:
+    input_vcfs = SV_Copy_Number.output_vcf,
+    output_vcf_basename = cohort_name + ".merged.gt.cn",
+    disk_size = disk_size,
+    preemptible_tries = preemptible_tries
+  }
+
+  call Prune_VCF {
+    input:
+    input_vcf_gz = Paste_VCF.output_vcf_gz,
+    output_vcf_basename = cohort_name + "merged.gt.cn.pruned",
+    disk_size = disk_size,
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV_Classify {
+    input:
+    input_vcf_gz = Prune_VCF.output_vcf_gz,
+    mei_annotation_bed = mei_annotation_bed,
+    output_vcf_basename = cohort_name + "merged.gt.cn.pruned.class",
+    disk_size = disk_size,
+    preemptible_tries = preemptible_tries
+  }
+
+  # call Sort_Index_VCF {
+  #  input:
+  #  input_vcf_gz = SV_Classify.output_vcf_gz,
+  #  output_vcf_name = final_vcf_name,
+  #  disk_size = disk_size,
+  #  preemptible_tries = preemptible_tries
+  #}
 }
