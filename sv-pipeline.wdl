@@ -2,18 +2,17 @@
 task Extract_Reads {
   File input_cram
   String basename
-  File ref_fasta
-  File ref_fasta_index
+  File ref_cache
   Int disk_size
   Int preemptible_tries
 
   command {
     mv ${input_cram} ${basename}.cram
     
-    # Create REF_CACHE for reading a CRAM file
-    seq_cache_populate.pl -root ./ref/cache ${ref_fasta}
-    export REF_PATH=./ref/cache/%2s/%2s/%s
-    export REF_CACHE=./ref/cache/%2s/%2s/%s
+    # build the reference sequence cache
+    tar -zxf ${ref_cache}
+    export REF_PATH=./cache/%2s/%2s/%s
+    export REF_CACHE=./cache/%2s/%2s/%s
 
     # index the CRAM
     samtools index ${basename}.cram
@@ -21,7 +20,6 @@ task Extract_Reads {
     extract-sv-reads \
       -e \
       -r \
-      -T ${ref_fasta} \
       -i ${basename}.cram \
       -s ${basename}.splitters.bam \
       -d ${basename}.discordants.bam
@@ -129,6 +127,7 @@ task CNVnator_Histogram {
   File input_cram_index
   File ref_fasta
   File ref_fasta_index
+  File ref_cache
   String ref_chrom_dir = "cnvnator_chroms"
   Int disk_size
   Int preemptible_tries
@@ -138,10 +137,10 @@ task CNVnator_Histogram {
     mv ${input_cram} ${basename}.cram
     mv ${input_cram_index} ${basename}.cram.crai
 
-    # Create REF_CACHE for reading a CRAM file
-    seq_cache_populate.pl -root ./ref/cache ${ref_fasta}
-    export REF_PATH=./ref/cache/%2s/%2s/%s
-    export REF_CACHE=./ref/cache/%2s/%2s/%s
+    # build the reference sequence cache
+    tar -zxf ${ref_cache}
+    export REF_PATH=./cache/%2s/%2s/%s
+    export REF_CACHE=./cache/%2s/%2s/%s
     
     # Create directory of chromosome FASTA files for CNVnator
     mkdir -p ${ref_chrom_dir}
@@ -189,7 +188,7 @@ task Merge_Cohort_VCFs {
 
   command {
     svtools lsort \
-      ${basename}.vcf \
+      basename.vcf \
       | bgzip -c \
       > /data/sorted.vcf.gz
   }
@@ -197,31 +196,31 @@ task Merge_Cohort_VCFs {
 
 # SV detection workflow
 workflow SV_Detect {
+  # data inputs
   Array[File] aligned_crams
   String aligned_cram_suffix
 
+  # reference inputs
+  File ref_fasta
+  File ref_fasta_index
+  File ref_cache
+  File exclude_regions
+
+  # system inputs
   Int disk_size
   Int preemptible_tries
 
-  File ref_fasta
-  File ref_fasta_index
-  File exclude_regions
-
   scatter (aligned_cram in aligned_crams) {
     
-    # Because of a wdl/cromwell bug this is not currently valid so we have to sub(sub()) in each task
-    # String basename = sub(sub(aligned_cram, "gs://.*/", ""), aligned_cram_suffix + "$", "")
-
     String basename = sub(sub(aligned_cram, "gs://.*/", ""), aligned_cram_suffix + "$", "")
     
     call Extract_Reads {
       input:
       input_cram = aligned_cram,
       basename = basename,
+      ref_cache = ref_cache,
       disk_size = disk_size,
-      preemptible_tries = preemptible_tries,
-      ref_fasta = ref_fasta,
-      ref_fasta_index = ref_fasta_index
+      preemptible_tries = preemptible_tries
     }
     
     call Lumpy {
@@ -259,6 +258,7 @@ workflow SV_Detect {
       input_cram_index = Extract_Reads.output_cram_index,
       ref_fasta = ref_fasta,
       ref_fasta_index = ref_fasta_index,
+      ref_cache = ref_cache,
       disk_size = disk_size,
       preemptible_tries = preemptible_tries
     }
