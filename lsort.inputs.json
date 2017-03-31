@@ -1,0 +1,13 @@
+{
+  "SV_Detect.cohort_name": "pilot-01",
+  "SV_Detect.disk_size": 50,
+  "SV_Detect.preemptible_tries": 3,
+
+  "SV_Detect.L_Sort_VCF_Variants.input_vcfs_string_array": [
+    "gs://ccdg-100-samples-trios-pilot-crams-mgi/workspace/SV_Detect/34c85eb9-55df-4823-8bbc-7a1a244eac26/call-SV_Genotype_Unmerged/shard-0/H_IJ-NA12878-NA12878_K10.gt.vcf",
+    "gs://ccdg-100-samples-trios-pilot-crams-mgi/workspace/SV_Detect/34c85eb9-55df-4823-8bbc-7a1a244eac26/call-SV_Genotype_Unmerged/shard-1/H_IJ-NA12891-NA12891_D2.gt.vcf"],
+
+  "SV_Detect.L_Sort_VCF_Variants.input_vcfs_file_array": [
+    "gs://ccdg-100-samples-trios-pilot-crams-mgi/workspace/SV_Detect/34c85eb9-55df-4823-8bbc-7a1a244eac26/call-SV_Genotype_Unmerged/shard-0/H_IJ-NA12878-NA12878_K10.gt.vcf",
+    "gs://ccdg-100-samples-trios-pilot-crams-mgi/workspace/SV_Detect/34c85eb9-55df-4823-8bbc-7a1a244eac26/call-SV_Genotype_Unmerged/shard-1/H_IJ-NA12891-NA12891_D2.gt.vcf"]
+}

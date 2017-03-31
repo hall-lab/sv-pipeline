@@ -6,7 +6,7 @@ task Get_Sample_Name {
 
   command {
     samtools view -H ${input_cram} \
-      | grep '^@RG' | head -n 1 | tr '\t' '\n' \
+      | grep -m 1 '^@RG' | tr '\t' '\n' \
       | grep '^SM:' | sed 's/^SM://g'
   }
 
@@ -170,19 +170,23 @@ task SV_Genotype {
   File input_cram
   File input_cram_index
   File input_vcf
-  File ref_fasta
-  File ref_fasta_index
+  File ref_cache
   Int disk_size
   Int preemptible_tries
   
   command {
     mv ${input_cram} ${basename}.cram
     mv ${input_cram_index} ${basename}.cram.crai
+
+    # build the reference sequence cache
+    tar -zxf ${ref_cache}
+    export REF_PATH=./cache/%2s/%2s/%s
+    export REF_CACHE=./cache/%2s/%2s/%s
+
     rm -f ${basename}.cram.json
     svtyper \
       -i ${input_vcf} \
       -B ${basename}.cram \
-      -T ${ref_fasta} \
       -l ${basename}.cram.json \
       > ${basename}.gt.vcf
   }
@@ -290,16 +294,22 @@ task CNVnator_Histogram {
   }
 }
 
-task Sort_VCF_Variants {
-  Array[File] input_vcfs
+task L_Sort_VCF_Variants {
+  Array[String] input_vcfs_string_array
+  Array[File] input_vcfs_file_array
   String output_vcf_basename
   Int disk_size
   Int preemptible_tries
 
   command {
+    # strip the "gs://" prefix from the file paths
+    cat ${write_lines(input_vcfs_string_array)} \
+      | sed 's/^gs:\/\//\.\//g' \
+      > input_vcfs_file.txt
+
     svtools lsort \
       -b 200 \
-      -f ${write_lines(input_vcfs)} \
+      -f input_vcfs_file.txt \
       > ${output_vcf_basename}.vcf
   }
 
@@ -316,7 +326,7 @@ task Sort_VCF_Variants {
   }
 }
 
-task Merge_VCF_Variants {
+task L_Merge_VCF_Variants {
   File input_vcf
   String output_vcf_basename
   Int disk_size
@@ -507,8 +517,7 @@ workflow SV_Detect {
       input_cram = Extract_Reads.output_cram,
       input_cram_index = Extract_Reads.output_cram_index,
       input_vcf = Lumpy.output_vcf,
-      ref_fasta = ref_fasta,
-      ref_fasta_index = ref_fasta_index,
+      ref_cache = ref_cache,
       disk_size = disk_size,
       preemptible_tries = preemptible_tries
     }
@@ -549,82 +558,82 @@ workflow SV_Detect {
     disk_size = 1    
   }
 
-  call Sort_VCF_Variants {
+  call L_Sort_VCF_Variants {
     input:
-    input_vcfs = SV_Genotype_Unmerged.output_vcf,
-    output_vcf_basename = cohort_name + ".lsort.vcf",
+    input_vcfs_string_array = SV_Genotype_Unmerged.output_vcf,
+    input_vcfs_file_array = SV_Genotype_Unmerged.output_vcf,
+    output_vcf_basename = cohort_name + ".lsort",
     disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
 
-  call Merge_VCF_Variants {
+  call L_Merge_VCF_Variants {
     input:
-    input_vcf = Sort_VCF_Variants.output_vcf,
-    output_vcf_basename = cohort_name + ".lmerge.vcf",
+    input_vcf = L_Sort_VCF_Variants.output_vcf,
+    output_vcf_basename = cohort_name + ".lmerge",
     disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
 
-  # Re-genotype and call copy number for each sample on the merged SV VCF
-  scatter (i in range(length(Extract_Reads.output_cram))) {
+  # # Re-genotype and call copy number for each sample on the merged SV VCF
+  # scatter (i in range(length(Extract_Reads.output_cram))) {
 
-    File aligned_cram = Extract_Reads.output_cram[i]
-    File aligned_cram_index = Extract_Reads.output_cram_index[i]
-    String basename = sub(sub(aligned_cram, "gs://.*/", ""), aligned_cram_suffix + "$", "")
+  #   File aligned_cram = Extract_Reads.output_cram[i]
+  #   File aligned_cram_index = Extract_Reads.output_cram_index[i]
+  #   String basename = sub(sub(aligned_cram, "gs://.*/", ""), aligned_cram_suffix + "$", "")
 
-    call SV_Genotype as SV_Genotype_Merged {
-      input:
-      basename = basename,
-      input_cram = aligned_cram,
-      input_cram_index = aligned_cram_index,
-      input_vcf = Merge_VCF_Variants.output_vcf,
-      ref_fasta = ref_fasta,
-      ref_fasta_index = ref_fasta_index,
-      disk_size = disk_size,
-      preemptible_tries = preemptible_tries
-    }
+  #   call SV_Genotype as SV_Genotype_Merged {
+  #     input:
+  #     basename = basename,
+  #     input_cram = aligned_cram,
+  #     input_cram_index = aligned_cram_index,
+  #     input_vcf = L_Merge_VCF_Variants.output_vcf,
+  #     ref_cache = ref_cache,
+  #     disk_size = disk_size,
+  #     preemptible_tries = preemptible_tries
+  #   }
 
-    call SV_Copy_Number {
-      input:
-      basename = basename,
-      input_vcf = SV_Genotype_Merged.output_vcf,
-      input_cn_hist_root = CNVnator_Histogram.output_cn_hist_root[i],
-      ref_cache = ref_cache,
-      disk_size = disk_size,
-      preemptible_tries = preemptible_tries
-    }
-  }
+  #   call SV_Copy_Number {
+  #     input:
+  #     basename = basename,
+  #     input_vcf = SV_Genotype_Merged.output_vcf,
+  #     input_cn_hist_root = CNVnator_Histogram.output_cn_hist_root[i],
+  #     ref_cache = ref_cache,
+  #     disk_size = disk_size,
+  #     preemptible_tries = preemptible_tries
+  #   }
+  # }
 
-  call Paste_VCF {
-    input:
-    input_vcfs = SV_Copy_Number.output_vcf,
-    output_vcf_basename = cohort_name + ".merged.gt.cn",
-    disk_size = disk_size,
-    preemptible_tries = preemptible_tries
-  }
+  # call Paste_VCF {
+  #   input:
+  #   input_vcfs = SV_Copy_Number.output_vcf,
+  #   output_vcf_basename = cohort_name + ".merged.gt.cn",
+  #   disk_size = disk_size,
+  #   preemptible_tries = preemptible_tries
+  # }
 
-  call Prune_VCF {
-    input:
-    input_vcf_gz = Paste_VCF.output_vcf_gz,
-    output_vcf_basename = cohort_name + "merged.gt.cn.pruned",
-    disk_size = disk_size,
-    preemptible_tries = preemptible_tries
-  }
+  # call Prune_VCF {
+  #   input:
+  #   input_vcf_gz = Paste_VCF.output_vcf_gz,
+  #   output_vcf_basename = cohort_name + "merged.gt.cn.pruned",
+  #   disk_size = disk_size,
+  #   preemptible_tries = preemptible_tries
+  # }
 
-  call SV_Classify {
-    input:
-    input_vcf_gz = Prune_VCF.output_vcf_gz,
-    mei_annotation_bed = mei_annotation_bed,
-    output_vcf_basename = cohort_name + "merged.gt.cn.pruned.class",
-    disk_size = disk_size,
-    preemptible_tries = preemptible_tries
-  }
+  # call SV_Classify {
+  #   input:
+  #   input_vcf_gz = Prune_VCF.output_vcf_gz,
+  #   mei_annotation_bed = mei_annotation_bed,
+  #   output_vcf_basename = cohort_name + "merged.gt.cn.pruned.class",
+  #   disk_size = disk_size,
+  #   preemptible_tries = preemptible_tries
+  # }
 
-  # call Sort_Index_VCF {
-  #  input:
-  #  input_vcf_gz = SV_Classify.output_vcf_gz,
-  #  output_vcf_name = final_vcf_name,
-  #  disk_size = disk_size,
-  #  preemptible_tries = preemptible_tries
-  #}
+  # # call Sort_Index_VCF {
+  # #  input:
+  # #  input_vcf_gz = SV_Classify.output_vcf_gz,
+  # #  output_vcf_name = final_vcf_name,
+  # #  disk_size = disk_size,
+  # #  preemptible_tries = preemptible_tries
+  # #}
 }
