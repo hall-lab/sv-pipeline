@@ -641,7 +641,7 @@ workflow SV_Detect {
   call Prune_VCF {
     input:
     input_vcf_gz = Paste_VCF.output_vcf_gz,
-    output_vcf_basename = cohort_name + "merged.gt.cn.pruned",
+    output_vcf_basename = cohort_name + ".merged.gt.cn.pruned",
     disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
@@ -651,7 +651,7 @@ workflow SV_Detect {
     input_vcf_gz = Prune_VCF.output_vcf_gz,
     input_ped = Make_Pedigree_File.output_ped,
     mei_annotation_bed = mei_annotation_bed,
-    output_vcf_basename = cohort_name + "merged.gt.cn.pruned.class",
+    output_vcf_basename = cohort_name + ".merged.gt.cn.pruned.class",
     disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
