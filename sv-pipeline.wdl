@@ -7,7 +7,8 @@ task Get_Sample_Name {
   command {
     samtools view -H ${input_cram} \
       | grep -m 1 '^@RG' | tr '\t' '\n' \
-      | grep '^SM:' | sed 's/^SM://g'
+      | grep '^SM:' | sed 's/^SM://g' \
+      > sample.txt
   }
 
   runtime {
@@ -19,7 +20,7 @@ task Get_Sample_Name {
   }
 
   output {
-    String sample = read_string(stdout())
+    File sample = "sample.txt"
   }
 }
 
@@ -35,7 +36,8 @@ task Get_Sex {
       | awk '$1=="chrX" { print $1":0-"$2 } END { print "exit"}' \
       | cnvnator -root ${input_cn_hist_root} -genotype 100 \
       | grep -v "^Assuming male" \
-      | awk '{ printf("%.0f\n",$4); }'
+      | awk '{ printf("%.0f\n",$4); }' \
+      > sex.txt
   >>>
 
   runtime {
@@ -47,18 +49,27 @@ task Get_Sex {
   }
 
   output {
-    String sex = read_string(stdout())
+    File sex = "sex.txt"
   }
 }
 
+# Eventually may need to modify to pass a list of files
+# (or strings) if numerous samples exceed command line
+# argument input length
 task Make_Pedigree_File {
-  Array[String] sample_array
-  Array[String] sex_array
+  Array[File] sample_files
+  Array[File] sex_files
   String output_ped_basename
   Int disk_size
 
   command <<<
-    paste ${write_lines(sample_array)} ${write_lines(sex_array)} \
+    cat ${sep=' ' sample_files} \
+      > sample_list.txt
+
+    cat ${sep=' ' sex_files} \
+      > sex_list.txt
+
+    paste sample_list.txt sex_list.txt \
       | awk '{ print $1,$1,-9,-9,$2,-9 }' OFS='\t' \
       > ${output_ped_basename}.ped
   >>>
@@ -194,7 +205,7 @@ task SV_Genotype {
   runtime {
     docker: "cc2qe/lumpy:v1"
     cpu: "1"
-    memory: "4 GB"
+    memory: "1.7 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
@@ -207,6 +218,7 @@ task SV_Genotype {
 
 task SV_Copy_Number {
   String basename
+  String sample
   File input_vcf
   File input_cn_hist_root
   File ref_cache
@@ -214,27 +226,24 @@ task SV_Copy_Number {
   Int preemptible_tries
 
   command {
-    # build the reference sequence cache
-    tar -zxf ${ref_cache}
-    export REF_PATH=./cache/%2s/%2s/%s
-    export REF_CACHE=./cache/%2s/%2s/%s
-
-    cat ${input_vcf} | create_coordinates -o coordinates.txt
+    create_coordinates \
+      -i ${input_vcf} \
+      -o coordinates.txt
 
     svtools copynumber \
+      -i ${input_vcf} \
+      -s ${sample} \
       --cnvnator cnvnator \
-      -s ${basename} \
       -w 100 \
       -r ${input_cn_hist_root} \
       -c coordinates.txt \
-      -i ${input_vcf} \
       > ${basename}.cn.vcf
   }
   
   runtime {
     docker: "cc2qe/sv-pipeline:v1"
     cpu: "1"
-    memory: "1 GB"
+    memory: "4 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
@@ -295,21 +304,21 @@ task CNVnator_Histogram {
 }
 
 task L_Sort_VCF_Variants {
-  Array[String] input_vcfs_string_array
-  Array[File] input_vcfs_file_array
+  Array[File] input_vcfs
+  File input_vcfs_file = write_lines(input_vcfs)
   String output_vcf_basename
   Int disk_size
   Int preemptible_tries
 
   command {
     # strip the "gs://" prefix from the file paths
-    cat ${write_lines(input_vcfs_string_array)} \
+    cat ${input_vcfs_file} \
       | sed 's/^gs:\/\//\.\//g' \
-      > input_vcfs_file.txt
+      > input_vcfs_file.local_map.txt
 
     svtools lsort \
       -b 200 \
-      -f input_vcfs_file.txt \
+      -f input_vcfs_file.local_map.txt \
       > ${output_vcf_basename}.vcf
   }
 
@@ -354,13 +363,19 @@ task L_Merge_VCF_Variants {
 
 task Paste_VCF {
   Array[File] input_vcfs
+  File input_vcfs_file = write_lines(input_vcfs)
   String output_vcf_basename
   Int disk_size
   Int preemptible_tries
 
   command {
+    # strip the "gs://" prefix from the file paths
+    cat ${input_vcfs_file} \
+      | sed 's/^gs:\/\//\.\//g' \
+      > input_vcfs_file.local_map.txt
+    
     svtools vcfpaste \
-      -f ${write_lines(input_vcfs)} \
+      -f input_vcfs_file.local_map.txt \
       -q \
       | bgzip -c \
       > ${output_vcf_basename}.vcf.gz
@@ -411,15 +426,20 @@ task Prune_VCF {
 
 task SV_Classify {
   File input_vcf_gz
+  File input_ped
   String output_vcf_basename
   File mei_annotation_bed
   Int disk_size
   Int preemptible_tries
 
   command {
+    cat ${input_ped} \
+      | cut -f 2,5 \
+      > sex.txt
+
     zcat ${input_vcf_gz} \
       | svtools classify \
-      -g ceph.sex.txt \
+      -g sex.txt \
       -a ${mei_annotation_bed} \
       -m large_sample \
       | bgzip -c \
@@ -441,24 +461,30 @@ task SV_Classify {
 
 task Sort_Index_VCF {
   File input_vcf_gz
-  File output_vcf_name
+  String output_vcf_name
   Int disk_size
   Int preemptible_tries
 
   command {
-    touch ${output_vcf_name}
+    zcat ${input_vcf_gz} \
+      | svtools vcfsort \
+      | bgzip -c \
+      > ${output_vcf_name}
+
+    tabix -p vcf -f ${output_vcf_name}
   }
 
   runtime {
     docker: "cc2qe/svtools:v1"
     cpu: "1"
-    memory: "1 GB"
+    memory: "2 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
 
   output {
     File output_vcf_gz = "${output_vcf_name}"
+    File output_vcf_gz_index = "${output_vcf_name}.tbi"
   }
 }
 
@@ -552,16 +578,15 @@ workflow SV_Detect {
 
   call Make_Pedigree_File {
     input:
-    sample_array = Get_Sample_Name.sample,
-    sex_array = Get_Sex.sex,
+    sample_files = Get_Sample_Name.sample,
+    sex_files = Get_Sex.sex,
     output_ped_basename = cohort_name,
     disk_size = 1    
   }
 
   call L_Sort_VCF_Variants {
     input:
-    input_vcfs_string_array = SV_Genotype_Unmerged.output_vcf,
-    input_vcfs_file_array = SV_Genotype_Unmerged.output_vcf,
+    input_vcfs = SV_Genotype_Unmerged.output_vcf,
     output_vcf_basename = cohort_name + ".lsort",
     disk_size = disk_size,
     preemptible_tries = preemptible_tries
@@ -575,65 +600,67 @@ workflow SV_Detect {
     preemptible_tries = preemptible_tries
   }
 
-  # # Re-genotype and call copy number for each sample on the merged SV VCF
-  # scatter (i in range(length(Extract_Reads.output_cram))) {
+# Re-genotype and call copy number for each sample on the merged SV VCF
+  scatter (i in range(length(Extract_Reads.output_cram))) {
+    
+    File aligned_cram = Extract_Reads.output_cram[i]
+    File aligned_cram_index = Extract_Reads.output_cram_index[i]
+    String basename = sub(sub(aligned_cram, "gs://.*/", ""), aligned_cram_suffix + "$", "")
 
-  #   File aligned_cram = Extract_Reads.output_cram[i]
-  #   File aligned_cram_index = Extract_Reads.output_cram_index[i]
-  #   String basename = sub(sub(aligned_cram, "gs://.*/", ""), aligned_cram_suffix + "$", "")
+    call SV_Genotype as SV_Genotype_Merged {
+      input:
+      basename = basename,
+      input_cram = aligned_cram,
+      input_cram_index = aligned_cram_index,
+      input_vcf = L_Merge_VCF_Variants.output_vcf,
+      ref_cache = ref_cache,
+      disk_size = disk_size,
+      preemptible_tries = preemptible_tries
+    }
 
-  #   call SV_Genotype as SV_Genotype_Merged {
-  #     input:
-  #     basename = basename,
-  #     input_cram = aligned_cram,
-  #     input_cram_index = aligned_cram_index,
-  #     input_vcf = L_Merge_VCF_Variants.output_vcf,
-  #     ref_cache = ref_cache,
-  #     disk_size = disk_size,
-  #     preemptible_tries = preemptible_tries
-  #   }
+    call SV_Copy_Number {
+      input:
+      basename = basename,
+      sample = basename,
+      input_vcf = SV_Genotype_Merged.output_vcf,
+      input_cn_hist_root = CNVnator_Histogram.output_cn_hist_root[i],
+      ref_cache = ref_cache,
+      disk_size = disk_size,
+      preemptible_tries = preemptible_tries
+    }
+  }
 
-  #   call SV_Copy_Number {
-  #     input:
-  #     basename = basename,
-  #     input_vcf = SV_Genotype_Merged.output_vcf,
-  #     input_cn_hist_root = CNVnator_Histogram.output_cn_hist_root[i],
-  #     ref_cache = ref_cache,
-  #     disk_size = disk_size,
-  #     preemptible_tries = preemptible_tries
-  #   }
-  # }
+  call Paste_VCF {
+    input:
+    input_vcfs = SV_Copy_Number.output_vcf,
+    output_vcf_basename = cohort_name + ".merged.gt.cn",
+    disk_size = disk_size,
+    preemptible_tries = preemptible_tries
+  }
 
-  # call Paste_VCF {
-  #   input:
-  #   input_vcfs = SV_Copy_Number.output_vcf,
-  #   output_vcf_basename = cohort_name + ".merged.gt.cn",
-  #   disk_size = disk_size,
-  #   preemptible_tries = preemptible_tries
-  # }
+  call Prune_VCF {
+    input:
+    input_vcf_gz = Paste_VCF.output_vcf_gz,
+    output_vcf_basename = cohort_name + "merged.gt.cn.pruned",
+    disk_size = disk_size,
+    preemptible_tries = preemptible_tries
+  }
 
-  # call Prune_VCF {
-  #   input:
-  #   input_vcf_gz = Paste_VCF.output_vcf_gz,
-  #   output_vcf_basename = cohort_name + "merged.gt.cn.pruned",
-  #   disk_size = disk_size,
-  #   preemptible_tries = preemptible_tries
-  # }
+  call SV_Classify {
+    input:
+    input_vcf_gz = Prune_VCF.output_vcf_gz,
+    input_ped = Make_Pedigree_File.output_ped,
+    mei_annotation_bed = mei_annotation_bed,
+    output_vcf_basename = cohort_name + "merged.gt.cn.pruned.class",
+    disk_size = disk_size,
+    preemptible_tries = preemptible_tries
+  }
 
-  # call SV_Classify {
-  #   input:
-  #   input_vcf_gz = Prune_VCF.output_vcf_gz,
-  #   mei_annotation_bed = mei_annotation_bed,
-  #   output_vcf_basename = cohort_name + "merged.gt.cn.pruned.class",
-  #   disk_size = disk_size,
-  #   preemptible_tries = preemptible_tries
-  # }
-
-  # # call Sort_Index_VCF {
-  # #  input:
-  # #  input_vcf_gz = SV_Classify.output_vcf_gz,
-  # #  output_vcf_name = final_vcf_name,
-  # #  disk_size = disk_size,
-  # #  preemptible_tries = preemptible_tries
-  # #}
+  call Sort_Index_VCF {
+    input:
+    input_vcf_gz = SV_Classify.output_vcf_gz,
+    output_vcf_name = final_vcf_name,
+    disk_size = disk_size,
+    preemptible_tries = preemptible_tries
+  }
 }

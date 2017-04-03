@@ -6,9 +6,6 @@ RUN apt-get update -qq \
     && apt-get -y install \
         apt-transport-https \
        	git \
-       	gawk \
-        ca-certificates \
-	build-essential \
     && echo "deb [trusted=yes] https://gitlab.com/hall-lab/ccdg-apt-repo/raw/master ccdg main" | tee -a /etc/apt/sources.list \
     && runDeps=' \
 	ccdg-python-2.7.12 \
