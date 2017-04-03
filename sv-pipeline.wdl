@@ -205,7 +205,7 @@ task SV_Genotype {
   runtime {
     docker: "cc2qe/lumpy:v1"
     cpu: "1"
-    memory: "1.7 GB"
+    memory: "6.5 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
