@@ -186,8 +186,8 @@ task SV_Genotype {
     export REF_CACHE=./cache/%2s/%2s/%s
 
     rm -f ${basename}.cram.json
-    svtyper \
-      -i ${input_vcf} \
+    zless ${input_vcf} \
+      | svtyper \
       -B ${basename}.cram \
       -l ${basename}.cram.json \
       > ${basename}.gt.vcf
@@ -310,7 +310,8 @@ task L_Sort_VCF_Variants {
     svtools lsort \
       -b 200 \
       -f input_vcfs_file.local_map.txt \
-      > ${output_vcf_basename}.vcf
+      | bgzip -c \
+      > ${output_vcf_basename}.vcf.gz
   }
 
   runtime {
@@ -322,21 +323,23 @@ task L_Sort_VCF_Variants {
   }
 
   output {
-    File output_vcf = "${output_vcf_basename}.vcf"
+    File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
   }
 }
 
 task L_Merge_VCF_Variants {
-  File input_vcf
+  File input_vcf_gz
   String output_vcf_basename
   Int disk_size
   Int preemptible_tries
 
   command {
-    svtools lmerge \
-      -i ${input_vcf} \
+    zcat ${input_vcf_gz} \
+      | svtools lmerge \
+      -i /dev/stdin \
       -f 20 \
-      > ${output_vcf_basename}.vcf
+      | bgzip -c \
+      > ${output_vcf_basename}.vcf.gz
   }
   
   runtime {
@@ -348,7 +351,7 @@ task L_Merge_VCF_Variants {
   }
 
   output {
-    File output_vcf = "${output_vcf_basename}.vcf"
+    File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
   }
 }
 
@@ -585,7 +588,7 @@ workflow SV_Detect {
 
   call L_Merge_VCF_Variants {
     input:
-    input_vcf = L_Sort_VCF_Variants.output_vcf,
+    input_vcf_gz = L_Sort_VCF_Variants.output_vcf_gz,
     output_vcf_basename = cohort_name + ".lmerge",
     disk_size = disk_size,
     preemptible_tries = preemptible_tries
@@ -603,7 +606,7 @@ workflow SV_Detect {
       basename = basename,
       input_cram = aligned_cram,
       input_cram_index = aligned_cram_index,
-      input_vcf = L_Merge_VCF_Variants.output_vcf,
+      input_vcf = L_Merge_VCF_Variants.output_vcf_gz,
       ref_cache = ref_cache,
       disk_size = disk_size,
       preemptible_tries = preemptible_tries
