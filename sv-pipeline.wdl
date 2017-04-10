@@ -177,7 +177,6 @@ task SV_Genotype {
   Int preemptible_tries
   
   command {
-    
     mv ${input_cram} ${basename}.cram
     mv ${input_cram_index} ${basename}.cram.crai
 
