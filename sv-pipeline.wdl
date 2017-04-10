@@ -177,6 +177,7 @@ task SV_Genotype {
   Int preemptible_tries
   
   command {
+    
     mv ${input_cram} ${basename}.cram
     mv ${input_cram_index} ${basename}.cram.crai
 
@@ -333,14 +334,15 @@ task L_Merge_VCF_Variants {
   Int disk_size
   Int preemptible_tries
 
-  command {
+  command <<<
     zcat ${input_vcf_gz} \
       | svtools lmerge \
       -i /dev/stdin \
       -f 20 \
+      | awk '$0~"^#" { print; next } { $6=0 ; print }' OFS="\t" \
       | bgzip -c \
       > ${output_vcf_basename}.vcf.gz
-  }
+  >>>
   
   runtime {
     docker: "cc2qe/svtools:v1"
