@@ -7,8 +7,7 @@ task Get_Sample_Name {
   command {
     samtools view -H ${input_cram} \
       | grep -m 1 '^@RG' | tr '\t' '\n' \
-      | grep '^SM:' | sed 's/^SM://g' \
-      > sample.txt
+      | grep '^SM:' | sed 's/^SM://g'
   }
 
   runtime {
@@ -20,7 +19,7 @@ task Get_Sample_Name {
   }
 
   output {
-    File sample = "sample.txt"
+    String sample = read_string(stdout())
   }
 }
 
@@ -36,8 +35,7 @@ task Get_Sex {
       | awk '$1=="chrX" { print $1":0-"$2 } END { print "exit"}' \
       | cnvnator -root ${input_cn_hist_root} -genotype 100 \
       | grep -v "^Assuming male" \
-      | awk '{ printf("%.0f\n",$4); }' \
-      > sex.txt
+      | awk '{ printf("%.0f\n",$4); }'
   >>>
 
   runtime {
@@ -49,27 +47,20 @@ task Get_Sex {
   }
 
   output {
-    File sex = "sex.txt"
+    String sex = read_string(stdout())
   }
 }
 
-# Eventually may need to modify to pass a list of files
-# (or strings) if numerous samples exceed command line
-# argument input length
+# Create pedigree file from samples, with sex inferred from
+# CNVnator X chrom copy number
 task Make_Pedigree_File {
-  Array[File] sample_files
-  Array[File] sex_files
+  Array[String] sample_array
+  Array[String] sex_array
   String output_ped_basename
   Int disk_size
 
   command <<<
-    cat ${sep=' ' sample_files} \
-      > sample_list.txt
-
-    cat ${sep=' ' sex_files} \
-      > sex_list.txt
-
-    paste sample_list.txt sex_list.txt \
+    paste ${write_lines(sample_array)} ${write_lines(sex_array)} \
       | awk '{ print $1,$1,-9,-9,$2,-9 }' OFS='\t' \
       > ${output_ped_basename}.ped
   >>>
@@ -578,8 +569,8 @@ workflow SV_Detect {
 
   call Make_Pedigree_File {
     input:
-    sample_files = Get_Sample_Name.sample,
-    sex_files = Get_Sex.sex,
+    sample_array = Get_Sample_Name.sample,
+    sex_array = Get_Sex.sex,
     output_ped_basename = cohort_name,
     disk_size = 1    
   }
@@ -662,5 +653,16 @@ workflow SV_Detect {
     output_vcf_name = final_vcf_name,
     disk_size = disk_size,
     preemptible_tries = preemptible_tries
+  }
+
+  # Outputs that will be retained when execution is complete
+  output {
+    Make_Pedigree_File.*
+    SV_Genotype_Unmerged.output_vcf
+    CNVnator_Histogram.*
+    L_Merge_VCF_Variants.*
+    Paste_VCF.*
+    Prune_VCF.*
+    Sort_Index_VCF.*
   }
 }

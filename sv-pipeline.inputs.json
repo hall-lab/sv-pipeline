@@ -21,6 +21,7 @@
   "SV_Detect.ref_cache": "gs://human-b38/cache.tar.gz",
   "SV_Detect.ref_dict": "gs://human-b38/GRCh38DH/all_sequences.dict",
   "SV_Detect.ref_alt": "gs://human-b38/GRCh38DH/all_sequences.fa.alt",
-  "SV_Detect.exclude_regions": "gs://human-b38/GRCh38DH/annotations/exclude.cnvnator_100bp.GRCh38.20170131.bed",
+  
+  "SV_Detect.exclude_regions": "gs://human-b38/GRCh38DH/annotations/exclude.cnvnator_100bp.GRCh38.20170403.bed",
   "SV_Detect.mei_annotation_bed": "gs://human-b38/GRCh38DH/annotations/repeatMasker.recent.lt200millidiv.LINE_SINE_SVA.GRCh38.sorted.bed.gz"
 }
