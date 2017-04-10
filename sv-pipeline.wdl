@@ -663,6 +663,7 @@ workflow SV_Detect {
   output {
     Make_Pedigree_File.*
     SV_Genotype_Unmerged.output_vcf
+    SV_Genotype_Unmerged.output_lib
     CNVnator_Histogram.*
     L_Merge_VCF_Variants.*
     Paste_VCF.*
