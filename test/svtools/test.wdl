@@ -6,6 +6,7 @@ workflow Test_SVTools {
   Array[File] input_post_merged_vcfs
   File pedigree_file
   String cohort_name
+  String final_vcf_name
 
   # reference inputs
   File mei_annotation_bed
