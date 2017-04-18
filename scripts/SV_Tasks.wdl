@@ -317,7 +317,7 @@ task L_Sort_VCF_Variants {
   }
 
   runtime {
-    docker: "cc2qe/svtools:v1"
+    docker: "halllab/svtools:v0.3.2-19ff895"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -345,7 +345,7 @@ task L_Merge_VCF_Variants {
   }
   
   runtime {
-    docker: "cc2qe/svtools:v1"
+    docker: "halllab/svtools:v0.3.2-19ff895"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -378,7 +378,7 @@ task Paste_VCF {
   }
 
   runtime {
-    docker: "cc2qe/svtools:v1"
+    docker: "halllab/svtools:v0.3.2-19ff895"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -408,7 +408,7 @@ task Prune_VCF {
   }
 
   runtime {
-    docker: "cc2qe/svtools:v1"
+    docker: "halllab/svtools:v0.3.2-19ff895"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -443,7 +443,7 @@ task Classify {
   }
 
   runtime {
-    docker: "cc2qe/svtools:v1"
+    docker: "halllab/svtools:v0.3.2-19ff895"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -471,7 +471,7 @@ task Sort_Index_VCF {
   }
 
   runtime {
-    docker: "cc2qe/svtools:v1"
+    docker: "halllab/svtools:v0.3.2-19ff895"
     cpu: "1"
     memory: "2 GB"
     disks: "local-disk " + disk_size + " HDD"

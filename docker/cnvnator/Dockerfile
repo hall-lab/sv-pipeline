@@ -26,7 +26,7 @@ ENV PATH /opt/ccdg/cnvnator-0.3.3/bin:${PATH}
 RUN cd /opt \
     && git clone https://github.com/hall-lab/speedseq.git
 
-ENV PATH /opt/speedseq/src/cnvnator/bin:${PATH}
+ENV PATH /opt/speedseq/bin:${PATH}
 ENV SHELL /bin/bash
 
 CMD ["/bin/bash"]
