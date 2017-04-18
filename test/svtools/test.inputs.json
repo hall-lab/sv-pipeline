@@ -1,5 +1,6 @@
 {
   "Test_SVTools.cohort_name": "test-01",
+  "Test_SVTools.final_vcf_name": "test-01.vcf.gz",
   "Test_SVTools.input_pre_merged_vcfs": [
     "gs://mgi-wdl-test/data/call-SV_Genotype_Unmerged/shard-0/H_IJ-NA12878-NA12878_K10.gt.vcf",
     "gs://mgi-wdl-test/data/call-SV_Genotype_Unmerged/shard-1/H_IJ-NA12891-NA12891_D2.gt.vcf"
