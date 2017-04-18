@@ -1,4 +1,4 @@
-import "../../scripts/SV_Tasks.wdl" as SV
+import "../../../scripts/SV_Tasks.wdl" as SV
 
 workflow Test_Lumpy {
   # data inputs
