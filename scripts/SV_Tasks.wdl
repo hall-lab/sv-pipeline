@@ -188,14 +188,13 @@ task Genotype {
     rm -f ${basename}.cram.json
     zless ${input_vcf} \
       | svtyper \
-      -q \
       -B ${basename}.cram \
       -l ${basename}.cram.json \
       > ${basename}.gt.vcf
   }
   
   runtime {
-    docker: "cc2qe/lumpy:v1"
+    docker: "halllab/svtyper:v0.1.3-6756a0a"
     cpu: "1"
     memory: "6.5 GB"
     disks: "local-disk " + disk_size + " HDD"
