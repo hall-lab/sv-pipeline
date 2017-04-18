@@ -1,0 +1,9 @@
+{
+  "Test_Genotype.basename": "H_IJ-NA12878-NA12878_K10",
+  "Test_Genotype.input_cram": "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.cram",
+  "Test_Genotype.input_cram_index": "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.cram.crai",
+  "Test_Genotype.input_vcf": "gs://mgi-wdl-test/data/call-L_Merge_VCF_Variants/pilot-01.lmerge.vcf.gz",
+  "Test_Genotype.ref_cache": "gs://human-b38/cache.tar.gz",
+  "Test_Genotype.preemptible_tries": 3,
+  "Test_Genotype.disk_size": 50
+}
