@@ -11,7 +11,7 @@ task Get_Sample_Name {
   }
 
   runtime {
-    docker: "cc2qe/extract-sv-reads:v1"
+    docker: "halllab/extract-sv-reads:v1.1.2-9bb74fc"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -39,7 +39,7 @@ task Get_Sex {
   >>>
 
   runtime {
-    docker: "cc2qe/cnvnator:v1"
+    docker: "halllab/cnvnator:v0.3.3-9d3a92b"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + disk_size + " HDD" 
@@ -235,7 +235,7 @@ task Copy_Number {
   }
   
   runtime {
-    docker: "cc2qe/sv-pipeline:v1"
+    docker: "halllab/cnvnator:v0.3.3-9d3a92b"
     cpu: "1"
     memory: "4 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -284,7 +284,7 @@ task CNVnator_Histogram {
   >>>
 
   runtime {
-    docker: "cc2qe/cnvnator:v1"
+    docker: "halllab/cnvnator:v0.3.3-9d3a92b"
     cpu: threads
     memory: "26 GB"
     disks: "local-disk " + disk_size + " HDD" 
@@ -292,7 +292,6 @@ task CNVnator_Histogram {
   }
 
   output {
-    File output_cn_root = "cnvnator.out/${basename}.cram.root"
     File output_cn_hist_root = "cnvnator.out/${basename}.cram.hist.root"
   }
 }

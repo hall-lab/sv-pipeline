@@ -1,0 +1,21 @@
+{
+  "Test_Copy_Number.input_cram": "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.cram",
+  "Test_Copy_Number.input_cram_index": "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.cram.crai",
+  "Test_Copy_Number.basename": "H_IJ-NA12878-NA12878_K10",
+  "Test_Copy_Number.input_vcf": "gs://mgi-wdl-test/data/call-SV_Genotype_Merged/shard-0/H_IJ-NA12878-NA12878_K10.gt.vcf",
+  "Test_Copy_Number.ref_fasta": "gs://human-b38/GRCh38DH/all_sequences.fa",
+  "Test_Copy_Number.ref_fasta_index": "gs://human-b38/GRCh38DH/all_sequences.fa.fai",
+  "Test_Copy_Number.ref_cache": "gs://human-b38/cache.tar.gz",
+  "Test_Copy_Number.disk_size": 50,
+  "Test_Copy_Number.preemptible_tries": 3,
+
+  "Test_Copy_Number.cohort_name": "test-01",
+  "Test_Copy_Number.aligned_crams": [
+    "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.cram",
+    "gs://mgi-wdl-test/data/call-Extract_Reads/shard-1/attempt-4/H_IJ-NA12891-NA12891_D2.cram"
+  ],
+  "Test_Copy_Number.cn_hist_roots": [
+    "gs://mgi-wdl-test/data/call-CNVnator_Histogram/shard-0/attempt-2/cnvnator.out/H_IJ-NA12878-NA12878_K10.cram.hist.root",
+    "gs://mgi-wdl-test/data/call-CNVnator_Histogram/shard-1/cnvnator.out/H_IJ-NA12891-NA12891_D2.cram.hist.root"
+  ]
+}
