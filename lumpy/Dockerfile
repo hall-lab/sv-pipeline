@@ -5,18 +5,12 @@ LABEL maintainer "Colby Chiang <colbychiang@wustl.edu>"
 RUN apt-get update -qq \
     && apt-get -y install \
         apt-transport-https \
-	wget \
-       	build-essential \
-       	zlib1g-dev \
-   	libncurses5 \
-      	libbz2-dev \
-       	liblzma-dev \
-       	git \
-       	bsdmainutils \
-       	gawk \
-        libcurl3 \
-        ca-certificates \
-       	\
+        g++ \
+	gawk \
+        libcurl4-gnutls-dev \
+        autoconf \
+	libssl-dev \
+        git \
     && echo "deb [trusted=yes] https://gitlab.com/hall-lab/ccdg-apt-repo/raw/master ccdg main" | tee -a /etc/apt/sources.list \
     && runDeps=' \
 	ccdg-python-2.7.12 \
@@ -40,7 +34,6 @@ RUN cd /opt \
     && git checkout 0.2.13_cram_support \
     && git submodule sync \
     && git submodule update --init \
-        scripts/bamkit \
     && cd /opt/lumpy-sv \
     && make \
     && cd /opt \
@@ -50,3 +43,17 @@ ENV PATH /opt/lumpy-sv/bin:/opt/svtyper:${PATH}
 ENV SHELL /bin/bash
 
 CMD ["/bin/bash"]
+
+
+
+# build-essential \
+
+# zlib1g-dev \
+# libncurses5 \
+# libbz2-dev \
+# liblzma-dev \
+# git \
+# bsdmainutils \
+
+# libcurl3 \
+# ca-certificates \
