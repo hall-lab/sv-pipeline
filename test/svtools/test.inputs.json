@@ -1,0 +1,15 @@
+{
+  "Test_SVTools.cohort_name": "test-01",
+  "Test_SVTools.input_pre_merged_vcfs": [
+    "gs://mgi-wdl-test/data/call-SV_Genotype_Unmerged/shard-0/H_IJ-NA12878-NA12878_K10.gt.vcf",
+    "gs://mgi-wdl-test/data/call-SV_Genotype_Unmerged/shard-1/H_IJ-NA12891-NA12891_D2.gt.vcf"
+  ],
+  "Test_SVTools.input_post_merged_vcfs": [
+    "gs://mgi-wdl-test/data/call-SV_Copy_Number/shard-0/H_IJ-NA12878-NA12878_K10.cn.vcf",
+    "gs://mgi-wdl-test/data/call-SV_Copy_Number/shard-1/H_IJ-NA12891-NA12891_D2.cn.vcf"
+  ],
+  "Test_SVTools.pedigree_file": "gs://mgi-wdl-test/data/call-Make_Pedigree_File/pilot-01.ped",
+  "Test_SVTools.mei_annotation_bed": "gs://human-b38/GRCh38DH/annotations/repeatMasker.recent.lt200millidiv.LINE_SINE_SVA.GRCh38.sorted.bed.gz",
+  "Test_SVTools.disk_size": 50,
+  "Test_SVTools.preemptible_tries": 3
+}
