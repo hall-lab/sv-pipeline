@@ -107,4 +107,8 @@ workflow Post_Merge_SV {
     disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
+
+  output {
+    Genotype_Merged.output_vcf
+  }
 }
