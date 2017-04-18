@@ -2,6 +2,7 @@
   "Test_Copy_Number.input_cram": "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.cram",
   "Test_Copy_Number.input_cram_index": "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.cram.crai",
   "Test_Copy_Number.basename": "H_IJ-NA12878-NA12878_K10",
+  "Test_Copy_Number.sample": "H_IJ-NA12878-NA12878_K10",
   "Test_Copy_Number.input_vcf": "gs://mgi-wdl-test/data/call-SV_Genotype_Merged/shard-0/H_IJ-NA12878-NA12878_K10.gt.vcf",
   "Test_Copy_Number.ref_fasta": "gs://human-b38/GRCh38DH/all_sequences.fa",
   "Test_Copy_Number.ref_fasta_index": "gs://human-b38/GRCh38DH/all_sequences.fa.fai",

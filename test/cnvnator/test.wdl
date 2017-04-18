@@ -3,6 +3,7 @@ import "../../scripts/SV_Tasks.wdl" as SV
 workflow Test_Copy_Number {
   # data inputs
   String basename
+  String sample
   File input_cram
   File input_cram_index
   File input_vcf
@@ -33,7 +34,7 @@ workflow Test_Copy_Number {
   call SV.Copy_Number {
     input:
     basename = basename,
-    sample = basename,
+    sample = sample,
     input_vcf = input_vcf,
     input_cn_hist_root = CNVnator_Histogram.output_cn_hist_root,
     ref_cache = ref_cache,
