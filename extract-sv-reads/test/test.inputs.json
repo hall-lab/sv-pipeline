@@ -1,0 +1,7 @@
+{
+  "Test_Extract_Reads.input_cram": "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.cram",
+  "Test_Extract_Reads.basename": "H_IJ-NA12878-NA12878_K10",
+  "Test_Extract_Reads.ref_cache": "gs://human-b38/cache.tar.gz",
+  "Test_Extract_Reads.preemptible_tries": 3,
+  "Test_Extract_Reads.disk_size": 50
+}
