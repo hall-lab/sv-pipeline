@@ -23,7 +23,7 @@ workflow SV_Detect {
 
     String basename = sub(sub(aligned_cram, "gs://.*/", ""), aligned_cram_suffix + "$", "")
     
-    call Extract_Reads {
+    call SV.Extract_Reads {
       input:
       input_cram = aligned_cram,
       basename = basename,
@@ -32,7 +32,7 @@ workflow SV_Detect {
       preemptible_tries = preemptible_tries
     }
     
-    call Lumpy {
+    call SV.Lumpy {
       input:
       basename = basename,
       input_cram = Extract_Reads.output_cram,
@@ -41,14 +41,13 @@ workflow SV_Detect {
       input_splitters_bam_index = Extract_Reads.output_splitters_bam_index,
       input_discordants_bam = Extract_Reads.output_discordants_bam,
       input_discordants_bam_index = Extract_Reads.output_discordants_bam_index,
-      ref_fasta = ref_fasta,
-      ref_fasta_index = ref_fasta_index,
+      ref_cache = ref_cache,
       exclude_regions = exclude_regions,
       disk_size = disk_size,
       preemptible_tries = preemptible_tries
     }
     
-    call SV_Genotype as SV_Genotype_Unmerged {
+    call SV.Genotype as Genotype_Unmerged {
       input:
       basename = basename,
       input_cram = Extract_Reads.output_cram,
@@ -59,7 +58,7 @@ workflow SV_Detect {
       preemptible_tries = preemptible_tries
     }
     
-    call CNVnator_Histogram {
+    call SV.CNVnator_Histogram {
       input:
       basename = basename,
       input_cram = Extract_Reads.output_cram,
@@ -71,14 +70,14 @@ workflow SV_Detect {
       preemptible_tries = preemptible_tries
     }
 
-    call Get_Sample_Name {
+    call SV.Get_Sample_Name {
       input:
       input_cram = Extract_Reads.output_cram,
       disk_size = disk_size,
       preemptible_tries = preemptible_tries
     }
 
-    call Get_Sex {
+    call SV.Get_Sex {
       input:
       input_cn_hist_root = CNVnator_Histogram.output_cn_hist_root,
       ref_fasta_index = ref_fasta_index,
@@ -87,7 +86,7 @@ workflow SV_Detect {
     }
   }
 
-  call Make_Pedigree_File {
+  call SV.Make_Pedigree_File {
     input:
     sample_array = Get_Sample_Name.sample,
     sex_array = Get_Sex.sex,
@@ -95,15 +94,15 @@ workflow SV_Detect {
     disk_size = 1    
   }
 
-  call L_Sort_VCF_Variants {
+  call SV.L_Sort_VCF_Variants {
     input:
-    input_vcfs = SV_Genotype_Unmerged.output_vcf,
+    input_vcfs = Genotype_Unmerged.output_vcf,
     output_vcf_basename = cohort_name + ".lsort",
     disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
 
-  call L_Merge_VCF_Variants {
+  call SV.L_Merge_VCF_Variants {
     input:
     input_vcf_gz = L_Sort_VCF_Variants.output_vcf_gz,
     output_vcf_basename = cohort_name + ".lmerge",
@@ -118,7 +117,7 @@ workflow SV_Detect {
     File aligned_cram_index = Extract_Reads.output_cram_index[i]
     String basename = sub(sub(aligned_cram, "gs://.*/", ""), aligned_cram_suffix + "$", "")
 
-    call SV_Genotype as SV_Genotype_Merged {
+    call SV.Genotype as Genotype_Merged {
       input:
       basename = basename,
       input_cram = aligned_cram,
@@ -129,11 +128,11 @@ workflow SV_Detect {
       preemptible_tries = preemptible_tries
     }
 
-    call SV_Copy_Number {
+    call SV.Copy_Number {
       input:
       basename = basename,
       sample = basename,
-      input_vcf = SV_Genotype_Merged.output_vcf,
+      input_vcf = Genotype_Merged.output_vcf,
       input_cn_hist_root = CNVnator_Histogram.output_cn_hist_root[i],
       ref_cache = ref_cache,
       disk_size = disk_size,
@@ -141,15 +140,15 @@ workflow SV_Detect {
     }
   }
 
-  call Paste_VCF {
+  call SV.Paste_VCF {
     input:
-    input_vcfs = SV_Copy_Number.output_vcf,
+    input_vcfs = Copy_Number.output_vcf,
     output_vcf_basename = cohort_name + ".merged.gt.cn",
     disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
 
-  call Prune_VCF {
+  call SV.Prune_VCF {
     input:
     input_vcf_gz = Paste_VCF.output_vcf_gz,
     output_vcf_basename = cohort_name + ".merged.gt.cn.pruned",
@@ -157,7 +156,7 @@ workflow SV_Detect {
     preemptible_tries = preemptible_tries
   }
 
-  call SV_Classify {
+  call SV.Classify {
     input:
     input_vcf_gz = Prune_VCF.output_vcf_gz,
     input_ped = Make_Pedigree_File.output_ped,
@@ -167,9 +166,9 @@ workflow SV_Detect {
     preemptible_tries = preemptible_tries
   }
 
-  call Sort_Index_VCF {
+  call SV.Sort_Index_VCF {
     input:
-    input_vcf_gz = SV_Classify.output_vcf_gz,
+    input_vcf_gz = Classify.output_vcf_gz,
     output_vcf_name = final_vcf_name,
     disk_size = disk_size,
     preemptible_tries = preemptible_tries
@@ -178,8 +177,8 @@ workflow SV_Detect {
   # Outputs that will be retained when execution is complete
   output {
     Make_Pedigree_File.*
-    SV_Genotype_Unmerged.output_vcf
-    SV_Genotype_Unmerged.output_lib
+    Genotype_Unmerged.output_vcf
+    Genotype_Unmerged.output_lib
     CNVnator_Histogram.*
     L_Merge_VCF_Variants.*
     Paste_VCF.*
