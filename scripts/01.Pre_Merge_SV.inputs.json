@@ -11,9 +11,9 @@
   "Pre_Merge_SV.ref_fasta_index": "gs://human-b38/GRCh38DH/all_sequences.fa.fai",
   "Pre_Merge_SV.ref_cache": "gs://human-b38/cache.tar.gz",
   "Pre_Merge_SV.exclude_regions": "gs://human-b38/GRCh38DH/annotations/exclude.cnvnator_100bp.GRCh38.20170403.bed",
-  "Pre_Merge_SV.exclude_regions.mei_annotation_bed": "gs://human-b38/GRCh38DH/annotations/repeatMasker.recent.lt200millidiv.LINE_SINE_SVA.GRCh38.sorted.bed.gz",
+  "Pre_Merge_SV.mei_annotation_bed": "gs://human-b38/GRCh38DH/annotations/repeatMasker.recent.lt200millidiv.LINE_SINE_SVA.GRCh38.sorted.bed.gz",
 
   "##_COMMENT3": "SYSTEM PARAMETERS",
-  "Pre_Merge_SV.disk_size": 50,
+  "Pre_Merge_SV.disk_size": 60,
   "Pre_Merge_SV.preemptible_tries": 3
 }

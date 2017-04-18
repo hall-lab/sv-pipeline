@@ -36,8 +36,7 @@ workflow Pre_Merge_SV {
       input_splitters_bam_index = Extract_Reads.output_splitters_bam_index,
       input_discordants_bam = Extract_Reads.output_discordants_bam,
       input_discordants_bam_index = Extract_Reads.output_discordants_bam_index,
-      ref_fasta = ref_fasta,
-      ref_fasta_index = ref_fasta_index,
+      ref_cache = ref_cache,
       exclude_regions = exclude_regions,
       disk_size = disk_size,
       preemptible_tries = preemptible_tries
