@@ -1,0 +1,13 @@
+{
+  "Test_Lumpy.basename": "H_IJ-NA12878-NA12878_K10",
+  "Test_Lumpy.input_cram": "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.cram",
+  "Test_Lumpy.input_cram_index": "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.cram.crai",
+  "Test_Lumpy.input_discordants_bam": "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.discordants.bam",
+  "Test_Lumpy.input_discordants_bam_index": "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.discordants.bam.bai",
+  "Test_Lumpy.input_splitters_bam": "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.splitters.bam",
+  "Test_Lumpy.input_splitters_bam_index": "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.splitters.bam.bai",
+  "Test_Lumpy.disk_size": 50,
+  "Test_Lumpy.ref_cache": "gs://human-b38/cache.tar.gz",
+  "Test_Lumpy.exclude_regions": "gs://human-b38/GRCh38DH/annotations/exclude.cnvnator_100bp.GRCh38.20170403.bed",
+  "Test_Lumpy.preemptible_tries": 3
+}
