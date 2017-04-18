@@ -1,47 +1,4 @@
-task Lumpy {
-  String basename
-  File input_cram
-  File input_cram_index
-  File input_splitters_bam
-  File input_splitters_bam_index
-  File input_discordants_bam
-  File input_discordants_bam_index
-
-  File ref_cache
-  File exclude_regions
-  Int disk_size
-  Int preemptible_tries
-
-  command {
-    # build the reference sequence cache
-    tar -zxf ${ref_cache}
-    export REF_PATH=./cache/%2s/%2s/%s
-    export REF_CACHE=./cache/%2s/%2s/%s
-
-    lumpyexpress \
-      -P \
-      -T ${basename}.temp \
-      -o ${basename}.vcf \
-      -B ${input_cram} \
-      -S ${input_splitters_bam} \
-      -D ${input_discordants_bam} \
-      -x ${exclude_regions} \
-      -k \
-      -v
-  }
-
-  runtime {
-    docker: "halllab/lumpy:v0.2.13-2d611fa"
-    cpu: "1"
-    memory: "8 GB"
-    disks: "local-disk " + disk_size + " HDD"
-    preemptible: preemptible_tries
-  }
-
-  output {
-    File output_vcf = "${basename}.vcf"
-  }
-}
+import "../../scripts/SV_Tasks.wdl" as SV
 
 workflow Test_Lumpy {
   # data inputs
@@ -61,7 +18,7 @@ workflow Test_Lumpy {
   Int disk_size
   Int preemptible_tries
 
-  call Lumpy {
+  call SV.Lumpy {
     input:
     basename = basename,
     input_cram = input_cram,

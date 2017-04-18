@@ -23,11 +23,10 @@ RUN apt-get update -qq \
     && /opt/ccdg/python-2.7.12/bin/pip install --upgrade pip numpy scipy pysam \
     && rm -rf /var/lib/apt/lists/*
 
-
 ENV PATH /opt/ccdg/samtools-1.3.1/bin:${PATH}
 ENV PATH /opt/ccdg/python-2.7.12/bin:${PATH}
 
-# Install LUMPY and SVTyper
+# Install LUMPY
 RUN cd /opt \
     && git clone https://github.com/hall-lab/lumpy-sv.git \
     && cd /opt/lumpy-sv \
@@ -35,25 +34,9 @@ RUN cd /opt \
     && git submodule sync \
     && git submodule update --init \
     && cd /opt/lumpy-sv \
-    && make \
-    && cd /opt \
-    && git clone https://github.com/hall-lab/svtyper.git
+    && make
 
-ENV PATH /opt/lumpy-sv/bin:/opt/svtyper:${PATH}
+ENV PATH /opt/lumpy-sv/bin:${PATH}
 ENV SHELL /bin/bash
 
 CMD ["/bin/bash"]
-
-
-
-# build-essential \
-
-# zlib1g-dev \
-# libncurses5 \
-# libbz2-dev \
-# liblzma-dev \
-# git \
-# bsdmainutils \
-
-# libcurl3 \
-# ca-certificates \

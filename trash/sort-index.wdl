@@ -51,8 +51,6 @@ task Get_Sex {
   }
 }
 
-# Create pedigree file from samples, with sex inferred from
-# CNVnator X chrom copy number
 task Make_Pedigree_File {
   Array[String] sample_array
   Array[String] sex_array
@@ -107,7 +105,7 @@ task Extract_Reads {
   }
 
   runtime {
-    docker: "halllab/extract-sv-reads:v1.1.2-9bb74fc"
+    docker: "cc2qe/extract-sv-reads:v1"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -133,18 +131,14 @@ task Lumpy {
   File input_splitters_bam_index
   File input_discordants_bam
   File input_discordants_bam_index
-
-  File ref_cache
+  
+  File ref_fasta
+  File ref_fasta_index
   File exclude_regions
   Int disk_size
   Int preemptible_tries
 
   command {
-    # build the reference sequence cache
-    tar -zxf ${ref_cache}
-    export REF_PATH=./cache/%2s/%2s/%s
-    export REF_CACHE=./cache/%2s/%2s/%s
-
     lumpyexpress \
       -P \
       -T ${basename}.temp \
@@ -152,25 +146,26 @@ task Lumpy {
       -B ${input_cram} \
       -S ${input_splitters_bam} \
       -D ${input_discordants_bam} \
+      -R ${ref_fasta} \
       -x ${exclude_regions} \
       -k \
       -v
   }
-
+  
   runtime {
-    docker: "halllab/lumpy:v0.2.13-2d611fa"
+    docker: "cc2qe/lumpy:v1"
     cpu: "1"
     memory: "8 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
-
+  
   output {
     File output_vcf = "${basename}.vcf"
   }
 }
 
-task Genotype {
+task SV_Genotype {
   String basename
   File input_cram
   File input_cram_index
@@ -189,17 +184,17 @@ task Genotype {
     export REF_CACHE=./cache/%2s/%2s/%s
 
     rm -f ${basename}.cram.json
-    zless ${input_vcf} \
-      | svtyper \
+    svtyper \
+      -i ${input_vcf} \
       -B ${basename}.cram \
       -l ${basename}.cram.json \
       > ${basename}.gt.vcf
   }
   
   runtime {
-    docker: "halllab/svtyper:v0.1.3-6756a0a"
+    docker: "cc2qe/lumpy:v1"
     cpu: "1"
-    memory: "6.5 GB"
+    memory: "4 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
@@ -210,7 +205,7 @@ task Genotype {
   }
 }
 
-task Copy_Number {
+task SV_Copy_Number {
   String basename
   String sample
   File input_vcf
@@ -313,8 +308,7 @@ task L_Sort_VCF_Variants {
     svtools lsort \
       -b 200 \
       -f input_vcfs_file.local_map.txt \
-      | bgzip -c \
-      > ${output_vcf_basename}.vcf.gz
+      > ${output_vcf_basename}.vcf
   }
 
   runtime {
@@ -326,23 +320,21 @@ task L_Sort_VCF_Variants {
   }
 
   output {
-    File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
+    File output_vcf = "${output_vcf_basename}.vcf"
   }
 }
 
 task L_Merge_VCF_Variants {
-  File input_vcf_gz
+  File input_vcf
   String output_vcf_basename
   Int disk_size
   Int preemptible_tries
 
   command {
-    zcat ${input_vcf_gz} \
-      | svtools lmerge \
-      -i /dev/stdin \
+    svtools lmerge \
+      -i ${input_vcf} \
       -f 20 \
-      | bgzip -c \
-      > ${output_vcf_basename}.vcf.gz
+      > ${output_vcf_basename}.vcf
   }
   
   runtime {
@@ -354,7 +346,7 @@ task L_Merge_VCF_Variants {
   }
 
   output {
-    File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
+    File output_vcf = "${output_vcf_basename}.vcf"
   }
 }
 
@@ -370,7 +362,7 @@ task Paste_VCF {
     cat ${input_vcfs_file} \
       | sed 's/^gs:\/\//\.\//g' \
       > input_vcfs_file.local_map.txt
-    
+
     svtools vcfpaste \
       -f input_vcfs_file.local_map.txt \
       -q \
@@ -421,7 +413,7 @@ task Prune_VCF {
   }
 }
 
-task Classify {
+task SV_Classify {
   File input_vcf_gz
   File input_ped
   String output_vcf_basename
@@ -474,7 +466,7 @@ task Sort_Index_VCF {
   runtime {
     docker: "cc2qe/svtools:v1"
     cpu: "1"
-    memory: "2 GB"
+    memory: "4 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
@@ -485,3 +477,30 @@ task Sort_Index_VCF {
   }
 }
 
+# ============================
+# SV detection workflow
+workflow SV_Detect {
+  # data inputs
+  Array[File] aligned_crams
+  String aligned_cram_suffix
+  String cohort_name
+  String final_vcf_name
+
+  # reference inputs
+  File ref_fasta
+  File ref_fasta_index
+  File ref_cache
+  File exclude_regions
+  File mei_annotation_bed
+
+  # system inputs
+  Int disk_size
+  Int preemptible_tries
+
+  call Sort_Index_VCF {
+    input:
+    output_vcf_name = final_vcf_name,
+    disk_size = disk_size,
+    preemptible_tries = preemptible_tries
+  }
+}
