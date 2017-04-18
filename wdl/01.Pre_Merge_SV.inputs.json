@@ -1,0 +1,19 @@
+{
+  "##_COMMENT1": "DATA FILES",
+  "Pre_Merge_SV.aligned_crams": [
+    "gs://ccdg-100-samples-trios-pilot-crams/WashU/WashU/Coriell_Trios_1/H_IJ-NA12878-NA12878_K10/v1/H_IJ-NA12878-NA12878_K10.cram",
+    "gs://ccdg-100-samples-trios-pilot-crams/WashU/WashU/Coriell_Trios_1/H_IJ-NA12891-NA12891_D2/v1/H_IJ-NA12891-NA12891_D2.cram"
+  ],
+  "Pre_Merge_SV.aligned_cram_suffix": ".cram",
+
+  "##_COMMENT2": "REFERENCE FILES",
+  "Pre_Merge_SV.ref_fasta": "gs://human-b38/GRCh38DH/all_sequences.fa",
+  "Pre_Merge_SV.ref_fasta_index": "gs://human-b38/GRCh38DH/all_sequences.fa.fai",
+  "Pre_Merge_SV.ref_cache": "gs://human-b38/cache.tar.gz",
+  "Pre_Merge_SV.exclude_regions": "gs://human-b38/GRCh38DH/annotations/exclude.cnvnator_100bp.GRCh38.20170403.bed",
+  "Pre_Merge_SV.exclude_regions.mei_annotation_bed": "gs://human-b38/GRCh38DH/annotations/repeatMasker.recent.lt200millidiv.LINE_SINE_SVA.GRCh38.sorted.bed.gz",
+
+  "##_COMMENT3": "SYSTEM PARAMETERS",
+  "Pre_Merge_SV.disk_size": 50,
+  "Pre_Merge_SV.preemptible_tries": 3
+}
