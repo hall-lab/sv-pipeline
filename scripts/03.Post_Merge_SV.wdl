@@ -1,9 +1,12 @@
-import "SV_Detect.tasks.wdl" as SV
+import "SV_Tasks.wdl" as SV
 
-workflow Post_Merge_SV_Genotype {
+workflow Post_Merge_SV {
   # data inputs
   Array[File] aligned_crams
+  Array[File] aligned_cram_indices
   String aligned_cram_suffix
+  Array[File] cn_hist_roots
+  File merged_vcf
   String cohort_name
   String final_vcf_name
 
@@ -11,26 +14,41 @@ workflow Post_Merge_SV_Genotype {
   File ref_fasta
   File ref_fasta_index
   File ref_cache
-  File exclude_regions
   File mei_annotation_bed
 
   # system inputs
   Int disk_size
   Int preemptible_tries
 
-# Re-genotype and call copy number for each sample on the merged SV VCF
-  scatter (i in range(length(Extract_Reads.output_cram))) {
+  # Re-genotype and call copy number for each sample on the merged SV VCF
+  scatter (i in range(length(aligned_crams))) {
     
-    File aligned_cram = Extract_Reads.output_cram[i]
-    File aligned_cram_index = Extract_Reads.output_cram_index[i]
+    File aligned_cram = aligned_crams[i]
+    File aligned_cram_index = aligned_cram_indices[i]
+    File cn_hist_root = cn_hist_roots[i]
     String basename = sub(sub(aligned_cram, "gs://.*/", ""), aligned_cram_suffix + "$", "")
 
-    call Genotype as Genotype_Merged {
+    call SV.Get_Sample_Name {
+      input:
+      input_cram = aligned_cram,
+      disk_size = disk_size,
+      preemptible_tries = preemptible_tries
+    }
+
+    call SV.Get_Sex {
+      input:
+      input_cn_hist_root = cn_hist_root,
+      ref_fasta_index = ref_fasta_index,
+      disk_size = disk_size,
+      preemptible_tries = preemptible_tries
+    }
+
+    call SV.Genotype as Genotype_Merged {
       input:
       basename = basename,
       input_cram = aligned_cram,
       input_cram_index = aligned_cram_index,
-      input_vcf = L_Merge_VCF_Variants.output_vcf_gz,
+      input_vcf = merged_vcf,
       ref_cache = ref_cache,
       disk_size = disk_size,
       preemptible_tries = preemptible_tries
@@ -39,18 +57,26 @@ workflow Post_Merge_SV_Genotype {
     call SV.Copy_Number {
       input:
       basename = basename,
-      sample = basename,
+      sample = Get_Sample_Name.sample,
       input_vcf = Genotype_Merged.output_vcf,
-      input_cn_hist_root = CNVnator_Histogram.output_cn_hist_root[i],
+      input_cn_hist_root = cn_hist_root,
       ref_cache = ref_cache,
       disk_size = disk_size,
       preemptible_tries = preemptible_tries
     }
   }
+  
+  call SV.Make_Pedigree_File {
+    input:
+    sample_array = Get_Sample_Name.sample,
+    sex_array = Get_Sex.sex,
+    output_ped_basename = cohort_name,
+    disk_size = 1
+  }
 
   call SV.Paste_VCF {
     input:
-    input_vcfs = SV_Copy_Number.output_vcf,
+    input_vcfs = Copy_Number.output_vcf,
     output_vcf_basename = cohort_name + ".merged.gt.cn",
     disk_size = disk_size,
     preemptible_tries = preemptible_tries
@@ -76,21 +102,9 @@ workflow Post_Merge_SV_Genotype {
 
   call SV.Sort_Index_VCF {
     input:
-    input_vcf_gz = SV_Classify.output_vcf_gz,
+    input_vcf_gz = Classify.output_vcf_gz,
     output_vcf_name = final_vcf_name,
     disk_size = disk_size,
     preemptible_tries = preemptible_tries
-  }
-
-  # Outputs that will be retained when execution is complete
-  output {
-    Make_Pedigree_File.*
-    SV_Genotype_Unmerged.output_vcf
-    SV_Genotype_Unmerged.output_lib
-    CNVnator_Histogram.*
-    L_Merge_VCF_Variants.*
-    Paste_VCF.*
-    Prune_VCF.*
-    Sort_Index_VCF.*
   }
 }

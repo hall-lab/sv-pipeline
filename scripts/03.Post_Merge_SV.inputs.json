@@ -1,0 +1,29 @@
+{
+  "##_COMMENT1": "DATA FILES",
+  "Post_Merge_SV.aligned_crams": [
+    "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.cram",
+    "gs://mgi-wdl-test/data/call-Extract_Reads/shard-1/attempt-4/H_IJ-NA12891-NA12891_D2.cram"
+  ],
+  "Post_Merge_SV.aligned_cram_indices": [
+    "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.cram.crai",
+    "gs://mgi-wdl-test/data/call-Extract_Reads/shard-1/attempt-4/H_IJ-NA12891-NA12891_D2.cram.crai"
+  ],
+  "Post_Merge_SV.cn_hist_roots": [
+    "gs://mgi-wdl-test/data/call-CNVnator_Histogram/shard-0/attempt-2/cnvnator.out/H_IJ-NA12878-NA12878_K10.cram.hist.root",
+    "gs://mgi-wdl-test/data/call-CNVnator_Histogram/shard-1/cnvnator.out/H_IJ-NA12891-NA12891_D2.cram.hist.root"
+  ],
+  "Post_Merge_SV.merged_vcf": "gs://mgi-wdl-test/data/call-L_Merge_VCF_Variants/pilot-01.lmerge.vcf.gz",
+  "Post_Merge_SV.cohort_name": "test-01",
+  "Post_Merge_SV.aligned_cram_suffix": ".cram",
+  "Post_Merge_SV.final_vcf_name": "test-01.vcf.gz",
+
+  "##_COMMENT2": "REFERENCE FILES",
+  "Post_Merge_SV.ref_fasta": "gs://human-b38/GRCh38DH/all_sequences.fa",
+  "Post_Merge_SV.ref_fasta_index": "gs://human-b38/GRCh38DH/all_sequences.fa.fai",
+  "Post_Merge_SV.ref_cache": "gs://human-b38/cache.tar.gz",
+  "Post_Merge_SV.mei_annotation_bed": "gs://human-b38/GRCh38DH/annotations/exclude.cnvnator_100bp.GRCh38.20170403.bed",
+
+  "##_COMMENT3": "SYSTEM PARAMETERS",
+  "Post_Merge_SV.disk_size": 60,
+  "Post_Merge_SV.preemptible_tries": 3
+}
