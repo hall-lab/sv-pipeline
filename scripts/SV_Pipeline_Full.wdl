@@ -104,7 +104,7 @@ workflow SV_Detect {
 
     call SV.Get_Sex {
       input:
-      input_cn_hist_root = cn_hist_root
+      input_cn_hist_root = cn_hist_root,
       ref_fasta_index = ref_fasta_index,
       disk_size = disk_size,
       preemptible_tries = preemptible_tries
