@@ -1,6 +1,6 @@
 import "SV_Tasks.wdl" as SV
 
-workflow Merge_SVs {
+workflow Merge_SV {
   # data inputs
   Array[File] input_vcfs
   String cohort_name
