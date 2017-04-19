@@ -473,7 +473,7 @@ task Sort_Index_VCF {
   runtime {
     docker: "halllab/svtools:v0.3.2-19ff895"
     cpu: "1"
-    memory: "2 GB"
+    memory: "3 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }

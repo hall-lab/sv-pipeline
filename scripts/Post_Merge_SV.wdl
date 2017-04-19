@@ -109,6 +109,8 @@ workflow Post_Merge_SV {
   }
 
   output {
-    Genotype_Merged.output_vcf
+    Make_Pedigree_File.output_ped
+    Sort_Index_VCF.output_vcf_gz
+    Sort_Index_VCF.output_vcf_gz_index
   }
 }
