@@ -71,7 +71,7 @@ workflow Post_Merge_SV {
     sample_array = Get_Sample_Name.sample,
     sex_array = Get_Sex.sex,
     output_ped_basename = cohort_name,
-    disk_size = 1
+    disk_size = 10
   }
 
   call SV.Paste_VCF {

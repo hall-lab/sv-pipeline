@@ -69,29 +69,6 @@ workflow SV_Detect {
       disk_size = disk_size,
       preemptible_tries = preemptible_tries
     }
-
-    call SV.Get_Sample_Name {
-      input:
-      input_cram = Extract_Reads.output_cram,
-      disk_size = disk_size,
-      preemptible_tries = preemptible_tries
-    }
-
-    call SV.Get_Sex {
-      input:
-      input_cn_hist_root = CNVnator_Histogram.output_cn_hist_root,
-      ref_fasta_index = ref_fasta_index,
-      disk_size = disk_size,
-      preemptible_tries = preemptible_tries
-    }
-  }
-
-  call SV.Make_Pedigree_File {
-    input:
-    sample_array = Get_Sample_Name.sample,
-    sex_array = Get_Sex.sex,
-    output_ped_basename = cohort_name,
-    disk_size = 1    
   }
 
   call SV.L_Sort_VCF_Variants {
@@ -115,8 +92,24 @@ workflow SV_Detect {
     
     File aligned_cram = Extract_Reads.output_cram[i]
     File aligned_cram_index = Extract_Reads.output_cram_index[i]
+    File cn_hist_root = CNVnator_Histogram.output_cn_hist_root[i]
     String basename = sub(sub(aligned_cram, "gs://.*/", ""), aligned_cram_suffix + "$", "")
+    
+    call SV.Get_Sample_Name {
+      input:
+      input_cram = aligned_cram,
+      disk_size = disk_size,
+      preemptible_tries = preemptible_tries
+    }
 
+    call SV.Get_Sex {
+      input:
+      input_cn_hist_root = cn_hist_root
+      ref_fasta_index = ref_fasta_index,
+      disk_size = disk_size,
+      preemptible_tries = preemptible_tries
+    }
+    
     call SV.Genotype as Genotype_Merged {
       input:
       basename = basename,
@@ -133,11 +126,19 @@ workflow SV_Detect {
       basename = basename,
       sample = basename,
       input_vcf = Genotype_Merged.output_vcf,
-      input_cn_hist_root = CNVnator_Histogram.output_cn_hist_root[i],
+      input_cn_hist_root = cn_hist_root,
       ref_cache = ref_cache,
       disk_size = disk_size,
       preemptible_tries = preemptible_tries
     }
+  }
+
+  call SV.Make_Pedigree_File {
+    input:
+    sample_array = Get_Sample_Name.sample,
+    sex_array = Get_Sex.sex,
+    output_ped_basename = cohort_name,
+    disk_size = 10
   }
 
   call SV.Paste_VCF {
@@ -174,7 +175,6 @@ workflow SV_Detect {
     preemptible_tries = preemptible_tries
   }
 
-  # Outputs that will be retained when execution is complete
   output {
     Make_Pedigree_File.*
     Genotype_Unmerged.output_vcf
