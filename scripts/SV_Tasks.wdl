@@ -380,7 +380,7 @@ task Paste_VCF {
   runtime {
     docker: "halllab/svtools:v0.3.2-19ff895"
     cpu: "1"
-    memory: "1 GB"
+    memory: "3 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
@@ -410,7 +410,7 @@ task Prune_VCF {
   runtime {
     docker: "halllab/svtools:v0.3.2-19ff895"
     cpu: "1"
-    memory: "1 GB"
+    memory: "3 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
@@ -445,7 +445,7 @@ task Classify {
   runtime {
     docker: "halllab/svtools:v0.3.2-19ff895"
     cpu: "1"
-    memory: "1 GB"
+    memory: "3 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
