@@ -65,4 +65,11 @@ workflow Pre_Merge_SV {
       preemptible_tries = preemptible_tries
     }
   }
+
+  output {
+    Extract_Reads.output_cram
+    Extract_Reads.output_cram_index
+    CNVnator_Histogram.output_cn_hist_root
+    Genotype_Unmerged.output_vcf
+  }
 }

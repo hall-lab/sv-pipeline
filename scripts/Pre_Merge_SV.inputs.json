@@ -1,8 +1,8 @@
 {
   "##_COMMENT1": "DATA FILES",
   "Pre_Merge_SV.aligned_crams": [
-    "gs://ccdg-100-samples-trios-pilot-crams/WashU/WashU/Coriell_Trios_1/H_IJ-NA12878-NA12878_K10/v1/H_IJ-NA12878-NA12878_K10.cram",
-    "gs://ccdg-100-samples-trios-pilot-crams/WashU/WashU/Coriell_Trios_1/H_IJ-NA12891-NA12891_D2/v1/H_IJ-NA12891-NA12891_D2.cram"
+    "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.cram",
+    "gs://mgi-wdl-test/data/call-Extract_Reads/shard-1/attempt-4/H_IJ-NA12891-NA12891_D2.cram"
   ],
   "Pre_Merge_SV.aligned_cram_suffix": ".cram",
 
