@@ -1,7 +1,7 @@
 import "SV_Tasks.wdl" as SV
 
 # SV detection workflow
-workflow SV_Detect {
+workflow SV_Pipeline {
   # data inputs
   Array[File] aligned_crams
   String aligned_cram_suffix
