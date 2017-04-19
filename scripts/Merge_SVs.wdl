@@ -24,4 +24,8 @@ workflow Merge_SVs {
     disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
+
+  output {
+    L_Merge_VCF_Variants.output_vcf_gz
+  }
 }
