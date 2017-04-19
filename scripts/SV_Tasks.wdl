@@ -197,7 +197,7 @@ task Genotype {
   }
   
   runtime {
-    docker: "halllab/svtyper:v0.1.3-6756a0a"
+    docker: "halllab/svtyper:v0.1.4-635b8f6"
     cpu: "1"
     memory: "6.5 GB"
     disks: "local-disk " + disk_size + " HDD"
