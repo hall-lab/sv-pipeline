@@ -4,7 +4,7 @@
 # Table of contents
 1. [Overview](#overview)
 2. [WDL scripts](#wdl-scripts)
-3. [Dockerfiles](#dockerfiles)
+3. [Docker images](#docker-images)
 
 # Overview
 This repository contains pipeline scripts for structural variation detection in large cohorts. The pipeline is designed for Illumina paired-end whole genome sequencing data, preferably with at least 30x sequence coverage. Data inputs should be a set of sorted CRAM files, aligned with BWA-MEM.
@@ -17,7 +17,7 @@ Additional details on the SVTools pipeline are available in the [SVTools tutoria
 
 # WDL scripts
 
-Pipeline scripts (in [WDL format](https://software.broadinstitute.org/wdl/)) are available in the [scripts](scripts) directory.
+Pipeline scripts (in [WDL format](https://software.broadinstitute.org/wdl/)) are available in the [scripts](scripts) directory. These scripts can be launched using the [Cromwell](https://github.com/broadinstitute/cromwell) (version 25 or later) workflow management system.
 
 While the SV pipeline can be run in its entirety via the [SV_Pipeline_Full.wdl](scripts/SV_Pipeline_Full.wdl) script, we recommend running the pipeline in three stages to enable intermediate quality control checkpoints.
 
@@ -50,9 +50,8 @@ For the cohort:
   - Classify SV type based on the concordance between variant genotypes and read-depths
   - Sort and index the VCF
 
-# Dockerfiles
+# Docker images
 
-Generator scripts for the requisite Docker containers.
-
-
-
+- Docker images for this pipeline are available at https://hub.docker.com/u/halllab.
+- Dockerfiles for these containers are available in the [docker](docker) directory.
+- WDL test scripts for each of these Docker containers are available in the [test](test) directory.
