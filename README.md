@@ -29,15 +29,26 @@ For each sample:
   - Preliminary SV genotyping with SVTyper
   - Generate CNVnator histogram files
 
-At this stage, we recommend performing quality control checks on each sample before merging them into the cohort-level VCF (step 2).
+After this step, we recommend performing quality control checks on each sample before merging them into the cohort-level VCF (step 2).
 
 ## 2. [Merge_SV.wdl](scripts/Merge_SV.wdl)
 
-Merge
+This step merges the sample-level VCF files from step 1 using the LUMPY breakpoint probability curves to produce a single cohort-level VCF.
 
 ## 3. [Post_Merge_SV.wdl](scripts/Post_Merge_SV.wdl)
 
-Post-merge
+This step re-genotypes each sample at the sites in the cohort-level VCF file from step 2, and the combines the results into the final VCF.
+
+For each sample:
+  - Re-genotype each SV using SVTyper
+  - Annotate the read-depth at each SV using CNVnator
+  - Generate a .ped file of sample names and sexes
+
+For the cohort:
+  - Combine the re-genotyped VCFs into a single cohort-level VCF
+  - Prune overlapping SVs
+  - Classify SV type based on the concordance between variant genotypes and read-depths
+  - Sort and index the VCF
 
 # Dockerfiles
 
