@@ -17,7 +17,7 @@ Additional details on the SVTools pipeline are available in the [SVTools tutoria
 
 # WDL scripts
 
-Pipeline scripts (in [WDL format](https://software.broadinstitute.org/wdl/)) are available in the [scripts](scripts) directory. These scripts can be launched using the [Cromwell](https://github.com/broadinstitute/cromwell) (version 25 or later) workflow management system.
+Pipeline scripts (in [WDL format](https://software.broadinstitute.org/wdl/)) are available in the [scripts](scripts) directory. These scripts can be launched using [Cromwell](https://github.com/broadinstitute/cromwell) (version 25 or later).
 
 While the SV pipeline can be run in its entirety via the [SV_Pipeline_Full.wdl](scripts/SV_Pipeline_Full.wdl) script, we recommend running the pipeline in three stages to enable intermediate quality control checkpoints.
 
@@ -37,7 +37,7 @@ This step merges the sample-level VCF files from step 1 using the LUMPY breakpoi
 
 ## 3. [Post_Merge_SV.wdl](scripts/Post_Merge_SV.wdl)
 
-This step re-genotypes each sample at the sites in the cohort-level VCF file from step 2, and the combines the results into the final VCF.
+This step re-genotypes each sample at the sites in the cohort-level VCF file from step 2, and then combines the results into the final VCF.
 
 For each sample:
   - Re-genotype each SV using SVTyper
