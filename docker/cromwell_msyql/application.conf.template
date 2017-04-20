@@ -190,7 +190,7 @@ backend {
         kill = "bkill ${job_id}"
         check-alive = "bjobs -noheader -o \"stat\" ${job_id} | /bin/grep 'PEND\\|RUN'"
         job-id-regex = "Job <(\\d+)>.*"
-        root = "%%SHARED_FS_DIRECTORY%%cromwell-executions" // Change this to your directory that contains this application.conf file.
+        root = "%%SHARED_FS_DIRECTORY%%/cromwell-executions" // Change this to your directory that contains this application.conf file.
         filesystems {
             localization: [
                 "soft-link"
