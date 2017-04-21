@@ -2,6 +2,7 @@
 
 set -eo pipefail
 
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 RESOURCE_DIR=/opt/ccdg/cromwell/resources
 #RESOURCE_DIR='.'
 CROMWELL_CONF_TEMPLATE=$RESOURCE_DIR/application.conf.template
@@ -146,11 +147,11 @@ function run_cromwell {
 
 function cleanup {
     local dir="$1"
-    if $LOCK_ACQUIRED; then
-        unlock "$dir"
-    fi
     if [[ $MYSQLD_PID ]]; then
         shutdown_mysql
+    fi
+    if $LOCK_ACQUIRED; then
+        unlock "$dir"
     fi
 }
 
