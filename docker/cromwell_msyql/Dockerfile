@@ -18,7 +18,7 @@ RUN apt-get update -qq \
 
 ADD application.conf.template /opt/ccdg/cromwell/resources
 ADD mysql.cnf.template /opt/ccdg/cromwell/resources
+ADD run_pipeline.sh /opt/ccdg/cromwell/resources
 
 # Reset entrypoint so container doesn't try to run cromwell directly
-# ENTRYPOINT []
-CMD ["/bin/bash"]
+ENTRYPOINT ["bash", "/opt/ccdg/cromwell/resources/run_pipeline.sh"]
