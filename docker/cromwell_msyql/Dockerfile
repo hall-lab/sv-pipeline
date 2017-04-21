@@ -17,6 +17,7 @@ RUN apt-get update -qq \
     && rm -rf /var/lib/apt/lists/*
 
 ADD application.conf.template /opt/ccdg/cromwell/resources
+ADD mysql.cnf.template /opt/ccdg/cromwell/resources
 
 # Reset entrypoint so container doesn't try to run cromwell directly
 # ENTRYPOINT []
