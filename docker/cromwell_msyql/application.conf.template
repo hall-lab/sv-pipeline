@@ -142,7 +142,7 @@ backend {
         # Root directory where Cromwell writes job results.  This directory must be
         # visible and writeable by the Cromwell process as well as the jobs that Cromwell
         # launches.
-        root = "cromwell-executions"
+        root = "%%SHARED_FS_DIRECTORY%%/cromwell-executions" // Change this to your directory that contains this application.conf file.
 
         filesystems {
           local {
