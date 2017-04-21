@@ -7,7 +7,10 @@ RESOURCE_DIR=/opt/ccdg/cromwell/resources
 CROMWELL_CONF_TEMPLATE=$RESOURCE_DIR/application.conf.template
 MYSQL_CONF_TEMPLATE=$RESOURCE_DIR/mysql.cnf.template
 
-MYSQLD_PID=0
+MYSQLD_PID=''
+LOCK_ACQUIRED=false
+
+MAIN_DIR="$1"
 
 function clean_directory {
     local cleaned=$(echo "$1" | sed 's|/*$||')
@@ -69,12 +72,14 @@ function start_mysql {
     local dir="$1"
     local mysql_cnf_file=$(mysql_conf "$dir")
     mysqld_safe --defaults-file="$mysql_cnf_file" &
-    MYSQLD_PID=$!
+    MYSQLD_PID="$!"
     wait_for_file "/tmp/mysqld.sock"
 }
 
 function shutdown_mysql {
+    echo "Shutting down mysql" >&2
     /usr/bin/mysqladmin -u root --socket /tmp/mysqld.sock shutdown
+    MYSQLD_PID=''
 }
 
 function install_db {
@@ -114,6 +119,7 @@ function is_locked {
 function lock {
     local dir="$1"
     if mkdir "$dir/.lock"; then
+        LOCK_ACQUIRED=true
         echo "Locked $dir" >&2
     else
         echo "Unable to lock $dir" >&2
@@ -124,6 +130,7 @@ function lock {
 function unlock {
     local dir="$1"
     if rmdir "$dir/.lock"; then
+        LOCK_ACQUIRED=false
         echo "Unlocked $dir" >&2
     else
         echo "Unable to unlock $dir" >&2
@@ -138,9 +145,11 @@ function run_cromwell {
 }
 
 function cleanup {
-    local dir=$(clean_directory "$1")
-    unlock "$dir"
-    if [[ ! $MYSQLD_PID ]]; then
+    local dir="$1"
+    if $LOCK_ACQUIRED; then
+        unlock "$dir"
+    fi
+    if [[ $MYSQLD_PID ]]; then
         shutdown_mysql
     fi
 }
@@ -150,8 +159,8 @@ function main {
    if [[ -d "$dir" ]]
     then
         local clean_dir=$(clean_directory "$dir")
+        trap 'cleanup $(clean_directory "$MAIN_DIR")' EXIT SIGTERM SIGINT
         lock "$clean_dir"
-        trap 'cleanup $clean_dir' SIGINT SIGTERM
         set_up_conf "$clean_dir"
         set_up_mysql_cnf "$clean_dir"
         if ! $(has_db "$clean_dir"); then
@@ -162,8 +171,6 @@ function main {
         fi
         echo "${@:2}" >&2
         run_cromwell "$clean_dir" "${@:2}"
-        shutdown_mysql
-        unlock "$dir"
     else
         echo "$dir is not a directory" >&2
         exit 1
