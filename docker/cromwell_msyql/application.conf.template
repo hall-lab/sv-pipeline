@@ -164,10 +164,10 @@ backend {
       config {
         runtime-attributes = """
         Int cpu = 1
-        String? memory_gb
-        String? queue
+        Int? memory_mb = 4000
+        String? queue = 'research-hpc'
         String? project
-        String? docker_image
+        String? docker
         String? resource
         String? job_group
         """
@@ -178,19 +178,37 @@ backend {
         -cwd ${cwd} \
         -o ${out} \
         -e ${err} \
-        ${"-a \"docker(" + docker_image + ")\""} \
         ${"-P " + project} \
         ${"-q " + queue} \
-        ${"-M " + memory_gb} \
-        ${"-C " + cpu} \
+        -M ${memory_mb}000 \
+        -R 'select[mem>${memory_mb}] rusage[mem=${memory_mb}] span[hosts=1]' \
+        ${"-n " + cpu} \
         ${"-R \"" + resource + "\""} \
         ${"-g \"" + job_group + "\""} \
         /bin/bash ${script}
         """
+
+        submit-docker = """
+        bsub \
+        -J ${job_name} \
+        -cwd ${cwd} \
+        -o ${out} \
+        -e ${err} \
+        -a 'docker(${docker})' \
+        ${"-P " + project} \
+        ${"-q " + queue} \
+        -M ${memory_mb}000 \
+        -R 'select[mem>${memory_mb}] rusage[mem=${memory_mb}] span[hosts=1]' \
+        ${"-n " + cpu} \
+        ${"-R \"" + resource + "\""} \
+        ${"-g \"" + job_group + "\""} \
+        /bin/bash ${script}
+        """
+
         kill = "bkill ${job_id}"
         check-alive = "bjobs -noheader -o \"stat\" ${job_id} | /bin/grep 'PEND\\|RUN'"
         job-id-regex = "Job <(\\d+)>.*"
-        root = "%%SHARED_FS_DIRECTORY%%/cromwell-executions" // Change this to your directory that contains this application.conf file.
+        root = "%%SHARED_FS_DIRECTORY%%/cromwell-executions"
         filesystems {
             localization: [
                 "soft-link"
