@@ -21,4 +21,4 @@ ADD mysql.cnf.template /opt/ccdg/cromwell/resources
 ADD run_pipeline.sh /opt/ccdg/cromwell/resources
 
 # Reset entrypoint so container doesn't try to run cromwell directly
-ENTRYPOINT ["bash", "/opt/ccdg/cromwell/resources/run_pipeline.sh"]
+ENTRYPOINT ["/opt/ccdg/cromwell/resources/run_pipeline.sh"]
