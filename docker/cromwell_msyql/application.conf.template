@@ -189,6 +189,7 @@ backend {
         """
 
         submit-docker = """
+        LSF_DOCKER_VOLUMES='${cwd}:${docker_cwd}'
         bsub \
         -J ${job_name} \
         -cwd ${cwd} \
