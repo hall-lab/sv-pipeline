@@ -202,7 +202,7 @@ backend {
         ${"-n " + cpu} \
         ${"-R \"" + resource + "\""} \
         ${"-g \"" + job_group + "\""} \
-        /bin/bash ${script} > ${out} 2>${err}
+        '/bin/bash ${script} > ${out} 2>${err}'
         """
 
         kill = "bkill ${job_id}"
