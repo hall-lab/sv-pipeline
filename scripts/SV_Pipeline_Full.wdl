@@ -21,7 +21,7 @@ workflow SV_Pipeline {
 
   scatter (aligned_cram in aligned_crams) {
 
-    String basename = sub(sub(aligned_cram, "gs://.*/", ""), aligned_cram_suffix + "$", "")
+    String basename = sub(sub(aligned_cram, "^.*/", ""), aligned_cram_suffix + "$", "")
     
     call SV.Extract_Reads {
       input:
@@ -93,7 +93,7 @@ workflow SV_Pipeline {
     File aligned_cram = Extract_Reads.output_cram[i]
     File aligned_cram_index = Extract_Reads.output_cram_index[i]
     File cn_hist_root = CNVnator_Histogram.output_cn_hist_root[i]
-    String basename = sub(sub(aligned_cram, "gs://.*/", ""), aligned_cram_suffix + "$", "")
+    String basename = sub(sub(aligned_cram, "^.*/", ""), aligned_cram_suffix + "$", "")
     
     call SV.Get_Sample_Name {
       input:

@@ -26,7 +26,7 @@ workflow Post_Merge_SV {
     File aligned_cram = aligned_crams[i]
     File aligned_cram_index = aligned_cram_indices[i]
     File cn_hist_root = cn_hist_roots[i]
-    String basename = sub(sub(aligned_cram, "gs://.*/", ""), aligned_cram_suffix + "$", "")
+    String basename = sub(sub(aligned_cram, "^.*/", ""), aligned_cram_suffix + "$", "")
 
     call SV.Get_Sample_Name {
       input:
