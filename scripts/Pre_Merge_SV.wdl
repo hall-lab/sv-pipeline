@@ -16,7 +16,7 @@ workflow Pre_Merge_SV {
   Int preemptible_tries
 
   scatter (aligned_cram in aligned_crams) {
-    String basename = sub(sub(aligned_cram, "gs://.*/", ""), aligned_cram_suffix + "$", "")
+    String basename = sub(sub(aligned_cram, "^.*/", ""), aligned_cram_suffix + "$", "")
     
     call SV.Extract_Reads {
       input:
