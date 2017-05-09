@@ -86,7 +86,7 @@ task Extract_Reads {
   Int preemptible_tries
 
   command {
-    mv ${input_cram} ${basename}.cram
+    ln -s ${input_cram} ${basename}.cram
     
     # build the reference sequence cache
     tar -zxf ${ref_cache}
@@ -115,7 +115,6 @@ task Extract_Reads {
   }
 
   output {
-    File output_cram = "${basename}.cram"
     File output_cram_index = "${basename}.cram.crai"
     File output_splitters_bam = "${basename}.splitters.bam"
     File output_splitters_bam_index = "${basename}.splitters.bam.bai"
@@ -140,6 +139,9 @@ task Lumpy {
   Int preemptible_tries
 
   command {
+    ln -s ${input_cram} ${basename}.cram
+    ln -s ${input_cram_index} ${basename}.cram.crai
+
     # build the reference sequence cache
     tar -zxf ${ref_cache}
     export REF_PATH=./cache/%2s/%2s/%s
@@ -180,8 +182,8 @@ task Genotype {
   Int preemptible_tries
   
   command {
-    mv ${input_cram} ${basename}.cram
-    mv ${input_cram_index} ${basename}.cram.crai
+    ln -s ${input_cram} ${basename}.cram
+    ln -s ${input_cram_index} ${basename}.cram.crai
 
     # build the reference sequence cache
     tar -zxf ${ref_cache}
@@ -260,8 +262,8 @@ task CNVnator_Histogram {
   Int threads = 4
   
   command <<<
-    mv ${input_cram} ${basename}.cram
-    mv ${input_cram_index} ${basename}.cram.crai
+    ln -s ${input_cram} ${basename}.cram
+    ln -s ${input_cram_index} ${basename}.cram.crai
 
     # build the reference sequence cache
     tar -zxf ${ref_cache}

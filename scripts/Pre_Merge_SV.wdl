@@ -30,7 +30,7 @@ workflow Pre_Merge_SV {
     call SV.Lumpy {
       input:
       basename = basename,
-      input_cram = Extract_Reads.output_cram,
+      input_cram = aligned_cram,
       input_cram_index = Extract_Reads.output_cram_index,
       input_splitters_bam = Extract_Reads.output_splitters_bam,
       input_splitters_bam_index = Extract_Reads.output_splitters_bam_index,
@@ -45,7 +45,7 @@ workflow Pre_Merge_SV {
     call SV.Genotype as Genotype_Unmerged {
       input:
       basename = basename,
-      input_cram = Extract_Reads.output_cram,
+      input_cram = aligned_cram,
       input_cram_index = Extract_Reads.output_cram_index,
       input_vcf = Lumpy.output_vcf,
       ref_cache = ref_cache,
@@ -56,7 +56,7 @@ workflow Pre_Merge_SV {
     call SV.CNVnator_Histogram {
       input:
       basename = basename,
-      input_cram = Extract_Reads.output_cram,
+      input_cram = aligned_cram,
       input_cram_index = Extract_Reads.output_cram_index,
       ref_fasta = ref_fasta,
       ref_fasta_index = ref_fasta_index,
@@ -67,7 +67,6 @@ workflow Pre_Merge_SV {
   }
 
   output {
-    Extract_Reads.output_cram
     Extract_Reads.output_cram_index
     CNVnator_Histogram.output_cn_hist_root
     Genotype_Unmerged.output_vcf
