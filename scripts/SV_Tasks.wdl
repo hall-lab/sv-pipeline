@@ -319,7 +319,7 @@ task L_Sort_VCF_Variants {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d4"
+    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d45"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -347,7 +347,7 @@ task L_Merge_VCF_Variants {
   }
   
   runtime {
-    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d4"
+    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d45"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -380,7 +380,7 @@ task Paste_VCF {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d4"
+    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d45"
     cpu: "1"
     memory: "3 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -410,7 +410,7 @@ task Prune_VCF {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d4"
+    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d45"
     cpu: "1"
     memory: "3 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -445,7 +445,7 @@ task Classify {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d4"
+    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d45"
     cpu: "1"
     memory: "3 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -473,7 +473,7 @@ task Sort_Index_VCF {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d4"
+    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d45"
     cpu: "1"
     memory: "3 GB"
     disks: "local-disk " + disk_size + " HDD"
