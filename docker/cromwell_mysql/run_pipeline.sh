@@ -142,7 +142,7 @@ function unlock {
 function run_cromwell {
     local dir="$1"
     local cromwell_conf=$(cromwell_conf "$dir")
-    /usr/bin/java -Dconfig.file="$cromwell_conf" -jar /app/cromwell.jar run "${@:2}"
+    /usr/bin/java -Xmx31G -Xms16G -Dconfig.file="$cromwell_conf" -jar /app/cromwell.jar run "${@:2}"
 }
 
 function cleanup {
