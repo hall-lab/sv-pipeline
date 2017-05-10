@@ -212,7 +212,7 @@ backend {
         root = "%%SHARED_FS_DIRECTORY%%/cromwell-executions"
         filesystems {
             localization: [
-                "soft-link"
+                "hard-link", "soft-link", "copy"
             ]
         }
         default-runtime-attributes {
