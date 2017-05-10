@@ -11,7 +11,7 @@ task Get_Sample_Name {
   }
 
   runtime {
-    docker: "halllab/extract-sv-reads:v1.1.2-9bb74fc"
+    docker: "halllab/extract-sv-reads@sha256:192090f72afaeaaafa104d50890b2fc23935c8dc98988a9b5c80ddf4ec50f70c"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -39,7 +39,7 @@ task Get_Sex {
   >>>
 
   runtime {
-    docker: "halllab/cnvnator:v0.3.3-9d3a92b"
+    docker: "halllab/cnvnator@sha256:c41e9ce51183fc388ef39484cbb218f7ec2351876e5eda18b709d82b7e8af3a2"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + disk_size + " HDD" 
@@ -107,7 +107,7 @@ task Extract_Reads {
   }
 
   runtime {
-    docker: "halllab/extract-sv-reads:v1.1.2-9bb74fc"
+    docker: "halllab/extract-sv-reads@sha256:192090f72afaeaaafa104d50890b2fc23935c8dc98988a9b5c80ddf4ec50f70c"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -160,7 +160,7 @@ task Lumpy {
   }
 
   runtime {
-    docker: "halllab/lumpy:v0.2.13-2d611fa"
+    docker: "halllab/lumpy@sha256:59ce7551307a54087e57d5cec89b17511d910d1fe9fa3651c12357f0594dcb07"
     cpu: "1"
     memory: "8 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -199,7 +199,7 @@ task Genotype {
   }
   
   runtime {
-    docker: "halllab/svtyper:v0.1.4-635b8f6"
+    docker: "halllab/svtyper@sha256:21d757e77dfc52fddeab94acd66b09a561771a7803f9581b8cca3467ab7ff94a"
     cpu: "1"
     memory: "6.5 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -237,7 +237,7 @@ task Copy_Number {
   }
   
   runtime {
-    docker: "halllab/cnvnator:v0.3.3-9d3a92b"
+    docker: "halllab/cnvnator@sha256:c41e9ce51183fc388ef39484cbb218f7ec2351876e5eda18b709d82b7e8af3a2"
     cpu: "1"
     memory: "4 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -286,7 +286,7 @@ task CNVnator_Histogram {
   >>>
 
   runtime {
-    docker: "halllab/cnvnator:v0.3.3-9d3a92b"
+    docker: "halllab/cnvnator@sha256:c41e9ce51183fc388ef39484cbb218f7ec2351876e5eda18b709d82b7e8af3a2"
     cpu: threads
     memory: "26 GB"
     disks: "local-disk " + disk_size + " HDD" 
