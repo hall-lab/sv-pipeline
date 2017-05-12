@@ -21,7 +21,7 @@
   "Post_Merge_SV.ref_fasta": "gs://human-b38/GRCh38DH/all_sequences.fa",
   "Post_Merge_SV.ref_fasta_index": "gs://human-b38/GRCh38DH/all_sequences.fa.fai",
   "Post_Merge_SV.ref_cache": "gs://human-b38/cache.tar.gz",
-  "Post_Merge_SV.mei_annotation_bed": "gs://human-b38/GRCh38DH/annotations/exclude.cnvnator_100bp.GRCh38.20170403.bed",
+  "Post_Merge_SV.mei_annotation_bed": "gs://human-b38/GRCh38DH/annotations/repeatMasker.recent.lt200millidiv.LINE_SINE_SVA.GRCh38.sorted.bed.gz",
 
   "##_COMMENT3": "SYSTEM PARAMETERS",
   "Post_Merge_SV.disk_size": 60,
