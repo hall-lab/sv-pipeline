@@ -6,7 +6,7 @@
   "Cnvnator_only.aligned_crams": [
     "file",
     ],
-  "Cnvnator_only.aligned_cram_suffix": "String"
+  "Cnvnator_only.aligned_cram_suffix": ".cram"
 
   "##_COMMENT2": "REFERENCE FILES",
   "Cnvnator_only.ref_fasta_index": "gs://human-b38/GRCh38DH/all_sequences.fa.fai",
