@@ -1,0 +1,30 @@
+{
+  "##_COMMENT1": "DATA INPUTS",
+  "Lumpy_and_Genotype.aligned_crams": [
+    "file.cram"
+  ],
+  "Lumpy_and_Genotype.aligned_cram_indices": [
+    "file.cram.crai"
+  ],
+  "Lumpy_and_Genotype.splitters_bams": [
+    "file.splitters.bam"
+  ],
+  "Lumpy_and_Genotype.splitters_bam_indices": [
+    "file.splitters.bam.bai"
+  ],
+  "Lumpy_and_Genotype.discordants_bams": [
+    "file.discordants.bam"
+  ],
+  "Lumpy_and_Genotype.discordants_bam_indices": [
+    "file.discordants.bam.bai"
+  ],
+  "Lumpy_and_Genotype.aligned_cram_suffix": ".cram",
+  
+  "##_COMMENT2": "REFERENCE FILES",
+  "Lumpy_and_Genotype.ref_cache": "gs://human-b38/cache.tar.gz",
+  "Lumpy_and_Genotype.exclude_regions": "gs://human-b38/GRCh38DH/annotations/exclude.cnvnator_100bp.GRCh38.20170403.bed",
+
+  "##_COMMENT3": "SYSTEM PARAMETERS",
+  "Lumpy_and_Genotype.disk_size": 60,
+  "Lumpy_and_Genotype.preemptible_tries": 3
+}

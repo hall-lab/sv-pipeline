@@ -1,0 +1,20 @@
+{
+  "##_COMMENT1": "DATA INPUTS",
+  "Genotype_only.aligned_crams": [
+    "file.cram"
+  ],
+  "Genotype_only.aligned_cram_indices": [
+    "file.cram.crai"
+  ],
+  "Genotype_only.input_vcfs": [
+    "file.vcf"
+  ],
+  "Genotype_only.aligned_cram_suffix": ".cram",
+
+  "##_COMMENT2": "REFERENCE FILES",
+  "Genotype_only.ref_cache": "gs://human-b38/cache.tar.gz",
+
+  "##_COMMENT3": "SYSTEM PARAMETERS",
+  "Genotype_only.disk_size": 60
+  "Genotype_only.preemptible_tries": 3
+}
