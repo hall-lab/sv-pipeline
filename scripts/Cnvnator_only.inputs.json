@@ -1,0 +1,19 @@
+{
+  "##_COMMENT1": "DATA INPUTS",
+  "Cnvnator_only.aligned_cram_indices": [
+    "file",
+    ],
+  "Cnvnator_only.aligned_crams": [
+    "file",
+    ],
+  "Cnvnator_only.aligned_cram_suffix": "String"
+
+  "##_COMMENT2": "REFERENCE FILES",
+  "Cnvnator_only.ref_fasta_index": "gs://human-b38/GRCh38DH/all_sequences.fa.fai",
+  "Cnvnator_only.ref_cache": "gs://human-b38/cache.tar.gz",
+  "Cnvnator_only.ref_fasta": "gs://human-b38/GRCh38DH/all_sequences.fa",
+  
+  "##_COMMENT3": "SYSTEM PARAMETERS",
+  "Cnvnator_only.disk_size": 60,
+  "Cnvnator_only.preemptible_tries": 3,
+}
