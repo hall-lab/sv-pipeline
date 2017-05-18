@@ -1,12 +1,12 @@
 {
   "##_COMMENT1": "DATA INPUTS",
   "Cnvnator_only.aligned_cram_indices": [
-    "file.cram",
+    "file.cram"
     ],
   "Cnvnator_only.aligned_crams": [
-    "file.cram.crai",
+    "file.cram.crai"
     ],
-  "Cnvnator_only.aligned_cram_suffix": ".cram"
+  "Cnvnator_only.aligned_cram_suffix": ".cram",
 
   "##_COMMENT2": "REFERENCE FILES",
   "Cnvnator_only.ref_fasta_index": "gs://human-b38/GRCh38DH/all_sequences.fa.fai",
