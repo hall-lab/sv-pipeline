@@ -1,10 +1,10 @@
 {
   "##_COMMENT1": "DATA INPUTS",
   "Cnvnator_only.aligned_cram_indices": [
-    "file",
+    "file.cram",
     ],
   "Cnvnator_only.aligned_crams": [
-    "file",
+    "file.cram.crai",
     ],
   "Cnvnator_only.aligned_cram_suffix": ".cram"
 
@@ -15,5 +15,5 @@
   
   "##_COMMENT3": "SYSTEM PARAMETERS",
   "Cnvnator_only.disk_size": 60,
-  "Cnvnator_only.preemptible_tries": 3,
+  "Cnvnator_only.preemptible_tries": 3
 }
