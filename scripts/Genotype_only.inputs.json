@@ -15,6 +15,6 @@
   "Genotype_only.ref_cache": "gs://human-b38/cache.tar.gz",
 
   "##_COMMENT3": "SYSTEM PARAMETERS",
-  "Genotype_only.disk_size": 60
+  "Genotype_only.disk_size": 60,
   "Genotype_only.preemptible_tries": 3
 }
