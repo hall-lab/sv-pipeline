@@ -161,8 +161,8 @@ task Lumpy {
 
   runtime {
     docker: "halllab/lumpy@sha256:59ce7551307a54087e57d5cec89b17511d910d1fe9fa3651c12357f0594dcb07"
-    cpu: "1"
-    memory: "8 GB"
+    cpu: "4"
+    memory: "26 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
