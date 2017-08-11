@@ -195,19 +195,20 @@ task Genotype {
       | svtyper \
       -B ${basename}.cram \
       -l ${basename}.cram.json \
-      > ${basename}.gt.vcf
+      | bgzip -c \
+      > ${basename}.gt.vcf.gz
   }
   
   runtime {
     docker: "halllab/svtyper@sha256:21d757e77dfc52fddeab94acd66b09a561771a7803f9581b8cca3467ab7ff94a"
     cpu: "1"
-    memory: "6.5 GB"
+    memory: "13 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
 
   output {
-    File output_vcf = "${basename}.gt.vcf"
+    File output_vcf_gz = "${basename}.gt.vcf.gz"
     File output_lib = "${basename}.cram.json"
   }
 }
@@ -218,22 +219,20 @@ task Copy_Number {
   File input_vcf
   File input_cn_hist_root
   File ref_cache
+  File coordinates
   Int disk_size
   Int preemptible_tries
 
   command {
-    create_coordinates \
-      -i ${input_vcf} \
-      -o coordinates.txt
-
     svtools copynumber \
       -i ${input_vcf} \
       -s ${sample} \
       --cnvnator cnvnator \
       -w 100 \
       -r ${input_cn_hist_root} \
-      -c coordinates.txt \
-      > ${basename}.cn.vcf
+      -c {coordinates} \
+      | bgzip -c \
+      > ${basename}.cn.vcf.gz
   }
   
   runtime {
@@ -245,7 +244,7 @@ task Copy_Number {
   }
 
   output {
-    File output_vcf = "${basename}.cn.vcf"
+    File output_vcf_gz = "${basename}.cn.vcf.gz"
   }
 }
 
