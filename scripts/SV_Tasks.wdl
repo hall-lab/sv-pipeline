@@ -230,7 +230,7 @@ task Copy_Number {
       --cnvnator cnvnator \
       -w 100 \
       -r ${input_cn_hist_root} \
-      -c {coordinates} \
+      -c ${coordinates} \
       | bgzip -c \
       > ${basename}.cn.vcf.gz
   }
