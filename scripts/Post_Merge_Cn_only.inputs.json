@@ -1,0 +1,26 @@
+{
+  "##_COMMENT1": "DATA INPUTS",
+  "Post_Merge_Cn_only_SV.aligned_crams": [
+    "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.cram",
+    "gs://mgi-wdl-test/data/call-Extract_Reads/shard-1/attempt-4/H_IJ-NA12891-NA12891_D2.cram"
+  ],
+  "Post_Merge_Cn_only_SV.genotype_vcf_gzs": [
+    "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.gt.vcf.gz",
+    "gs://mgi-wdl-test/data/call-Extract_Reads/shard-1/attempt-4/H_IJ-NA12891-NA12891_D2.gt.vcf.gz"
+  ],
+  "Post_Merge_Cn_only_SV.aligned_cram_suffix": ".cram",
+  "Post_Merge_Cn_only_SV.cn_hist_roots": [
+    "gs://mgi-wdl-test/data/call-CNVnator_Histogram/shard-0/attempt-2/cnvnator.out/H_IJ-NA12878-NA12878_K10.cram.hist.root",
+    "gs://mgi-wdl-test/data/call-CNVnator_Histogram/shard-1/cnvnator.out/H_IJ-NA12891-NA12891_D2.cram.hist.root"
+  ],
+  "Post_Merge_Cn_only_SV.coordinates": "test-01.coordinates",
+
+  "##_COMMENT2": "REFERENCE FILES",
+  "Post_Merge_Cn_only_SV.ref_fasta": "gs://human-b38/GRCh38DH/all_sequences.fa",
+  "Post_Merge_Cn_only_SV.ref_fasta_index": "gs://human-b38/GRCh38DH/all_sequences.fa.fai",
+  "Post_Merge_Cn_only_SV.ref_cache": "gs://human-b38/cache.tar.gz",
+
+  "##_COMMENT3": "SYSTEM PARAMETERS",
+  "Post_Merge_Cn_only_SV.disk_size": 64,
+  "Post_Merge_Cn_only_SV.preemptible_tries": 3
+}
