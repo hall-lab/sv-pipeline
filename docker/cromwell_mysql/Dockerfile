@@ -1,4 +1,4 @@
-FROM broadinstitute/cromwell:26
+FROM broadinstitute/cromwell:29
 LABEL maintainer "Dave Larson <delarson@wustl.edu>"
 
 # Build dependencies
