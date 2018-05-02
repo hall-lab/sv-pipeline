@@ -130,7 +130,7 @@ engine {
 }
 
 backend {
-  default = "Local"
+  default = "LSF"
   providers {
     Local {
       actor-factory = "cromwell.backend.impl.sfs.config.ConfigBackendLifecycleActorFactory"
