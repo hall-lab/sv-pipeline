@@ -77,13 +77,13 @@ system {
 
   # Default number of cache read workers
   number-of-cache-read-workers = 25
-  
+
   io {
     # Global Throttling - This is mostly useful for GCS and can be adjusted to match
     # the quota availble on the GCS API
     number-of-requests = 100000
     per = 100 seconds
-    
+
     # Number of times an I/O operation should be attempted before giving up and failing it.
     number-of-attempts = 5
   }
@@ -122,15 +122,35 @@ engine {
   # }
   # You will need to provide the engine with a gcs filesystem
   # Note that the default filesystem (local) is always available.
-  #filesystems {
+  filesystems {
   #  gcs {
   #    auth = "application-default"
   #  }
-  #}
+    local {
+       caching {
+              # When copying a cached result, what type of file duplication should occur. Attempted in the order listed below:
+              duplication-strategy: [
+                "soft-link"
+              ]
+
+              # Possible values: file, path
+              # "file" will compute an md5 hash of the file content.
+              # "path" will compute an md5 hash of the file path. This strategy will only be effective if the duplication-strategy (above) is set to "soft-link",
+              # in order to allow for the original file path to be hashed.
+              # Default: file
+              hashing-strategy: "path"
+
+              # When true, will check if a sibling file with the same name and the .md5 extension exists, and if it does, use the content of this file as a hash.
+              # If false or the md5 does not exist, will proceed with the above-defined hashing strategy.
+              # Default: false
+              check-sibling-md5: false
+            }
+    }
+  }
 }
 
 backend {
-  default = "Local"
+  default = "LSF"
   providers {
     Local {
       actor-factory = "cromwell.backend.impl.sfs.config.ConfigBackendLifecycleActorFactory"
@@ -212,8 +232,9 @@ backend {
         root = "%%SHARED_FS_DIRECTORY%%/cromwell-executions"
         filesystems {
             localization: [
-                "hard-link", "soft-link", "copy"
+                "soft-link"
             ]
+            hashing-strategy: "path"
         }
         default-runtime-attributes {
             failOnStderr: false
@@ -253,7 +274,7 @@ services {
 
 database {
   # mysql example
-  driver = "slick.driver.MySQLDriver$"
+  profile = "slick.jdbc.MySQLProfile$"
   db {
     driver = "com.mysql.jdbc.Driver"
     url = "jdbc:mysql://localhost:3306/cromwell?socket=/tmp/mysqld.sock"
