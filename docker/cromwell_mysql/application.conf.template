@@ -274,7 +274,7 @@ services {
 
 database {
   # mysql example
-  driver = "slick.driver.MySQLDriver$"
+  profile = "slick.jdbc.HsqldbProfile$"
   db {
     driver = "com.mysql.jdbc.Driver"
     url = "jdbc:mysql://localhost:3306/cromwell?socket=/tmp/mysqld.sock"
