@@ -191,6 +191,7 @@ backend {
         String? docker
         String? resource
         String? job_group
+        String? priority
         """
 
         submit = """
@@ -206,6 +207,7 @@ backend {
         ${"-n " + cpu} \
         ${"-R \"" + resource + "\""} \
         ${"-g \"" + job_group + "\""} \
+        ${"-sp " + priority} \
         /bin/bash ${script}
         """
 
@@ -223,6 +225,7 @@ backend {
         ${"-n " + cpu} \
         ${"-R \"" + resource + "\""} \
         ${"-g \"" + job_group + "\""} \
+        ${"-sp " + priority} \
         /bin/bash -c '/bin/bash ${script} >${out} 2>${err}'
         """
 
