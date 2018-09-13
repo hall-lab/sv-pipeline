@@ -69,6 +69,8 @@ workflow Pre_Merge_SV {
   output {
     Extract_Reads.output_cram_index
     CNVnator_Histogram.output_cn_hist_root
+    CNVnator_Histogram.output_cn_txt
+    CNVnator_Histogram.output_cn_bed
     Genotype_Unmerged.output_vcf
   }
 }
