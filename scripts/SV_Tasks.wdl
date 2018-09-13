@@ -29,7 +29,7 @@ task Get_Sex {
   File ref_fasta_index
   Int disk_size
   Int preemptible_tries
-  
+
   command <<<
     cat ${ref_fasta_index} \
       | awk '$1=="chrX" { print $1":0-"$2 } END { print "exit"}' \
@@ -42,7 +42,7 @@ task Get_Sex {
     docker: "halllab/cnvnator@sha256:c41e9ce51183fc388ef39484cbb218f7ec2351876e5eda18b709d82b7e8af3a2"
     cpu: "1"
     memory: "1 GB"
-    disks: "local-disk " + disk_size + " HDD" 
+    disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -87,7 +87,7 @@ task Extract_Reads {
 
   command {
     ln -s ${input_cram} ${basename}.cram
-    
+
     # build the reference sequence cache
     tar -zxf ${ref_cache}
     export REF_PATH=./cache/%2s/%2s/%s
@@ -120,6 +120,50 @@ task Extract_Reads {
     File output_splitters_bam_index = "${basename}.splitters.bam.bai"
     File output_discordants_bam = "${basename}.discordants.bam"
     File output_discordants_bam_index = "${basename}.discordants.bam.bai"
+  }
+}
+
+# index a CRAM
+task Index_Cram {
+  #input {
+  File input_cram
+  String basename
+  File ref_cache
+  Int disk_size
+  Int preemptible_tries
+  #}
+
+  # TODO Can we use our curl token etc to do the following without localization?
+  # How do we do that without using gcloud enabled containers or exposing our token?
+  # parameter_meta {
+  #   input_cram: {
+  #     description: "cram file",
+  #     localization_optional: true
+  #   }
+  # }
+
+  command {
+    ln -s ${input_cram} ${basename}.cram
+
+    # build the reference sequence cache
+    tar -zxf ${ref_cache}
+    export REF_PATH=./cache/%2s/%2s/%s
+    export REF_CACHE=./cache/%2s/%2s/%s
+
+    # index the CRAM
+    samtools index ${basename}.cram
+  }
+
+  runtime {
+    docker: "halllab/extract-sv-reads@sha256:192090f72afaeaaafa104d50890b2fc23935c8dc98988a9b5c80ddf4ec50f70c"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + disk_size + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_cram_index = "${basename}.cram.crai"
   }
 }
 
@@ -185,7 +229,7 @@ task Smoove {
 
   Int disk_size
   Int preemptible_tries
-  
+
   command {
     set -e
     ln -s ${input_cram} ${basename}.cram
@@ -195,7 +239,7 @@ task Smoove {
     # tar -zxf ${ref_cache}
     # export REF_PATH=./cache/%2s/%2s/%s
     # export REF_CACHE=./cache/%2s/%2s/%s
-    
+
     smoove call \
       --name ${basename} \
       --exclude ${exclude_regions} \
@@ -226,7 +270,7 @@ task Genotype {
   File ref_cache
   Int disk_size
   Int preemptible_tries
-  
+
   command {
     ln -s ${input_cram} ${basename}.cram
     ln -s ${input_cram_index} ${basename}.cram.crai
@@ -243,7 +287,7 @@ task Genotype {
       -l ${basename}.cram.json \
       > ${basename}.gt.vcf
   }
-  
+
   runtime {
     docker: "halllab/svtyper@sha256:21d757e77dfc52fddeab94acd66b09a561771a7803f9581b8cca3467ab7ff94a"
     cpu: "1"
@@ -281,7 +325,7 @@ task Copy_Number {
       -c coordinates.txt \
       > ${basename}.cn.vcf
   }
-  
+
   runtime {
     docker: "halllab/cnvnator@sha256:c41e9ce51183fc388ef39484cbb218f7ec2351876e5eda18b709d82b7e8af3a2"
     cpu: "1"
@@ -306,7 +350,7 @@ task CNVnator_Histogram {
   Int disk_size
   Int preemptible_tries
   Int threads = 4
-  
+
   command <<<
     ln -s ${input_cram} ${basename}.cram
     ln -s ${input_cram_index} ${basename}.cram.crai
@@ -315,7 +359,7 @@ task CNVnator_Histogram {
     tar -zxf ${ref_cache}
     export REF_PATH=./cache/%2s/%2s/%s
     export REF_CACHE=./cache/%2s/%2s/%s
-    
+
     # Create directory of chromosome FASTA files for CNVnator
     mkdir -p ${ref_chrom_dir}
     awk -v CHROM_DIR=${ref_chrom_dir} 'BEGIN { CHROM="" } { if ($1~"^>") CHROM=substr($1,2); print $0 > CHROM_DIR"/"CHROM".fa" }' ${ref_fasta}
@@ -335,7 +379,7 @@ task CNVnator_Histogram {
     docker: "halllab/cnvnator@sha256:c41e9ce51183fc388ef39484cbb218f7ec2351876e5eda18b709d82b7e8af3a2"
     cpu: threads
     memory: "26 GB"
-    disks: "local-disk " + disk_size + " HDD" 
+    disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -393,7 +437,7 @@ task L_Merge_VCF_Variants {
       | bgzip -c \
       > ${output_vcf_basename}.vcf.gz
   }
-  
+
   runtime {
     docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d45"
     cpu: "1"
@@ -419,7 +463,7 @@ task Paste_VCF {
     cat ${input_vcfs_file} \
       | sed 's/^gs:\/\//\.\//g' \
       > input_vcfs_file.local_map.txt
-    
+
     svtools vcfpaste \
       -f input_vcfs_file.local_map.txt \
       -q \
