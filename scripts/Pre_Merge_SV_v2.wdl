@@ -18,7 +18,7 @@ workflow Pre_Merge_SV {
   scatter (aligned_cram in aligned_crams) {
     String basename = sub(sub(aligned_cram, "^.*/", ""), aligned_cram_suffix + "$", "")
 
-    call.Index_Cram {
+    call SV.Index_Cram {
       input:
         basename = basename,
         input_cram = aligned_cram,
@@ -40,10 +40,8 @@ workflow Pre_Merge_SV {
   }
 
   output {
-    Extract_Reads.output_cram_index
-    CNVnator_Histogram.output_cn_hist_root
-    CNVnator_Histogram.output_cn_txt
-    CNVnator_Histogram.output_cn_bed
-    Genotype_Unmerged.output_vcf
+    Index_Cram.output_cram_index
+    Smoove.output_vcf
+    Smoove.output_csi
   }
 }
