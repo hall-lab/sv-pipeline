@@ -172,6 +172,52 @@ task Lumpy {
   }
 }
 
+# Smoove wrapper
+task Smoove {
+  String basename
+  File input_cram
+  File input_cram_index
+
+  File ref_fasta
+  # Can't tell yet if we need the ref cache
+  #File ref_cache
+  File exclude_regions
+
+  Int disk_size
+  Int preemptible_tries
+  
+  command {
+    set -e
+    ln -s ${input_cram} ${basename}.cram
+    ln -s ${input_cram_index} ${basename}.cram.crai
+
+    # build the reference sequence cache
+    # tar -zxf ${ref_cache}
+    # export REF_PATH=./cache/%2s/%2s/%s
+    # export REF_CACHE=./cache/%2s/%2s/%s
+    
+    smoove call \
+      --name ${basename} \
+      --exclude ${exclude_regions} \
+      --fasta ${ref_fasta} \
+      --genotype \
+      ${basename}.cram
+  }
+
+  runtime {
+    docker: "halllab/smoove@sha256:ee1a3d994b0d6a1eeed91894049ce4d883da40912c35a0aefeb6e26ad0ea34d1",
+    cpu: "1"
+    memory: "4 GB"
+    disks: "local-disk " + disk_size + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_vcf = "${basename}-smoove.genotyped.vcf.gz"
+    File output_csi = "${basename}-smoove.genotyped.vcf.gz.csi"
+  }
+}
+
 task Genotype {
   String basename
   File input_cram
