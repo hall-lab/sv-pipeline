@@ -295,6 +295,8 @@ task CNVnator_Histogram {
 
   output {
     File output_cn_hist_root = "cnvnator.out/${basename}.cram.hist.root"
+    File output_cn_txt = "${basename}.cn.txt"
+    File output_cn_bed = "${basename}.cn.bed"
   }
 }
 
