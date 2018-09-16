@@ -1,10 +1,10 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 LABEL maintainer "Dave Larson <delarson@wustl.edu>"
 
 # Build dependencies
 RUN SMOOVE_VERSION=0.1.7 \
-    && SAMTOOLS_VERSION=1.8 \
-    && BCFTOOLS_VERSION=1.8 \
+    && SAMTOOLS_VERSION=1.9 \
+    && BCFTOOLS_VERSION=1.9 \
     && LIBDEFLATE_VERSION=1.0 \
     && SVTYPER_VERSION=0.7.0 \
     && MOSDEPTH_VERSION=0.2.3 \

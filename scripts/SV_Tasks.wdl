@@ -249,7 +249,7 @@ task Smoove {
   }
 
   runtime {
-    docker: "halllab/smoove@sha256:ee1a3d994b0d6a1eeed91894049ce4d883da40912c35a0aefeb6e26ad0ea34d1",
+    docker: "halllab/smoove@sha256:46baaa4803f7c6f4d5e19a1aee338991058b352d5058049c589e7289ee2f4972",
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + disk_size + " HDD"
