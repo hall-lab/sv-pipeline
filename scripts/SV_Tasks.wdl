@@ -216,6 +216,42 @@ task Lumpy {
   }
 }
 
+task Manta {    
+  File input_cram
+  File input_cram_index
+  File ref_fasta
+  File ref_cache
+  String basename
+  Int disk_size
+  Int preemptible_tries
+
+  command {
+    set -e
+    ln -s ${input_cram} ${basename}.cram
+    ln -s ${input_cram_index} ${basename}.cram.crai
+    export REF_PATH=${ref_cache}
+    export REF_CACHE=${ref_cache}
+    configManta.py \
+    --referenceFasta=${ref_fasta} \
+    --runDir=MantaWorkflow \
+    --bam=${input_cram}
+    MantaWorkflow/runWorkflow.py -m local -j 8
+    mv MantaWorkflow/results/variants/diploidSV.vcf.gz ${basename}.vcf.gz
+    mv MantaWorkflow/results/variants/diploidSV.vcf.gz.tbi ${basename}.vcf.gz.tbi
+  }
+  runtime {
+    docker: "halllab/manta@sha256:e44b71678a1889eb80e276e9e648e1bf822f14d6fbe528fcf9a605d18bf3d72e",
+    cpu: "8"
+    memory: "14.4 GB"
+    disks: "local-disk " + disk_size + " HDD"
+    preemptible: preemptible_tries
+  }
+  output {
+    File output_vcf = "${basename}.vcf.gz"
+    File output_tbi = "${basename}.vcf.gz.tbi"
+  }
+}
+
 # Smoove wrapper
 task Smoove {
   String basename
