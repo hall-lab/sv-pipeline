@@ -18,6 +18,7 @@ RUN curl -O -L https://github.com/Illumina/manta/releases/download/v${MANTA_VERS
     && ../manta-${MANTA_VERSION}.release_src/configure --prefix=/opt/hall-lab/manta-${MANTA_VERSION} \
     && make -j 4 install
 RUN find /opt/hall-lab/python-2.7.15/ -depth \( -name '*.pyo' -o -name '*.pyc' -o -name 'test' -o -name 'tests' \) -exec rm -rf '{}' + ;
+RUN find /opt/hall-lab/python-2.7.15/lib/python2.7/site-packages/ -name '*.so' -print -exec sh -c 'file "{}" | grep -q "not stripped" && strip -s "{}"' \;
 
 FROM debian:stretch-slim
 LABEL maintainer "Dave Larson <delarson@wustl.edu>"
