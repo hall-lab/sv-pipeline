@@ -79,6 +79,7 @@ RUN apt-get update -qq \
         libncurses5 \
         libbz2-1.0 \ 
         liblzma5 \ 
-        libssl1.0.2
+        libssl1.0.2 \
+        zlib1g
 
 CMD ["/bin/bash"]
