@@ -39,7 +39,7 @@ task Get_Sex {
   >>>
 
   runtime {
-    docker: "halllab/cnvnator@sha256:c41e9ce51183fc388ef39484cbb218f7ec2351876e5eda18b709d82b7e8af3a2"
+    docker: "halllab/cnvnator@sha256:b692956f2caa4604acc1eeda41ed73dfe4382e0730ffb958a749bcd1cdc3b2d4"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -240,7 +240,7 @@ task Manta {
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz.tbi ${basename}.vcf.gz.tbi
   }
   runtime {
-    docker: "halllab/manta@sha256:e44b71678a1889eb80e276e9e648e1bf822f14d6fbe528fcf9a605d18bf3d72e",
+    docker: "halllab/manta@sha256:967d3e6e11411a24cbbbdd6faf941559ea55e83747554a59a0865618393fb7d6",
     cpu: "8"
     memory: "14.4 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -285,7 +285,7 @@ task Smoove {
   }
 
   runtime {
-    docker: "halllab/smoove@sha256:46baaa4803f7c6f4d5e19a1aee338991058b352d5058049c589e7289ee2f4972",
+    docker: "halllab/smoove@sha256:182c176c0a7af1da304601510f47028dd33d557c8e3bab777dccbcca9d25ee10",
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -412,7 +412,7 @@ task CNVnator_Histogram {
   >>>
 
   runtime {
-    docker: "halllab/cnvnator@sha256:c41e9ce51183fc388ef39484cbb218f7ec2351876e5eda18b709d82b7e8af3a2"
+    docker: "halllab/cnvnator@sha256:b692956f2caa4604acc1eeda41ed73dfe4382e0730ffb958a749bcd1cdc3b2d4"
     cpu: threads
     memory: "26 GB"
     disks: "local-disk " + disk_size + " HDD"
