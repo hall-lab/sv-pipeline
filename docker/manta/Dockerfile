@@ -31,6 +31,11 @@ COPY --from=manta-build /opt/hall-lab/python-2.7.15 /opt/hall-lab/python-2.7.15
 RUN apt-get update -qq \
     && apt-get -y install \
         --no-install-recommends \
+        libssl1.1 \
+        libcurl3 \
+        libbz2-1.0 \ 
+        liblzma5 \ 
+        libssl1.0.2 \
         zlib1g
 
 ENV PATH=/opt/hall-lab/manta-${MANTA_VERSION}/bin:/opt/hall-lab/python-2.7.15/bin/:$PATH
