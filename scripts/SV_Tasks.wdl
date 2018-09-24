@@ -155,7 +155,7 @@ task Index_Cram {
   }
 
   runtime {
-    docker: "halllab/extract-sv-reads@sha256:192090f72afaeaaafa104d50890b2fc23935c8dc98988a9b5c80ddf4ec50f70c"
+    docker: "halllab/samtools@sha256:5e6b0430a7ad25f68e5c46a9fa9c0ebba0f9af8ebf5aebe94242954d812a4e68"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -363,6 +363,7 @@ task Copy_Number {
   }
 
   runtime {
+    # TODO - This needs to be an updated svtools container
     docker: "halllab/cnvnator@sha256:c41e9ce51183fc388ef39484cbb218f7ec2351876e5eda18b709d82b7e8af3a2"
     cpu: "1"
     memory: "4 GB"
