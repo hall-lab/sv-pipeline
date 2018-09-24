@@ -16,7 +16,7 @@ RUN apt-get update -qq \
         libbz2-1.0 \ 
         liblzma5 \ 
         libssl1.0.2 \
-        zlib1g
+        zlib1g \
         libgomp1 \
         libstdc++6 \
         libstdc++-6-dev \
