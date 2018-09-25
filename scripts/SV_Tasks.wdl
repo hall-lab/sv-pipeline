@@ -220,6 +220,7 @@ task Manta {
   File input_cram
   File input_cram_index
   File ref_fasta
+  File ref_fasta_index
   File ref_cache
   String basename
   Int disk_size
@@ -234,7 +235,7 @@ task Manta {
     configManta.py \
     --referenceFasta=${ref_fasta} \
     --runDir=MantaWorkflow \
-    --bam=${input_cram}
+    --bam=${basename}.cram
     MantaWorkflow/runWorkflow.py -m local -j 8
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz ${basename}.vcf.gz
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz.tbi ${basename}.vcf.gz.tbi
