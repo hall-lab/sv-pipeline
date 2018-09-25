@@ -24,7 +24,9 @@ FROM debian:stretch-slim
 LABEL maintainer "Dave Larson <delarson@wustl.edu>"
 ARG MANTA_VERSION=1.4.0
 
-COPY --from=manta-build /opt/hall-lab/manta-${MANTA_VERSION}/[^s]* /opt/hall-lab/manta-${MANTA_VERSION}/
+COPY --from=manta-build /opt/hall-lab/manta-${MANTA_VERSION}/bin /opt/hall-lab/manta-${MANTA_VERSION}/bin
+COPY --from=manta-build /opt/hall-lab/manta-${MANTA_VERSION}/lib /opt/hall-lab/manta-${MANTA_VERSION}/lib
+COPY --from=manta-build /opt/hall-lab/manta-${MANTA_VERSION}/libexec /opt/hall-lab/manta-${MANTA_VERSION}/libexec
 COPY --from=manta-build /opt/hall-lab/python-2.7.15 /opt/hall-lab/python-2.7.15
 
 # Run dependencies
