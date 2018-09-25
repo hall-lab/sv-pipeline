@@ -37,11 +37,40 @@ workflow Pre_Merge_SV {
       disk_size = disk_size,
       preemptible_tries = preemptible_tries
     }
+
+    call SV.Manta {
+      input:
+      basename = basename,
+      input_cram = aligned_cram,
+      input_cram_index = Index_Cram.output_cram_index,
+      ref_fasta = ref_fasta,
+      ref_fasta_index = ref_fasta_index,
+      ref_cache = ref_cache,
+      disk_size = disk_size,
+      preemptible_tries = preemptible_tries
+    }
+
+    call SV.CNVnator_Histogram {
+      input:
+      basename = basename,
+      input_cram = aligned_cram,
+      input_cram_index = Index_Cram.output_cram_index,
+      ref_fasta = ref_fasta,
+      ref_fasta_index = ref_fasta_index,
+      ref_cache = ref_cache,
+      disk_size = disk_size,
+      preemptible_tries = preemptible_tries
+    }
   }
 
   output {
     Index_Cram.output_cram_index
     Smoove.output_vcf
     Smoove.output_csi
+    Manta.output_vcf
+    Manta.output_tbi
+    CNVnator_Histogram.output_cn_hist_root
+    CNVnator_Histogram.output_cn_txt
+    CNVnator_Histogram.output_cn_bed
   }
 }
