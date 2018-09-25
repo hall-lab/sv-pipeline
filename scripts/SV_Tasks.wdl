@@ -272,10 +272,7 @@ task Smoove {
     ln -s ${input_cram} ${basename}.cram
     ln -s ${input_cram_index} ${basename}.cram.crai
 
-    # build the reference sequence cache
-    # tar -zxf ${ref_cache}
-    # export REF_PATH=./cache/%2s/%2s/%s
-    # export REF_CACHE=./cache/%2s/%2s/%s
+    # build the reference sequence cache here if needed
 
     smoove call \
       --name ${basename} \
