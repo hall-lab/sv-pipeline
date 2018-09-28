@@ -223,8 +223,9 @@ task Manta {
   File ref_fasta_index
   File ref_cache
   String basename
-  Int disk_size
   Int preemptible_tries
+
+  Int disk_size = ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB" * 5) + 1.0 )
 
   command {
     set -e
@@ -236,13 +237,13 @@ task Manta {
     --referenceFasta=${ref_fasta} \
     --runDir=MantaWorkflow \
     --bam=${basename}.cram
-    MantaWorkflow/runWorkflow.py -m local -j 8
+    MantaWorkflow/runWorkflow.py -m local -j 16
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz ${basename}.vcf.gz
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz.tbi ${basename}.vcf.gz.tbi
   }
   runtime {
     docker: "halllab/manta@sha256:4ce53aa6163430773648b360fad119130a5cd4c1861dc5f5121a74d8270f481a"
-    cpu: "8"
+    cpu: "16"
     memory: "14.4 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
