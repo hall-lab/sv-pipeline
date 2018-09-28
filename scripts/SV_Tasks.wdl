@@ -244,7 +244,7 @@ task Manta {
   runtime {
     docker: "halllab/manta@sha256:4ce53aa6163430773648b360fad119130a5cd4c1861dc5f5121a74d8270f481a"
     cpu: "16"
-    memory: "14.4 GB"
+    memory: "15 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
@@ -261,12 +261,13 @@ task Smoove {
   File input_cram_index
 
   File ref_fasta
-  # Can't tell yet if we need the ref cache
-  #File ref_cache
+  File ref_fasta_index
   File exclude_regions
 
-  Int disk_size
   Int preemptible_tries
+
+  # Budgeting 15% of the input size for storage of splitters and discordants file
+  Int disk_size = ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(exclude_regions, "GB") + size(input_cram, "GB") * 0.15 )
 
   command {
     set -e
@@ -286,7 +287,7 @@ task Smoove {
   runtime {
     docker: "halllab/smoove@sha256:5dd2977b8234ecd1065972e169af4dca8df2cd33ca1cacdac43f6e6b3c94456f"
     cpu: "1"
-    memory: "3.75 GB"
+    memory: "3.5 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
@@ -294,6 +295,12 @@ task Smoove {
   output {
     File output_vcf = "${basename}-smoove.genotyped.vcf.gz"
     File output_csi = "${basename}-smoove.genotyped.vcf.gz.csi"
+    File output_histogram = "${basename}.histo"
+    File lumpy_script = "${basename}-lumpy-cmd.sh"
+    File splitters = "${basename}.split.bam"
+    File splitters_index = "${basename}.split.bam.bai"
+    File discordants = "${basename}.disc.bam"
+    File discordants_index = "${basename}.disc.bam.bai"
   }
 }
 
@@ -383,9 +390,10 @@ task CNVnator_Histogram {
   File ref_fasta_index
   File ref_cache
   String ref_chrom_dir = "cnvnator_chroms"
-  Int disk_size
   Int preemptible_tries
   Int threads = 4
+  # Add 7G of pad of the chromosome directory and ~2-3 GB of output files
+  Int disk_size = ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB" * 5) + 7.0 )
 
   command <<<
     ln -s ${input_cram} ${basename}.cram
@@ -414,7 +422,7 @@ task CNVnator_Histogram {
   runtime {
     docker: "halllab/cnvnator@sha256:8bf4fa64a288c5647a9a6b1ea90d14e76f48a3e16c5bf98c63419bb7d81c8938"
     cpu: threads
-    memory: "26 GB"
+    memory: "16 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
