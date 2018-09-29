@@ -225,7 +225,15 @@ task Manta {
   String basename
   Int preemptible_tries
 
-  Int disk_size = ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB" * 5) + 1.0 )
+  Int disk_size = ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB") * 5 + 7.0)
+
+  # Manta requires 2GB per thread for scheduling, but in typical cases uses less than this
+  # see https://github.com/Illumina/manta/issues/38
+  # Setting below derives CPU count from machine
+  # Sets RAM to unlimited to jobs are scheduled only 
+  # with respect to cores
+  # If a task starts to fail then we can adjust the machine resources to get it
+  # to succeed without adjusting the command
 
   command {
     set -e
@@ -237,7 +245,7 @@ task Manta {
     --referenceFasta=${ref_fasta} \
     --runDir=MantaWorkflow \
     --bam=${basename}.cram
-    MantaWorkflow/runWorkflow.py -m local -j 16
+    MantaWorkflow/runWorkflow.py -m local -g "unlimited"
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz ${basename}.vcf.gz
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz.tbi ${basename}.vcf.gz.tbi
   }
@@ -287,7 +295,7 @@ task Smoove {
   runtime {
     docker: "halllab/smoove@sha256:5dd2977b8234ecd1065972e169af4dca8df2cd33ca1cacdac43f6e6b3c94456f"
     cpu: "1"
-    memory: "3.5 GB"
+    memory: "2 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
@@ -393,7 +401,7 @@ task CNVnator_Histogram {
   Int preemptible_tries
   Int threads = 4
   # Add 7G of pad of the chromosome directory and ~2-3 GB of output files
-  Int disk_size = ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB" * 5) + 7.0 )
+  Int disk_size = ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB") * 5 + 7.0 )
 
   command <<<
     ln -s ${input_cram} ${basename}.cram
