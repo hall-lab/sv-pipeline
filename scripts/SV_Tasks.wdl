@@ -130,7 +130,7 @@ task Index_Cram {
   File ref_cache
   Int preemptible_tries
 
-  Int disk_size = ceil( size(input_cram, "GB") size(ref_cache, "GB") * 5 + 1.0)
+  Int disk_size = ceil( size(input_cram, "GB") + size(ref_cache, "GB") * 5 + 1.0)
 
   command {
     ln -s ${input_cram} ${basename}.cram
