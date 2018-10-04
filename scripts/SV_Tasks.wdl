@@ -125,22 +125,12 @@ task Extract_Reads {
 
 # index a CRAM
 task Index_Cram {
-  #input {
   File input_cram
   String basename
   File ref_cache
-  Int disk_size
   Int preemptible_tries
-  #}
 
-  # TODO Can we use our curl token etc to do the following without localization?
-  # How do we do that without using gcloud enabled containers or exposing our token?
-  # parameter_meta {
-  #   input_cram: {
-  #     description: "cram file",
-  #     localization_optional: true
-  #   }
-  # }
+  Int disk_size = ceil( size(input_cram, "GB") size(ref_cache, "GB") * 5 + 1.0)
 
   command {
     ln -s ${input_cram} ${basename}.cram
