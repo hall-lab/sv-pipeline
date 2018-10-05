@@ -229,8 +229,11 @@ task Manta {
     set -e
     ln -s ${input_cram} ${basename}.cram
     ln -s ${input_cram_index} ${basename}.cram.crai
-    export REF_PATH=${ref_cache}
-    export REF_CACHE=${ref_cache}
+
+    tar -zxf ${ref_cache}
+    export REF_PATH=./cache/%2s/%2s/%s
+    export REF_CACHE=./cache/%2s/%2s/%s
+
     configManta.py \
     --referenceFasta=${ref_fasta} \
     --runDir=MantaWorkflow \
