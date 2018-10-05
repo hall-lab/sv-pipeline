@@ -245,7 +245,7 @@ task Manta {
   runtime {
     docker: "halllab/manta@sha256:4ce53aa6163430773648b360fad119130a5cd4c1861dc5f5121a74d8270f481a"
     cpu: "8"
-    memory: "7.2 GiB"
+    memory: "16 GiB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
