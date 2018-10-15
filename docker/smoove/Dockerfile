@@ -46,9 +46,9 @@ RUN find /opt/hall-lab/python-2.7.15/ -depth \( -name '*.pyo' -o -name '*.pyc' -
 RUN find /opt/hall-lab/python-2.7.15/lib/python2.7/site-packages/ -name '*.so' -print -exec sh -c 'file "{}" | grep -q "not stripped" && strip -s "{}"' \;
 
 # Smoove build...
-FROM builder-base as smoove-0.1.10-build
-WORKDIR /opt/hall-lab/smoove-0.1.10/bin
-RUN SMOOVE_VERSION=0.1.10 \
+FROM builder-base as smoove-0.2.1-build
+WORKDIR /opt/hall-lab/smoove-0.2.1/bin
+RUN SMOOVE_VERSION=0.2.1 \
     && MOSDEPTH_VERSION=0.2.3 \
     && GSORT_VERSION=0.0.6 \
     && curl -L -o mosdepth https://github.com/brentp/mosdepth/releases/download/v$MOSDEPTH_VERSION/mosdepth \
@@ -66,9 +66,9 @@ COPY --from=svtyper-0.7.0-build /opt/hall-lab/python-2.7.15 /opt/hall-lab/python
 COPY --from=halllab/htslib-1.9-build:v1 /build/deb-build/opt/hall-lab/htslib-1.9 /opt/hall-lab/htslib-1.9
 COPY --from=halllab/samtools-1.9-build:v1 /build/deb-build/opt/hall-lab/samtools-1.9 /opt/hall-lab/samtools-1.9
 COPY --from=halllab/bcftools-1.9-build:v1 /build/deb-build/opt/hall-lab/bcftools-1.9 /opt/hall-lab/bcftools-1.9
-COPY --from=smoove-0.1.10-build /opt/hall-lab/smoove-0.1.10/bin /opt/hall-lab/smoove-0.1.10/bin
+COPY --from=smoove-0.2.1-build /opt/hall-lab/smoove-0.2.1/bin /opt/hall-lab/smoove-0.2.1/bin
 
-ENV PATH=/opt/hall-lab/smoove-0.1.10/bin:/opt/hall-lab/python-2.7.15/bin:/opt/hall-lab/lumpy-178d7a6/bin:/opt/hall-lab/htslib-1.9/bin:/opt/hall-lab/samtools-1.9/bin:/opt/hall-lab/bcftools-1.9/bin:$PATH
+ENV PATH=/opt/hall-lab/smoove-0.2.1/bin:/opt/hall-lab/python-2.7.15/bin:/opt/hall-lab/lumpy-178d7a6/bin:/opt/hall-lab/htslib-1.9/bin:/opt/hall-lab/samtools-1.9/bin:/opt/hall-lab/bcftools-1.9/bin:$PATH
 ENV LD_LIBRARY_PATH=/opt/hall-lab/htslib-1.9/lib:$LD_LIBRARY_PATH
 
 RUN apt-get update -qq \

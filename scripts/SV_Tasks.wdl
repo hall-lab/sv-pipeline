@@ -281,12 +281,13 @@ task Smoove {
       --name ${basename} \
       --exclude ${exclude_regions} \
       --fasta ${ref_fasta} \
+      --noextrafilters \
       --genotype \
       ${basename}.cram
   }
 
   runtime {
-    docker: "halllab/smoove@sha256:5dd2977b8234ecd1065972e169af4dca8df2cd33ca1cacdac43f6e6b3c94456f"
+    docker: "halllab/smoove@sha256:29b15aeaf0e35892a7060f8d7bf6dd0000ad7cc6e3cdff44b2038d56ccae4dab"
     cpu: "1"
     memory: "2 GB"
     disks: "local-disk " + disk_size + " HDD"
