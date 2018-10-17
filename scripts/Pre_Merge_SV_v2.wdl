@@ -22,7 +22,6 @@ workflow Pre_Merge_SV {
         basename = basename,
         input_cram = aligned_cram,
         ref_cache = ref_cache,
-        disk_size = disk_size,
         preemptible_tries = preemptible_tries
     }
     
