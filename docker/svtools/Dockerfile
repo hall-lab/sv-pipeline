@@ -38,6 +38,7 @@ LABEL maintainer "Dave Larson <delarson@wustl.edu>"
 COPY --from=svtools-0.4.0-build /opt/hall-lab/python-2.7.15 /opt/hall-lab/python-2.7.15
 COPY --from=halllab/samtools-1.9-build:v1 /build/deb-build/opt/hall-lab/samtools-1.9 /opt/hall-lab/samtools-1.9
 COPY --from=halllab/cnvnator-0.3.3-build:v1 /opt/hall-lab/cnvnator-0.3.3/deb-build/opt/hall-lab/cnvnator-0.3.3 /opt/hall-lab/cnvnator-0.3.3
+COPY --from=halllab/htslib-1.9-build:v1 /build/deb-build/opt/hall-lab/htslib-1.9 /opt/hall-lab/htslib-1.9
 
 RUN apt-get update -qq \
     && apt-get install -y --no-install-recommends \
@@ -58,7 +59,7 @@ RUN apt-get update -qq \
         g++ \
         libxpm4
 
-ENV PATH=/opt/hall-lab/python-2.7.15/bin:/opt/hall-lab/samtools-1.9/bin:/opt/hall-lab/cnvnator-0.3.3/bin:${PATH}
+ENV PATH=/opt/hall-lab/python-2.7.15/bin:/opt/hall-lab/samtools-1.9/bin:/opt/hall-lab/htslib-1.9/bin:/opt/hall-lab/cnvnator-0.3.3/bin:${PATH}
 
 CMD ["/bin/bash"]
 
