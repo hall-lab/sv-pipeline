@@ -238,9 +238,10 @@ task Manta {
     --referenceFasta=${ref_fasta} \
     --runDir=MantaWorkflow \
     --bam=${basename}.cram
-    MantaWorkflow/runWorkflow.py -m local -g "unlimited"
+    timeout -k 2m 8h MantaWorkflow/runWorkflow.py -m local -g "unlimited"
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz ${basename}.vcf.gz
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz.tbi ${basename}.vcf.gz.tbi
+    tar -czvf ${basename}.MantaWorkflow.tgz MantaWorkflow
   }
   runtime {
     docker: "halllab/manta@sha256:4ce53aa6163430773648b360fad119130a5cd4c1861dc5f5121a74d8270f481a"
@@ -252,6 +253,7 @@ task Manta {
   output {
     File output_vcf = "${basename}.vcf.gz"
     File output_tbi = "${basename}.vcf.gz.tbi"
+    File workflow_tgz = "${basename}.MantaWorkflow.tgz"
   }
 }
 
@@ -289,7 +291,7 @@ task Smoove {
   runtime {
     docker: "halllab/smoove@sha256:29b15aeaf0e35892a7060f8d7bf6dd0000ad7cc6e3cdff44b2038d56ccae4dab"
     cpu: "1"
-    memory: "2 GB"
+    memory: "2.5 GiB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
   }
