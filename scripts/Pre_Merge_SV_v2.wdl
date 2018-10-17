@@ -12,7 +12,6 @@ workflow Pre_Merge_SV {
   File exclude_regions
 
   # system inputs
-  Int disk_size
   Int preemptible_tries
 
   scatter (aligned_cram in aligned_crams) {
@@ -33,8 +32,8 @@ workflow Pre_Merge_SV {
       input_cram = aligned_cram,
       input_cram_index = Index_Cram.output_cram_index,
       ref_fasta = ref_fasta,
+      ref_fasta_index = ref_fasta_index,
       exclude_regions = exclude_regions,
-      disk_size = disk_size,
       preemptible_tries = preemptible_tries
     }
 
@@ -46,7 +45,6 @@ workflow Pre_Merge_SV {
       ref_fasta = ref_fasta,
       ref_fasta_index = ref_fasta_index,
       ref_cache = ref_cache,
-      disk_size = disk_size,
       preemptible_tries = preemptible_tries
     }
 
@@ -58,13 +56,11 @@ workflow Pre_Merge_SV {
       ref_fasta = ref_fasta,
       ref_fasta_index = ref_fasta_index,
       ref_cache = ref_cache,
-      disk_size = disk_size,
       preemptible_tries = preemptible_tries
     }
   }
 
   output {
-    Index_Cram.output_cram_index
     Smoove.output_vcf
     Smoove.output_csi
     Manta.output_vcf
