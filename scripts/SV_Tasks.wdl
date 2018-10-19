@@ -265,19 +265,20 @@ task Smoove {
 
   File ref_fasta
   File ref_fasta_index
+  File ref_cache
   File exclude_regions
 
   Int preemptible_tries
 
-  # Budgeting 15% of the input size for storage of splitters and discordants file
-  Int disk_size = ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(exclude_regions, "GB") + size(input_cram, "GB") * 0.15 )
 
   command {
     set -e
     ln -s ${input_cram} ${basename}.cram
     ln -s ${input_cram_index} ${basename}.cram.crai
 
-    # build the reference sequence cache here if needed
+    tar -zxf ${ref_cache}
+    export REF_PATH=./cache/%2s/%2s/%s
+    export REF_CACHE=./cache/%2s/%2s/%s
 
     smoove call \
       --name ${basename} \
@@ -286,13 +287,19 @@ task Smoove {
       --noextrafilters \
       --genotype \
       ${basename}.cram
+
+    mv *.histo ${basename}.histo
+    mv *.split.bam ${basename}.split.bam
+    mv *.split.bam.bai ${basename}.split.bam.bai
+    mv *.disc.bam ${basename}.disc.bam
+    mv *.disc.bam.bai ${basename}.disc.bam.bai
   }
 
   runtime {
     docker: "halllab/smoove@sha256:29b15aeaf0e35892a7060f8d7bf6dd0000ad7cc6e3cdff44b2038d56ccae4dab"
     cpu: "1"
     memory: "2.5 GiB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(exclude_regions, "GB") + size(input_cram, "GB") * 0.30 + size(ref_cache, "GB") * 5) + " HDD"
     preemptible: preemptible_tries
   }
 
