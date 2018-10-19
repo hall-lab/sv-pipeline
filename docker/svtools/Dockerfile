@@ -57,7 +57,9 @@ RUN apt-get update -qq \
         libstdc++-6-dev \
         libgcc1 \
         g++ \
-        libxpm4
+        libxpm4 \
+        gzip \
+        less
 
 ENV PATH=/opt/hall-lab/python-2.7.15/bin:/opt/hall-lab/samtools-1.9/bin:/opt/hall-lab/htslib-1.9/bin:/opt/hall-lab/cnvnator-0.3.3/bin:${PATH}
 
