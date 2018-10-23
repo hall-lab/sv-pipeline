@@ -130,8 +130,6 @@ task Index_Cram {
   File ref_cache
   Int preemptible_tries
 
-  Int disk_size = ceil( size(input_cram, "GB") + size(ref_cache, "GB") * 5 + 1.0)
-
   command {
     ln -s ${input_cram} ${basename}.cram
 
@@ -148,7 +146,7 @@ task Index_Cram {
     docker: "halllab/samtools@sha256:5e6b0430a7ad25f68e5c46a9fa9c0ebba0f9af8ebf5aebe94242954d812a4e68"
     cpu: "1"
     memory: "1 GB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk " + ceil( size(input_cram, "GB") + size(ref_cache, "GB") * 5 + 1.0) + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -212,10 +210,10 @@ task Manta {
   File ref_fasta
   File ref_fasta_index
   File ref_cache
+  File? call_regions_bed
+  File? call_regions_bed_index
   String basename
   Int preemptible_tries
-
-  Int disk_size = ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB") * 5 + 7.0)
 
   # Manta requires 2GB per thread for scheduling, but in typical cases uses less than this
   # see https://github.com/Illumina/manta/issues/38
@@ -234,10 +232,12 @@ task Manta {
     export REF_PATH=./cache/%2s/%2s/%s
     export REF_CACHE=./cache/%2s/%2s/%s
 
+    ${"touch " + call_regions_bed_index} 
+
     configManta.py \
     --referenceFasta=${ref_fasta} \
     --runDir=MantaWorkflow \
-    --bam=${basename}.cram
+    --bam=${basename}.cram ${"--callRegions=" + call_regions_bed}
     timeout -k 2m 8h MantaWorkflow/runWorkflow.py -m local -g "unlimited"
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz ${basename}.vcf.gz
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz.tbi ${basename}.vcf.gz.tbi
@@ -247,7 +247,7 @@ task Manta {
     docker: "halllab/manta@sha256:4ce53aa6163430773648b360fad119130a5cd4c1861dc5f5121a74d8270f481a"
     cpu: "8"
     memory: "16 GiB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB") * 5 + 7.0) + " HDD"
     preemptible: preemptible_tries
   }
   output {
@@ -288,11 +288,13 @@ task Smoove {
       --genotype \
       ${basename}.cram
 
-    mv *.histo ${basename}.histo
-    mv *.split.bam ${basename}.split.bam
-    mv *.split.bam.bai ${basename}.split.bam.bai
-    mv *.disc.bam ${basename}.disc.bam
-    mv *.disc.bam.bai ${basename}.disc.bam.bai
+    if [ ! -e ${basename}.histo ]; then
+      mv *.histo ${basename}.histo
+      mv *.split.bam ${basename}.split.bam
+      mv *.split.bam.bai ${basename}.split.bam.bai
+      mv *.disc.bam ${basename}.disc.bam
+      mv *.disc.bam.bai ${basename}.disc.bam.bai
+    fi
   }
 
   runtime {
