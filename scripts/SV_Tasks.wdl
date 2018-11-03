@@ -222,6 +222,8 @@ task Manta {
   # with respect to cores
   # If a task starts to fail then we can adjust the machine resources to get it
   # to succeed without adjusting the command
+  # Note that we are converting to BAM on the fly as CRAM is showing extreme memory usage in some situations. See https://github.com/Illumina/manta/issues/154.
+  # Note also that we are specifying an inflation factor of 4, but padding with 20GB of data. This is aimed to get us over 100GB of SSD for better performance on small samples.
 
   command {
     set -e
@@ -234,20 +236,23 @@ task Manta {
 
     ${"touch " + call_regions_bed_index} 
 
+    samtools view -hb -@8 ${basename}.cram -o ${basename}.bam 
+    samtools index -@8 ${basename}.bam 
+
     configManta.py \
     --referenceFasta=${ref_fasta} \
     --runDir=MantaWorkflow \
-    --bam=${basename}.cram ${"--callRegions=" + call_regions_bed}
+    --bam=${basename}.bam ${"--callRegions=" + call_regions_bed}
     timeout -k 2m 8h MantaWorkflow/runWorkflow.py -m local -g "unlimited"
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz ${basename}.vcf.gz
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz.tbi ${basename}.vcf.gz.tbi
     tar -czvf ${basename}.MantaWorkflow.tgz MantaWorkflow
   }
   runtime {
-    docker: "halllab/manta@sha256:4ce53aa6163430773648b360fad119130a5cd4c1861dc5f5121a74d8270f481a"
+    docker: "halllab/manta_samtools@sha256:6c8dfccfd3124ebf902ac6f0303e6f09b02a15e2c09963354620740788c407d0"
     cpu: "8"
     memory: "16 GiB"
-    disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB") * 5 + 7.0) + " HDD"
+    disks: "local-disk " + ceil( size(input_cram, "GB") * 4 + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB") * 5 + 20.0) + " SSD"
     preemptible: preemptible_tries
   }
   output {
