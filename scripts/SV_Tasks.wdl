@@ -160,6 +160,8 @@ task Count_Lumpy_VCF {
   String basename
   String cohort
 
+  Int preemptible_tries
+
   command <<<
     set -eo pipefail
 
