@@ -155,6 +155,34 @@ task Index_Cram {
   }
 }
 
+# flagstat a CRAM
+task Flagstat {
+  File input_cram
+  File input_cram_index
+  String basename
+  Int preemptible_tries
+
+  command {
+    ln -s ${input_cram} ${basename}.cram
+    ln -s ${input_cram_index} ${basename}.cram.crai
+
+    # index the CRAM
+    samtools flagstat ${basename}.cram > ${basename}.flagstat
+  }
+
+  runtime {
+    docker: "halllab/samtools@sha256:5e6b0430a7ad25f68e5c46a9fa9c0ebba0f9af8ebf5aebe94242954d812a4e68"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + 1.0) + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File flagstat = "${basename}.flagstat"
+  }
+}
+
 # LUMPY SV discovery
 task Lumpy {
   String basename
