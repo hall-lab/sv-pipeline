@@ -155,6 +155,31 @@ task Index_Cram {
   }
 }
 
+task Count_Lumpy_VCF {
+  File input_vcf
+  String basename
+  String cohort
+
+  command <<<
+    set -eo pipefail
+
+    echo -e "Cohort\tSample\tGenotype\tType\tLength"
+    bcftools query -e 'INFO/SECONDARY=1' -f "[${cohort}\t%SAMPLE\t%GT\t%INFO/SVTYPE\t%INFO/SVLEN\n]" | bgzip -c > ${basename}.counts.txt.gz
+  >>>
+
+  runtime {
+    docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + ceil( size(input_vcf, "GB") * 2) + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_vcf_count = "${basename}.counts.txt.gz"
+  }
+}
+
 # flagstat a CRAM
 task Flagstat {
   File input_cram
