@@ -1,23 +1,18 @@
-FROM ubuntu:14.04
+FROM debian:stretch-slim
 LABEL maintainer "Dave Larson <delarson@wustl.edu>"
 
-# Build dependencies
-RUN apt-get update -qq \
-    && apt-get -y install apt-transport-https \
-    && echo "deb [trusted=yes] https://gitlab.com/hall-lab/ccdg-apt-repo/raw/master ccdg main" | tee -a /etc/apt/sources.list \
-    && runDeps=' \
-        libcurl3 \
-        ca-certificates \
-        zlib1g \
-        libncurses5 \
-        ccdg-bcftools-1.3.1 \
-        ' \
-    && apt-get update -qq \
-    && apt-get -y install \
-        --no-install-recommends \
-        $runDeps \
-    && rm -rf /var/lib/apt/lists/*
+COPY --from=halllab/bcftools-1.9-build:v1 /build/deb-build/opt/hall-lab/bcftools-1.9 /opt/hall-lab/bcftools-1.9
+COPY --from=halllab/htslib-1.9-build:v1 /build/deb-build/opt/hall-lab/htslib-1.9 /opt/hall-lab/htslib-1.9
 
-ENV PATH=/opt/ccdg/bcftools-1.3.1/bin:${PATH}
+ENV PATH=/opt/hall-lab/bcftools-1.9/bin:/opt/hall-lab/htslib-1.9/bin:$PATH
+
+RUN apt-get update -qq \
+    && apt-get install -y --no-install-recommends \
+        libssl1.1 \
+        libcurl3 \
+        libbz2-1.0 \ 
+        liblzma5 \ 
+        libssl1.0.2 \
+        zlib1g
 
 CMD ["/bin/bash"]
