@@ -339,6 +339,8 @@ task Smoove {
     tar -zxf ${ref_cache}
     export REF_PATH=./cache/%2s/%2s/%s
     export REF_CACHE=./cache/%2s/%2s/%s
+    
+    export SMOOVE_NO_MAX_CI=TRUE
 
     smoove call \
       --name ${basename} \
@@ -358,7 +360,7 @@ task Smoove {
   }
 
   runtime {
-    docker: "halllab/smoove@sha256:29b15aeaf0e35892a7060f8d7bf6dd0000ad7cc6e3cdff44b2038d56ccae4dab"
+    docker: "halllab/smoove@sha256:839a071894568c13ef8a96c1f74e9bf0122569270c4049ef9c37a299febe99ab"
     cpu: "1"
     memory: "2.5 GiB"
     disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(exclude_regions, "GB") + size(input_cram, "GB") * 0.30 + size(ref_cache, "GB") * 5) + " HDD"
