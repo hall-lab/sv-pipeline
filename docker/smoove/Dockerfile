@@ -20,15 +20,15 @@ RUN apt-get update -qq \
         zlib1g-dev
 
 
-FROM builder-base as lumpy-178d7a6-build
+FROM builder-base as lumpy-2f3fccb-build
 LABEL maintainer "Dave Larson <delarson@wustl.edu>"
-RUN LUMPY_COMMIT=178d7a6745d2ed01c2789e5ff1d2b072ed3587dd \
+RUN LUMPY_COMMIT=2f3fccb0e6ef8732ff2f5c4e2c12a7a0b8ae2784 \
     && git clone --single-branch --recursive --depth 5 https://github.com/arq5x/lumpy-sv \
     && cd lumpy-sv \
     && git checkout $LUMPY_COMMIT \
     && make -j 3 \
-    && mkdir -p /opt/hall-lab/lumpy-178d7a6/bin \
-    && cp ./bin/* /opt/hall-lab/lumpy-178d7a6/bin
+    && mkdir -p /opt/hall-lab/lumpy-2f3fccb/bin \
+    && cp ./bin/* /opt/hall-lab/lumpy-2f3fccb/bin
     
 FROM builder-base as svtyper-0.7.0-build
 LABEL maintainer "Dave Larson <delarson@wustl.edu>"
@@ -61,14 +61,14 @@ RUN SMOOVE_VERSION=0.2.2 \
 FROM debian:stretch-slim
 LABEL maintainer "Dave Larson <delarson@wustl.edu>"
 
-COPY --from=lumpy-178d7a6-build /opt/hall-lab/lumpy-178d7a6/bin /opt/hall-lab/lumpy-178d7a6/bin
+COPY --from=lumpy-2f3fccb-build /opt/hall-lab/lumpy-2f3fccb/bin /opt/hall-lab/lumpy-2f3fccb/bin
 COPY --from=svtyper-0.7.0-build /opt/hall-lab/python-2.7.15 /opt/hall-lab/python-2.7.15
 COPY --from=halllab/htslib-1.9-build:v1 /build/deb-build/opt/hall-lab/htslib-1.9 /opt/hall-lab/htslib-1.9
 COPY --from=halllab/samtools-1.9-build:v1 /build/deb-build/opt/hall-lab/samtools-1.9 /opt/hall-lab/samtools-1.9
 COPY --from=halllab/bcftools-1.9-build:v1 /build/deb-build/opt/hall-lab/bcftools-1.9 /opt/hall-lab/bcftools-1.9
 COPY --from=smoove-0.2.2-build /opt/hall-lab/smoove-0.2.2/bin /opt/hall-lab/smoove-0.2.2/bin
 
-ENV PATH=/opt/hall-lab/smoove-0.2.2/bin:/opt/hall-lab/python-2.7.15/bin:/opt/hall-lab/lumpy-178d7a6/bin:/opt/hall-lab/htslib-1.9/bin:/opt/hall-lab/samtools-1.9/bin:/opt/hall-lab/bcftools-1.9/bin:$PATH
+ENV PATH=/opt/hall-lab/smoove-0.2.2/bin:/opt/hall-lab/python-2.7.15/bin:/opt/hall-lab/lumpy-2f3fccb/bin:/opt/hall-lab/htslib-1.9/bin:/opt/hall-lab/samtools-1.9/bin:/opt/hall-lab/bcftools-1.9/bin:$PATH
 ENV LD_LIBRARY_PATH=/opt/hall-lab/htslib-1.9/lib:$LD_LIBRARY_PATH
 
 RUN apt-get update -qq \
