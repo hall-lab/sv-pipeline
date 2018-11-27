@@ -360,7 +360,7 @@ task Smoove {
   }
 
   runtime {
-    docker: "halllab/smoove@sha256:839a071894568c13ef8a96c1f74e9bf0122569270c4049ef9c37a299febe99ab"
+    docker: "halllab/smoove@sha256:50dc501efb2443aa8261ceefbb8ab1f3d2ec792767f4893f796ea9c9357705e2"
     cpu: "1"
     memory: "2.5 GiB"
     disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(exclude_regions, "GB") + size(input_cram, "GB") * 0.30 + size(ref_cache, "GB") * 5) + " HDD"
