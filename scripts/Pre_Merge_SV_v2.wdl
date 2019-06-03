@@ -1,7 +1,7 @@
 import "Pre_Merge_SV_per_sample.wdl" as per_sample
 
 workflow Pre_Merge_SV_v2 {
-  Array[File] aligned_crams
+  File cram_list
   String aligned_cram_suffix
 
   # reference inputs
@@ -14,6 +14,7 @@ workflow Pre_Merge_SV_v2 {
 
   # system inputs
   Int preemptible_tries
+  Array[File] aligned_crams = read_lines(cram_list)
 
   scatter (i in range(length(aligned_crams))) {
     File aligned_cram = aligned_crams[i]

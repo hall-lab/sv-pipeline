@@ -1,9 +1,6 @@
 {
   "##_COMMENT1": "DATA INPUTS",
-  "Pre_Merge_SV_v2.aligned_crams": [
-    "gs://mgi-wdl-test/data/call-Extract_Reads/shard-0/attempt-2/H_IJ-NA12878-NA12878_K10.cram",
-    "gs://mgi-wdl-test/data/call-Extract_Reads/shard-1/attempt-4/H_IJ-NA12891-NA12891_D2.cram"
-  ],
+  "Pre_Merge_SV_v2.cram_list": "gs://1000g_sv_2019/inputs/cram_list.txt",
   "Pre_Merge_SV_v2.aligned_cram_suffix": ".cram",
 
   "##_COMMENT2": "REFERENCE FILES",
