@@ -2,6 +2,8 @@
   "##_COMMENT1": "DATA INPUTS",
   "Pre_Merge_SV_v2.cram_list": "gs://1000g_sv_2019/inputs/cram_list.txt",
   "Pre_Merge_SV_v2.aligned_cram_suffix": ".cram",
+  "Pre_Merge_SV_v2.cohort": "1000G"
+  "Pre_Merge_SV_v2.center": "NYGC"
 
   "##_COMMENT2": "REFERENCE FILES",
   "Pre_Merge_SV_v2.ref_fasta": "gs://human-b38/GRCh38DH/all_sequences.fa",

@@ -1,4 +1,5 @@
 import "Pre_Merge_SV_per_sample.wdl" as per_sample
+import "Pre_Merge_QC_per_sample.wdl" as qc
 
 workflow Pre_Merge_SV_v2 {
   File cram_list
@@ -11,6 +12,8 @@ workflow Pre_Merge_SV_v2 {
   File? call_regions_bed
   File? call_regions_bed_index
   File exclude_regions
+  String cohort
+  String center
 
   # system inputs
   Int preemptible_tries
@@ -31,6 +34,15 @@ workflow Pre_Merge_SV_v2 {
 	    exclude_regions = exclude_regions,
 	    preemptible_tries = preemptible_tries
     }
+    
+    call qc.Pre_Merge_QC_Per_Sample {
+      input:
+        manta_vcf = Pre_Merge_SV_Per_Sample.manta_vcf
+        lumpy_vcf = Pre_Merge_SV_Per_Sample.smoove_vcf
+        cnvnator_vcf = Pre_Merge_SV_Per_Sample.cnvnator_output_cn_txt
+        cohort = cohort
+        center = center
+    }
   }
 
   output {
@@ -42,5 +54,8 @@ workflow Pre_Merge_SV_v2 {
     Array[File] cnvnator_cn_bed_files = Pre_Merge_SV_Per_Sample.cnvnator_cn_bed
     Array[File] smoove_vcfs = Pre_Merge_SV_Per_Sample.smoove_vcf
     Array[File] smoove_csis = Pre_Merge_SV_Per_Sample.smoove_csi
+    Array[File] lumpy_counts = Pre_Merge_QC_Per_Sample.lumpy_counts
+    Array[File] manta_counts = Pre_Merge_QC_Per_Sample.cnvnator_counts
+    Array[File] cnvnator_counts = Pre_Merge_QC_Per_Sample.cnvnator_counts
   }
 }
