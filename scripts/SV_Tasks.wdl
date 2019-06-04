@@ -1,7 +1,6 @@
 # get the sample (SM) field from a CRAM file
 task Get_Sample_Name {
   File input_cram
-  Int disk_size
   Int preemptible_tries
 
   command {
@@ -14,7 +13,7 @@ task Get_Sample_Name {
     docker: "halllab/extract-sv-reads@sha256:192090f72afaeaaafa104d50890b2fc23935c8dc98988a9b5c80ddf4ec50f70c"
     cpu: "1"
     memory: "1 GB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk " + ceil( size(input_cram, "GB") + 2.0) + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -27,7 +26,6 @@ task Get_Sample_Name {
 task Get_Sex {
   File input_cn_hist_root
   File ref_fasta_index
-  Int disk_size
   Int preemptible_tries
 
   command <<<
@@ -42,7 +40,7 @@ task Get_Sex {
     docker: "halllab/cnvnator@sha256:8bf4fa64a288c5647a9a6b1ea90d14e76f48a3e16c5bf98c63419bb7d81c8938"
     cpu: "1"
     memory: "1 GB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk 4 HDD"
     preemptible: preemptible_tries
   }
 
@@ -57,7 +55,6 @@ task Make_Pedigree_File {
   Array[String] sample_array
   Array[String] sex_array
   String output_ped_basename
-  Int disk_size
 
   command <<<
     paste ${write_lines(sample_array)} ${write_lines(sex_array)} \
@@ -69,7 +66,7 @@ task Make_Pedigree_File {
     docker: "ubuntu@sha256:edf05697d8ea17028a69726b4b450ad48da8b29884cd640fec950c904bfb50ce"
     cpu: "1"
     memory: "1 GB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk 4 HDD"
   }
 
   output {
@@ -179,6 +176,111 @@ task Count_Lumpy_VCF {
 
   output {
     File output_vcf_count = "${basename}.counts.txt.gz"
+  }
+}
+
+task Count_Lumpy {
+  String basename
+  File input_vcf
+  Int preemptible_tries
+  String cohort
+  String center
+
+  command <<<
+    set -eo pipefail
+   
+     bcftools query  -f "[%CHROM\t${cohort}\t${center}\t%FILTER\t%INFO/SVTYPE\t%INFO/SVLEN\t%INFO/SR\t%SAMPLE\t%GT\n]"  ${input_vcf} \
+     | awk 'BEGIN{OFS="\t"}{if($1~/chr[1-9]+/ && $1!~/_/) {
+       svlen=$6;
+       if($6<0) svlen=-1*$6;
+       len_bin=">=1kb"
+       if(svlen<1000) len_bin="<1kb";
+       if($7>0) $7="SR>=1";
+       else $7="SR=0";
+       print $1, $2, $3, $4, $5, len_bin, $7, $8, $9;}}' \
+     | sort -k1,9 \
+     | uniq -c \
+     | awk 'BEGIN{OFS="\t"}{print $2, $3, $4, $5, $6, $7, $8, $9, $1}'  > ${basename}.lumpy.counts.1.txt
+  >>>
+
+  runtime {
+    docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + ceil( size(input_vcf, "GB") * 2) + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_counts = "${basename}.lumpy.counts.1.txt"
+  }
+}
+
+task Count_Manta {
+  String basename
+  File input_vcf
+  Int preemptible_tries
+  String cohort
+  String center
+
+  command <<<
+    set -eo pipefail
+
+     bcftools query  -f "[%CHROM\t${cohort}\t${center}\t%FILTER\t%INFO/SVTYPE\t%SAMPLE\t%GT\n]"  ${input_vcf} \
+     | awk 'BEGIN{OFS="\t"}{if($1~/chr[1-9]+/ && $1!~/_/ && $4=="PASS") print $0;}' \
+     | sort -k1,7 \
+     | uniq -c \
+     | awk 'BEGIN{OGS="\t"}{print $2, $3, $4, $5, $6, $7, $8,  $1}'  > ${basename}.manta.counts.1.txt
+  >>>
+
+  runtime {
+    docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + ceil( size(input_vcf, "GB") * 2) + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_counts = "${basename}.manta.counts.1.txt"
+  }
+}
+
+task Count_Cnvnator {
+  String basename
+  File input_vcf
+  Int preemptible_tries
+  String cohort
+  String center
+
+  command <<<
+    set -eo pipefail
+
+     cat ${input_vcf} \
+     | awk -v bn="${basename}" -v cohort="${cohort}" -v ctr="${center}" 'BEGIN{OFS="\t"}{
+       if($2~/chr[1-9]+/ && $2!~/_/) { 
+         len_bin=">2kb";
+         if($3<200) len_bin="<200bp";
+         else if ($3<500) len_bin="<500bp";
+         else if ($3<1000) len_bin="<1kb";
+         else if ($3<2000) len_bin="<2kb";
+         print cohort, ctr,  bn, $1, int($4*10)/10, len_bin, $3;}
+     }' \
+     | sort -k1,6 \
+     | bedtools groupby -g 1,2,3,4,5,6 -c 7,7 -o count,sum \
+     > ${basename}.cnvnator.counts.1.txt
+  >>>
+
+  runtime {
+    docker: "ernfrid/bedtools@sha256:be4c7bcf70ff0fec467245729251652d92842e4bd255479ae817a1ea2d696168"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + ceil( size(input_vcf, "GB") * 2) + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_counts = "${basename}.cnvnator.counts.1.txt"
   }
 }
 
@@ -385,7 +487,6 @@ task Genotype {
   File input_cram_index
   File input_vcf
   File ref_cache
-  Int disk_size
   Int preemptible_tries
 
   command {
@@ -398,7 +499,7 @@ task Genotype {
     export REF_CACHE=./cache/%2s/%2s/%s
 
     rm -f ${basename}.cram.json
-    zless ${input_vcf} \
+    zcat ${input_vcf} \
       | svtyper \
       -B ${basename}.cram \
       -l ${basename}.cram.json \
@@ -406,10 +507,10 @@ task Genotype {
   }
 
   runtime {
-    docker: "halllab/svtyper@sha256:21d757e77dfc52fddeab94acd66b09a561771a7803f9581b8cca3467ab7ff94a"
+    docker: "halllab/svtyper@sha256:8839f10f48c254470077ffc2c8f4c6cf78afa8ff6cf34129c1a53c39bfe1987f"
     cpu: "1"
     memory: "6.5 GB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_vcf, "GB") +  size(ref_cache, "GB") * 5 + 20.0) + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -419,13 +520,52 @@ task Genotype {
   }
 }
 
+task Genotype_Zip {
+  String basename
+  File input_cram
+  File input_cram_index
+  File input_vcf
+  File ref_cache
+  Int preemptible_tries
+
+  command {
+    ln -s ${input_cram} ${basename}.cram
+    ln -s ${input_cram_index} ${basename}.cram.crai
+
+    # build the reference sequence cache
+    tar -zxf ${ref_cache}
+    export REF_PATH=./cache/%2s/%2s/%s
+    export REF_CACHE=./cache/%2s/%2s/%s
+
+    rm -f ${basename}.cram.json
+    zcat ${input_vcf} \
+      | svtyper \
+      -B ${basename}.cram \
+      -l ${basename}.cram.json \
+      | bgzip -c \
+      > ${basename}.gt.vcf.gz
+  }
+
+  runtime {
+    docker: "halllab/svtyper@sha256:8839f10f48c254470077ffc2c8f4c6cf78afa8ff6cf34129c1a53c39bfe1987f"
+    #docker: "gcr.io/washu-genome-inh-dis-analysis/svtyper:v0.7.0-5fc3076"
+    cpu: "1"
+    memory: "6.5 GB"
+    disks: "local-disk " + ceil( size(input_cram, "GB") + size(ref_cache, "GB") * 5 + 20.0) + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_vcf = "${basename}.gt.vcf.gz"
+    File output_lib = "${basename}.cram.json"
+  }
+}
+
 task Copy_Number {
   String basename
   String sample
   File input_vcf
   File input_cn_hist_root
-  File ref_cache
-  Int disk_size
   Int preemptible_tries
 
   command {
@@ -444,16 +584,75 @@ task Copy_Number {
   }
 
   runtime {
-    # TODO - This needs to be an updated svtools container
-    docker: "halllab/cnvnator@sha256:c41e9ce51183fc388ef39484cbb218f7ec2351876e5eda18b709d82b7e8af3a2"
+    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
     cpu: "1"
     memory: "4 GB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk " + 35 + " HDD"
     preemptible: preemptible_tries
   }
 
   output {
     File output_vcf = "${basename}.cn.vcf"
+  }
+}
+
+task Zip {
+  File input_vcf
+  String basename
+  Int preemptible_tries
+
+  command {
+    cat ${input_vcf} \
+    | bgzip -c > ${basename}.gz
+  }
+
+  runtime {
+    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
+    cpu: "1"
+    memory: "4 GB"
+    disks: "local-disk " +  ceil(2.0*size(input_vcf, "GB")) + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_vcf = "${basename}.gz"
+  }
+}
+
+task Copy_Number_Zip {
+  String basename
+  String sample
+  File input_vcf
+  File input_cn_hist_root
+  Int preemptible_tries
+
+  command {
+    create_coordinates \
+      -i ${input_vcf} \
+      -o coordinates.txt
+
+    svtools copynumber \
+      -i ${input_vcf} \
+      -s ${sample} \
+      --cnvnator cnvnator \
+      -w 100 \
+      -r ${input_cn_hist_root} \
+      -c coordinates.txt \
+      | bgzip -c \
+      > ${basename}.cn.vcf.gz
+  }
+
+  runtime {
+   
+    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
+    cpu: "1"
+    memory: "6.5 GB"
+    disks: "local-disk " + 35 + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_vcf = "${basename}.cn.vcf.gz"
   }
 }
 
@@ -521,6 +720,7 @@ task L_Sort_VCF_Variants {
     cat ${input_vcfs_file} \
       | sed 's/^gs:\/\//\.\//g' \
       > input_vcfs_file.local_map.txt
+   sleep 1
 
     svtools lsort \
       -b 200 \
@@ -530,10 +730,11 @@ task L_Sort_VCF_Variants {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d45"
+    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + disk_size + " HDD"
+    bootDiskSizeGb: 30
     preemptible: preemptible_tries
   }
 
@@ -558,7 +759,32 @@ task L_Merge_VCF_Variants {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d45"
+    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
+    cpu: "1"
+    memory: "3.75 GB"
+    disks: "local-disk " + disk_size + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
+  }
+}
+
+task Filter_Del {
+  File input_vcf_gz
+  String output_vcf_basename
+  Int disk_size
+  Int preemptible_tries
+  
+  command <<<
+    set -eo pipefail
+
+    bcftools view -i '(SVTYPE!="DEL" || SVLEN>1000 || SVLEN<-1000 || INFO/SR>0)' ${input_vcf_gz}  | bgzip -c >  ${output_vcf_basename}.vcf.gz
+  >>>
+
+  runtime {
+    docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -591,11 +817,11 @@ task Paste_VCF {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d45"
+    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
     cpu: "1"
-    memory: "3 GB"
-    disks: "local-disk " + disk_size + " HDD"
-    preemptible: preemptible_tries
+    memory: "12 GB"
+    disks: "local-disk " +  220*ceil( size(master_vcf, "GB")) + " HDD"
+    preemptible: 0
   }
 
   output {
@@ -603,10 +829,62 @@ task Paste_VCF {
   }
 }
 
+task Remove_INS {
+  File input_vcf_gz
+  String output_vcf_basename
+  Int preemptible_tries
+
+  command {
+    zcat ${input_vcf_gz} \
+    | awk '{if($5!="<INS>") print $0}' \
+    | bgzip -c \
+    > ${output_vcf_basename}.vcf.gz
+  }
+
+  runtime {
+    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
+    cpu: "1"
+    memory: "3 GB"
+    disks: "local-disk " +  2*ceil( size(input_vcf_gz, "GB")) + " HDD"
+    preemptible: preemptible_tries
+  }
+  
+  output {
+    File output_vcf_gz =  "${output_vcf_basename}.vcf.gz"
+  }
+}
+
+task Prune_VCF_Output_Bedpe {
+  File input_vcf_gz
+  String output_vcfe_basename
+  Int preemptible_tries
+
+  command {
+    zcat ${input_vcf_gz} \
+      | svtools afreq \
+      | svtools vcftobedpe \
+      | svtools bedpesort \
+      | svtools prune -s -d 100 -e 'AF' \
+      | bgzip -c \ 
+      > ${output_vcf_basename}.bedpe.gz
+  }
+
+  runtime {
+    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
+    cpu: "1"
+    memory: "8 GB"
+    disks: "local-disk " +  4*ceil( size(input_vcf_gz, "GB")) + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_bedpe_gz = "${output_vcf_basename}.bedpe.gz"
+  }
+}
+
 task Prune_VCF {
   File input_vcf_gz
   String output_vcf_basename
-  Int disk_size
   Int preemptible_tries
 
   command {
@@ -621,10 +899,10 @@ task Prune_VCF {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d45"
+    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
     cpu: "1"
     memory: "3 GB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk " +  3*ceil( size(input_vcf_gz, "GB")) + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -638,7 +916,6 @@ task Classify {
   File input_ped
   String output_vcf_basename
   File mei_annotation_bed
-  Int disk_size
   Int preemptible_tries
 
   command {
@@ -656,10 +933,10 @@ task Classify {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d45"
+    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
     cpu: "1"
     memory: "3 GB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk " +  3*ceil( size(input_vcf_gz, "GB")) + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -668,10 +945,38 @@ task Classify {
   }
 }
 
+task Concat_VCF {
+  File input_del_vcf_gz
+  File input_dup_vcf_gz
+  File input_bnd_vcf_gz
+  String output_vcf_basename
+  Int preemptible_tries
+
+  command {
+    zcat ${input_dup_vcf_gz} \
+    | grep "^##"  > header.txt
+
+    zcat ${input_del_vcf_gz} ${input_dup_vcf_gz} ${input_bnd_vcf_gz} \
+    | grep -v "^##" \
+    | cat header.txt - \
+    | bgzip -c > ${output_vcf_basename}.vcf.gz
+  }
+  runtime {
+    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
+    cpu: "1"
+    memory: "3 GB"
+    disks: "local-disk " + 3*ceil( size(input_del_vcf_gz, "GB") + size(input_bnd_vcf_gz, "GB") + size(input_dup_vcf_gz, "GB")) + "  HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
+  }
+}
+  
 task Sort_Index_VCF {
   File input_vcf_gz
   String output_vcf_name
-  Int disk_size
   Int preemptible_tries
 
   command {
@@ -684,10 +989,10 @@ task Sort_Index_VCF {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:f2f3f9c788beb613bc26c858f897694cd6eaab450880c370bf0ef81d85bf8d45"
+    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
     cpu: "1"
     memory: "3 GB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk " + 3*ceil( size(input_vcf_gz, "GB")) + " HDD"
     preemptible: preemptible_tries
   }
 
