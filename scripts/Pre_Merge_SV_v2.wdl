@@ -37,11 +37,12 @@ workflow Pre_Merge_SV_v2 {
     
     call qc.Pre_Merge_QC_Per_Sample {
       input:
-        manta_vcf = Pre_Merge_SV_Per_Sample.manta_vcf
-        lumpy_vcf = Pre_Merge_SV_Per_Sample.smoove_vcf
-        cnvnator_vcf = Pre_Merge_SV_Per_Sample.cnvnator_output_cn_txt
-        cohort = cohort
-        center = center
+        manta_vcf = Pre_Merge_SV_Per_Sample.manta_vcf,
+        lumpy_vcf = Pre_Merge_SV_Per_Sample.smoove_vcf,
+        cnvnator_vcf = Pre_Merge_SV_Per_Sample.cnvnator_output_cn_txt,
+        cohort = cohort,
+        center = center,
+	preemptible_tries = preemptible_tries
     }
   }
 
