@@ -820,7 +820,7 @@ task Paste_VCF {
     docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
     cpu: "1"
     memory: "12 GB"
-    disks: "local-disk " +  220*ceil( size(master_vcf, "GB")) + " HDD"
+    disks: "local-disk " + disk_size + " HDD"
     preemptible: 0
   }
 
@@ -834,12 +834,12 @@ task Remove_INS {
   String output_vcf_basename
   Int preemptible_tries
 
-  command {
+  command <<<
     zcat ${input_vcf_gz} \
     | awk '{if($5!="<INS>") print $0}' \
     | bgzip -c \
     > ${output_vcf_basename}.vcf.gz
-  }
+  >>>
 
   runtime {
     docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
@@ -856,7 +856,7 @@ task Remove_INS {
 
 task Prune_VCF_Output_Bedpe {
   File input_vcf_gz
-  String output_vcfe_basename
+  String output_vcf_basename
   Int preemptible_tries
 
   command {
