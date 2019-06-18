@@ -56,7 +56,7 @@ workflow Pre_Merge_SV_v2 {
     Array[File] smoove_vcfs = Pre_Merge_SV_Per_Sample.smoove_vcf
     Array[File] smoove_csis = Pre_Merge_SV_Per_Sample.smoove_csi
     Array[File] lumpy_counts = Pre_Merge_QC_Per_Sample.lumpy_counts
-    Array[File] manta_counts = Pre_Merge_QC_Per_Sample.cnvnator_counts
+    Array[File] manta_counts = Pre_Merge_QC_Per_Sample.manta_counts
     Array[File] cnvnator_counts = Pre_Merge_QC_Per_Sample.cnvnator_counts
   }
 }
