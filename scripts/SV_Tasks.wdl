@@ -400,7 +400,7 @@ task Manta {
     --referenceFasta=${ref_fasta} \
     --runDir=MantaWorkflow \
     --bam=${basename}.bam ${"--callRegions=" + call_regions_bed}
-    timeout -k 2m 8h MantaWorkflow/runWorkflow.py -m local -g "unlimited"
+    MantaWorkflow/runWorkflow.py -m local -g "unlimited"
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz ${basename}.vcf.gz
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz.tbi ${basename}.vcf.gz.tbi
     tar -czvf ${basename}.MantaWorkflow.tgz MantaWorkflow
