@@ -505,11 +505,11 @@ task Genotype {
       | svtyper \
       -B ${basename}.cram \
       -l ${basename}.cram.json \
-      > ${basename}.gt.vcf
+      | bgzip -c > ${basename}.gt.vcf.gz
   }
 
   runtime {
-    docker: "halllab/svtyper@sha256:8839f10f48c254470077ffc2c8f4c6cf78afa8ff6cf34129c1a53c39bfe1987f"
+    docker: "apregier/svtyper@sha256:f419102e796f5cf6e1266d0a133b9590f7e57b36c597f4b63fe7012836e99e9e"
     cpu: "1"
     memory: "6.5 GB"
     disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_vcf, "GB") +  size(ref_cache, "GB") * 5 + 20.0) + " HDD"
@@ -517,7 +517,7 @@ task Genotype {
   }
 
   output {
-    File output_vcf = "${basename}.gt.vcf"
+    File output_vcf = "${basename}.gt.vcf.gz"
     File output_lib = "${basename}.cram.json"
   }
 }
@@ -549,7 +549,7 @@ task Genotype_Zip {
   }
 
   runtime {
-    docker: "halllab/svtyper@sha256:8839f10f48c254470077ffc2c8f4c6cf78afa8ff6cf34129c1a53c39bfe1987f"
+    docker: "apregier/svtyper@sha256:f419102e796f5cf6e1266d0a133b9590f7e57b36c597f4b63fe7012836e99e9e"
     #docker: "gcr.io/washu-genome-inh-dis-analysis/svtyper:v0.7.0-5fc3076"
     cpu: "1"
     memory: "6.5 GB"

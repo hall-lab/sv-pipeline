@@ -48,7 +48,8 @@ RUN apt-get update -qq \
         libbz2-1.0 \ 
         liblzma5 \ 
         libssl1.0.2 \
-        zlib1g
+        zlib1g \
+	tabix
 
 ENV PATH=/opt/hall-lab/python-2.7.15/bin:/opt/hall-lab/samtools-1.9/bin:${PATH}
 
