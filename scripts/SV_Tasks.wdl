@@ -403,18 +403,20 @@ task Manta {
     MantaWorkflow/runWorkflow.py -m local -g "unlimited"
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz ${basename}.vcf.gz
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz.tbi ${basename}.vcf.gz.tbi
+    zcat ${basename}.vcf.gz | /opt/hall-lab/python-2.7.15/bin/python /opt/hall-lab/doctor_manta.1.py -m 700 | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ${basename}.doctored.vcf.gz
+    /opt/hall-lab/htslib-1.9/bin/tabix -p vcf ${basename}.doctored.vcf.gz
     tar -czvf ${basename}.MantaWorkflow.tgz MantaWorkflow
   }
   runtime {
-    docker: "halllab/manta_samtools@sha256:6c8dfccfd3124ebf902ac6f0303e6f09b02a15e2c09963354620740788c407d0"
+    docker: "apregier/manta_samtools@sha256:cdaf55d96ebb8473383d2190d1a762991c54ca85a851e473a5b1538cb0c3fed1"
     cpu: "8"
     memory: "16 GiB"
     disks: "local-disk " + ceil( size(input_cram, "GB") * 4 + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB") * 5 + 20.0) + " SSD"
     preemptible: preemptible_tries
   }
   output {
-    File output_vcf = "${basename}.vcf.gz"
-    File output_tbi = "${basename}.vcf.gz.tbi"
+    File output_vcf = "${basename}.doctored.vcf.gz"
+    File output_tbi = "${basename}.doctored.vcf.gz.tbi"
     File workflow_tgz = "${basename}.MantaWorkflow.tgz"
   }
 }

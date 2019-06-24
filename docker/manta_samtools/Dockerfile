@@ -10,7 +10,11 @@ RUN apt-get update -qq \
         bzip2 \
         zlib1g-dev \
         curl \
-        ca-certificates
+        ca-certificates \
+	tabix \
+    && pip install pandas \
+    && pip install scipy \
+    && pip install pysam
 RUN curl -O -L https://github.com/Illumina/manta/releases/download/v${MANTA_VERSION}/manta-${MANTA_VERSION}.release_src.tar.bz2 \
     && tar -xjf manta-${MANTA_VERSION}.release_src.tar.bz2 \
     && mkdir build \
@@ -31,6 +35,7 @@ COPY --from=manta-build /opt/hall-lab/manta-${MANTA_VERSION}/libexec /opt/hall-l
 COPY --from=manta-build /opt/hall-lab/python-2.7.15 /opt/hall-lab/python-2.7.15
 COPY --from=halllab/htslib-1.9-build:v1 /build/deb-build/opt/hall-lab/htslib-1.9 /opt/hall-lab/htslib-1.9
 COPY --from=halllab/samtools-1.9-build:v1 /build/deb-build/opt/hall-lab/samtools-1.9 /opt/hall-lab/samtools-1.9
+ADD doctor_manta.1.py /opt/hall-lab/
 
 # Run dependencies
 RUN apt-get update -qq \
