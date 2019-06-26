@@ -1,13 +1,16 @@
+version 1.0
 import "SV_Tasks.wdl" as SV
 
 workflow Merge_SV {
-  # data inputs
-  Array[File] input_vcfs
-  String cohort_name
+  input {
+    # data inputs
+    Array[File] input_vcfs
+    String cohort_name
 
-  # system inputs
-  Int disk_size
-  Int preemptible_tries
+    # system inputs
+    Int disk_size
+    Int preemptible_tries
+  }
 
   call SV.L_Sort_VCF_Variants {
     input:

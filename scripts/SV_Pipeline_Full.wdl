@@ -1,23 +1,26 @@
+version 1.0
 import "SV_Tasks.wdl" as SV
 
 # SV detection workflow
 workflow SV_Pipeline {
-  # data inputs
-  Array[File] aligned_crams
-  String aligned_cram_suffix
-  String cohort_name
-  String final_vcf_name
+  input {
+    # data inputs
+    Array[File] aligned_crams
+    String aligned_cram_suffix
+    String cohort_name
+    String final_vcf_name
 
-  # reference inputs
-  File ref_fasta
-  File ref_fasta_index
-  File ref_cache
-  File exclude_regions
-  File mei_annotation_bed
+    # reference inputs
+    File ref_fasta
+    File ref_fasta_index
+    File ref_cache
+    File exclude_regions
+    File mei_annotation_bed
 
-  # system inputs
-  Int disk_size
-  Int preemptible_tries
+    # system inputs
+    Int disk_size
+    Int preemptible_tries
+  }
 
   scatter (aligned_cram in aligned_crams) {
 

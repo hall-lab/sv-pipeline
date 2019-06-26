@@ -1,24 +1,30 @@
+version 1.0
 import "SV_Tasks.wdl" as SV
 
 workflow Post_Merge_SV {
   # data inputs
-  Array[File] aligned_crams
-  Array[File] aligned_cram_indices
-  String aligned_cram_suffix
-  Array[File] cn_hist_roots
-  File merged_vcf
-  String cohort_name
-  String final_vcf_name
+  input {
+  	File cram_list
+  	File index_list
+  	File cn_hist_roots_list
+  	String aligned_cram_suffix
+  	File merged_vcf
+  	String cohort_name
+  	String final_vcf_name
 
-  # reference inputs
-  File ref_fasta
-  File ref_fasta_index
-  File ref_cache
-  File mei_annotation_bed
+  	# reference inputs
+  	File ref_fasta
+  	File ref_fasta_index
+  	File ref_cache
+  	File mei_annotation_bed
 
-  # system inputs
-  Int disk_size
-  Int preemptible_tries
+  	# system inputs
+  	Int disk_size
+  	Int preemptible_tries
+  }
+  Array[File] aligned_crams = read_lines(cram_list)
+  Array[File] aligned_cram_indices = read_lines(index_list)
+  Array[File] cn_hist_roots = read_lines(cn_hist_roots_list)
 
   # Re-genotype and call copy number for each sample on the merged SV VCF
   scatter (i in range(length(aligned_crams))) {
@@ -31,7 +37,6 @@ workflow Post_Merge_SV {
     call SV.Get_Sample_Name {
       input:
       input_cram = aligned_cram,
-      disk_size = disk_size,
       preemptible_tries = preemptible_tries
     }
 
@@ -39,7 +44,6 @@ workflow Post_Merge_SV {
       input:
       input_cn_hist_root = cn_hist_root,
       ref_fasta_index = ref_fasta_index,
-      disk_size = disk_size,
       preemptible_tries = preemptible_tries
     }
 
@@ -50,7 +54,6 @@ workflow Post_Merge_SV {
       input_cram_index = aligned_cram_index,
       input_vcf = merged_vcf,
       ref_cache = ref_cache,
-      disk_size = disk_size,
       preemptible_tries = preemptible_tries
     }
 
@@ -61,7 +64,6 @@ workflow Post_Merge_SV {
       input_vcf = Genotype_Merged.output_vcf,
       input_cn_hist_root = cn_hist_root,
       ref_cache = ref_cache,
-      disk_size = disk_size,
       preemptible_tries = preemptible_tries
     }
   }
@@ -71,7 +73,6 @@ workflow Post_Merge_SV {
     sample_array = Get_Sample_Name.sample,
     sex_array = Get_Sex.sex,
     output_ped_basename = cohort_name,
-    disk_size = 10
   }
 
   call SV.Paste_VCF {
@@ -86,7 +87,6 @@ workflow Post_Merge_SV {
     input:
     input_vcf_gz = Paste_VCF.output_vcf_gz,
     output_vcf_basename = cohort_name + ".merged.gt.cn.pruned",
-    disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
 
@@ -96,7 +96,6 @@ workflow Post_Merge_SV {
     input_ped = Make_Pedigree_File.output_ped,
     mei_annotation_bed = mei_annotation_bed,
     output_vcf_basename = cohort_name + ".merged.gt.cn.pruned.class",
-    disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
 
@@ -104,13 +103,12 @@ workflow Post_Merge_SV {
     input:
     input_vcf_gz = Classify.output_vcf_gz,
     output_vcf_name = final_vcf_name,
-    disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
 
   output {
-    Make_Pedigree_File.output_ped
-    Sort_Index_VCF.output_vcf_gz
-    Sort_Index_VCF.output_vcf_gz_index
+    File output_ped = Make_Pedigree_File.output_ped
+    File output_vcf = Sort_Index_VCF.output_vcf_gz
+    File output_vcf_index = Sort_Index_VCF.output_vcf_gz_index
   }
 }

@@ -1,23 +1,26 @@
+version 1.0
 import "SV_Tasks.wdl" as SV
 
 workflow Pre_Merge_SV_Per_Sample {
-  # data inputs
-  File aligned_cram
+  input {
+    # data inputs
+    File aligned_cram
 
-  # reference inputs
-  File ref_fasta
-  File ref_fasta_index
-  File ref_cache
-  File? call_regions_bed
-  File? call_regions_bed_index
-  File exclude_regions
+    # reference inputs
+    File ref_fasta
+    File ref_fasta_index
+    File ref_cache
+    File? call_regions_bed
+    File? call_regions_bed_index
+    File exclude_regions
   
-  String aligned_cram_suffix
+    String aligned_cram_suffix
 
-  # system inputs
-  Int preemptible_tries
+    # system inputs
+    Int preemptible_tries
 
-  String basename = sub(sub(aligned_cram, "^.*/", ""), aligned_cram_suffix + "$", "")
+    String basename = sub(sub(aligned_cram, "^.*/", ""), aligned_cram_suffix + "$", "")
+  }
 
   call SV.Index_Cram {
     input:

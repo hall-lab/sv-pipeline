@@ -1,7 +1,10 @@
+version 1.0
 # get the sample (SM) field from a CRAM file
 task Get_Sample_Name {
-  File input_cram
-  Int preemptible_tries
+  input {
+  	File input_cram
+  	Int preemptible_tries
+  }
 
   command {
     samtools view -H ${input_cram} \
@@ -24,9 +27,11 @@ task Get_Sample_Name {
 
 # infer the sex of a sample based on chrom X copy number
 task Get_Sex {
-  File input_cn_hist_root
-  File ref_fasta_index
-  Int preemptible_tries
+  input {
+  	File input_cn_hist_root
+  	File ref_fasta_index
+  	Int preemptible_tries
+  }
 
   command <<<
     cat ${ref_fasta_index} \
@@ -52,9 +57,11 @@ task Get_Sex {
 # Create pedigree file from samples, with sex inferred from
 # CNVnator X chrom copy number
 task Make_Pedigree_File {
-  Array[String] sample_array
-  Array[String] sex_array
-  String output_ped_basename
+  input {
+    Array[String] sample_array
+    Array[String] sex_array
+    String output_ped_basename
+  }
 
   command <<<
     paste ${write_lines(sample_array)} ${write_lines(sex_array)} \
@@ -76,12 +83,13 @@ task Make_Pedigree_File {
 
 # extract split/discordant reads
 task Extract_Reads {
-  File input_cram
-  String basename
-  File ref_cache
-  Int disk_size
-  Int preemptible_tries
-
+  input {
+    File input_cram
+    String basename
+    File ref_cache
+    Int disk_size
+    Int preemptible_tries
+  }
   command {
     ln -s ${input_cram} ${basename}.cram
 
@@ -122,10 +130,12 @@ task Extract_Reads {
 
 # index a CRAM
 task Index_Cram {
-  File input_cram
-  String basename
-  File ref_cache
-  Int preemptible_tries
+  input {
+    File input_cram
+    String basename
+    File ref_cache
+    Int preemptible_tries
+  }
 
   command {
     ln -s ${input_cram} ${basename}.cram
@@ -153,11 +163,13 @@ task Index_Cram {
 }
 
 task Count_Lumpy_VCF {
-  File input_vcf
-  String basename
-  String cohort
+  input {
+    File input_vcf
+    String basename
+    String cohort
 
-  Int preemptible_tries
+    Int preemptible_tries
+  }
 
   command <<<
     set -eo pipefail
@@ -180,11 +192,13 @@ task Count_Lumpy_VCF {
 }
 
 task Count_Lumpy {
-  String basename
-  File input_vcf
-  Int preemptible_tries
-  String cohort
-  String center
+  input {
+    String basename
+    File input_vcf
+    Int preemptible_tries
+    String cohort
+    String center
+  }
 
   command <<<
     set -eo pipefail
@@ -217,11 +231,13 @@ task Count_Lumpy {
 }
 
 task Count_Manta {
-  String basename
-  File input_vcf
-  Int preemptible_tries
-  String cohort
-  String center
+  input {
+    String basename
+    File input_vcf
+    Int preemptible_tries
+    String cohort
+    String center
+  }
 
   command <<<
     set -eo pipefail
@@ -247,11 +263,13 @@ task Count_Manta {
 }
 
 task Count_Cnvnator {
-  String basename
-  File input_vcf
-  Int preemptible_tries
-  String cohort
-  String center
+  input {
+    String basename
+    File input_vcf
+    Int preemptible_tries
+    String cohort
+    String center
+  }
 
   command <<<
     set -eo pipefail
@@ -286,10 +304,12 @@ task Count_Cnvnator {
 
 # flagstat a CRAM
 task Flagstat {
-  File input_cram
-  File input_cram_index
-  String basename
-  Int preemptible_tries
+  input {
+    File input_cram
+    File input_cram_index
+    String basename
+    Int preemptible_tries
+  }
 
   command {
     ln -s ${input_cram} ${basename}.cram
@@ -314,18 +334,20 @@ task Flagstat {
 
 # LUMPY SV discovery
 task Lumpy {
-  String basename
-  File input_cram
-  File input_cram_index
-  File input_splitters_bam
-  File input_splitters_bam_index
-  File input_discordants_bam
-  File input_discordants_bam_index
+  input {
+    String basename
+    File input_cram
+    File input_cram_index
+    File input_splitters_bam
+    File input_splitters_bam_index
+    File input_discordants_bam
+    File input_discordants_bam_index
 
-  File ref_cache
-  File exclude_regions
-  Int disk_size
-  Int preemptible_tries
+    File ref_cache
+    File exclude_regions
+    Int disk_size
+    Int preemptible_tries
+  }
 
   command {
     ln -s ${input_cram} ${basename}.cram
@@ -362,15 +384,17 @@ task Lumpy {
 }
 
 task Manta {    
-  File input_cram
-  File input_cram_index
-  File ref_fasta
-  File ref_fasta_index
-  File ref_cache
-  File? call_regions_bed
-  File? call_regions_bed_index
-  String basename
-  Int preemptible_tries
+  input {
+    File input_cram
+    File input_cram_index
+    File ref_fasta
+    File ref_fasta_index
+    File ref_cache
+    File? call_regions_bed
+    File? call_regions_bed_index
+    String basename
+    Int preemptible_tries
+  }
 
   # Manta requires 2GB per thread for scheduling, but in typical cases uses less than this
   # see https://github.com/Illumina/manta/issues/38
@@ -423,17 +447,18 @@ task Manta {
 
 # Smoove wrapper
 task Smoove {
-  String basename
-  File input_cram
-  File input_cram_index
+  input {
+    String basename
+    File input_cram
+    File input_cram_index
 
-  File ref_fasta
-  File ref_fasta_index
-  File ref_cache
-  File exclude_regions
+    File ref_fasta
+    File ref_fasta_index
+    File ref_cache
+    File exclude_regions
 
-  Int preemptible_tries
-
+    Int preemptible_tries
+  }
 
   command {
     set -e
@@ -484,12 +509,14 @@ task Smoove {
 }
 
 task Genotype {
-  String basename
-  File input_cram
-  File input_cram_index
-  File input_vcf
-  File ref_cache
-  Int preemptible_tries
+  input {
+    String basename
+    File input_cram
+    File input_cram_index
+    File input_vcf
+    File ref_cache
+    Int preemptible_tries
+  }
 
   command {
     ln -s ${input_cram} ${basename}.cram
@@ -523,12 +550,14 @@ task Genotype {
 }
 
 task Genotype_Zip {
-  String basename
-  File input_cram
-  File input_cram_index
-  File input_vcf
-  File ref_cache
-  Int preemptible_tries
+  input {
+    String basename
+    File input_cram
+    File input_cram_index
+    File input_vcf
+    File ref_cache
+    Int preemptible_tries
+  }
 
   command {
     ln -s ${input_cram} ${basename}.cram
@@ -564,11 +593,14 @@ task Genotype_Zip {
 }
 
 task Copy_Number {
-  String basename
-  String sample
-  File input_vcf
-  File input_cn_hist_root
-  Int preemptible_tries
+  input {
+    String basename
+    String sample
+    File input_vcf
+    File input_cn_hist_root
+    File ref_cache
+    Int preemptible_tries
+  }
 
   command {
     create_coordinates \
@@ -599,9 +631,11 @@ task Copy_Number {
 }
 
 task Zip {
-  File input_vcf
-  String basename
-  Int preemptible_tries
+  input {
+    File input_vcf
+    String basename
+    Int preemptible_tries
+  }
 
   command {
     cat ${input_vcf} \
@@ -622,11 +656,13 @@ task Zip {
 }
 
 task Copy_Number_Zip {
-  String basename
-  String sample
-  File input_vcf
-  File input_cn_hist_root
-  Int preemptible_tries
+  input {
+    String basename
+    String sample
+    File input_vcf
+    File input_cn_hist_root
+    Int preemptible_tries
+  }
 
   command {
     create_coordinates \
@@ -659,17 +695,19 @@ task Copy_Number_Zip {
 }
 
 task CNVnator_Histogram {
-  String basename
-  File input_cram
-  File input_cram_index
-  File ref_fasta
-  File ref_fasta_index
-  File ref_cache
-  String ref_chrom_dir = "cnvnator_chroms"
-  Int preemptible_tries
-  Int threads = 4
+  input {
+    String basename
+    File input_cram
+    File input_cram_index
+    File ref_fasta
+    File ref_fasta_index
+    File ref_cache
+    String ref_chrom_dir = "cnvnator_chroms"
+    Int preemptible_tries
+    Int threads = 4
   # Add 7G of pad of the chromosome directory and ~2-3 GB of output files
-  Int disk_size = ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB") * 5 + 7.0 )
+    Int disk_size = ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB") * 5 + 7.0 )
+  }
 
   command <<<
     ln -s ${input_cram} ${basename}.cram
@@ -711,11 +749,13 @@ task CNVnator_Histogram {
 }
 
 task L_Sort_VCF_Variants {
-  Array[File] input_vcfs
-  File input_vcfs_file = write_lines(input_vcfs)
-  String output_vcf_basename
-  Int disk_size
-  Int preemptible_tries
+  input {
+    Array[File] input_vcfs
+    File input_vcfs_file = write_lines(input_vcfs)
+    String output_vcf_basename
+    Int disk_size
+    Int preemptible_tries
+  }
 
   command {
     # strip the "gs://" prefix from the file paths
@@ -746,10 +786,12 @@ task L_Sort_VCF_Variants {
 }
 
 task L_Merge_VCF_Variants {
-  File input_vcf_gz
-  String output_vcf_basename
-  Int disk_size
-  Int preemptible_tries
+  input {
+    File input_vcf_gz
+    String output_vcf_basename
+    Int disk_size
+    Int preemptible_tries
+  }
 
   command {
     zcat ${input_vcf_gz} \
@@ -774,11 +816,13 @@ task L_Merge_VCF_Variants {
 }
 
 task Filter_Del {
-  File input_vcf_gz
-  String output_vcf_basename
-  Int disk_size
-  Int preemptible_tries
-  
+  input {
+    File input_vcf_gz
+    String output_vcf_basename
+    Int disk_size
+    Int preemptible_tries
+  }
+
   command <<<
     set -eo pipefail
 
@@ -799,11 +843,13 @@ task Filter_Del {
 }
 
 task Paste_VCF {
-  Array[File] input_vcfs
-  File input_vcfs_file = write_lines(input_vcfs)
-  String output_vcf_basename
-  Int disk_size
-  Int preemptible_tries
+  input {
+    Array[File] input_vcfs
+    File input_vcfs_file = write_lines(input_vcfs)
+    String output_vcf_basename
+    Int disk_size
+    Int preemptible_tries
+  }
 
   command {
     # strip the "gs://" prefix from the file paths
@@ -832,9 +878,11 @@ task Paste_VCF {
 }
 
 task Remove_INS {
-  File input_vcf_gz
-  String output_vcf_basename
-  Int preemptible_tries
+  input {
+    File input_vcf_gz
+    String output_vcf_basename
+    Int preemptible_tries
+  }
 
   command <<<
     zcat ${input_vcf_gz} \
@@ -857,9 +905,11 @@ task Remove_INS {
 }
 
 task Prune_VCF_Output_Bedpe {
-  File input_vcf_gz
-  String output_vcf_basename
-  Int preemptible_tries
+  input {
+    File input_vcf_gz
+    String output_vcf_basename
+    Int preemptible_tries
+  }
 
   command {
     zcat ${input_vcf_gz} \
@@ -885,9 +935,11 @@ task Prune_VCF_Output_Bedpe {
 }
 
 task Prune_VCF {
-  File input_vcf_gz
-  String output_vcf_basename
-  Int preemptible_tries
+  input {
+    File input_vcf_gz
+    String output_vcf_basename
+    Int preemptible_tries
+  }
 
   command {
     zcat ${input_vcf_gz} \
@@ -914,11 +966,13 @@ task Prune_VCF {
 }
 
 task Classify {
-  File input_vcf_gz
-  File input_ped
-  String output_vcf_basename
-  File mei_annotation_bed
-  Int preemptible_tries
+  input {
+    File input_vcf_gz
+    File input_ped
+    String output_vcf_basename
+    File mei_annotation_bed
+    Int preemptible_tries
+  }
 
   command {
     cat ${input_ped} \
@@ -948,11 +1002,13 @@ task Classify {
 }
 
 task Concat_VCF {
-  File input_del_vcf_gz
-  File input_dup_vcf_gz
-  File input_bnd_vcf_gz
-  String output_vcf_basename
-  Int preemptible_tries
+  input {
+    File input_del_vcf_gz
+    File input_dup_vcf_gz
+    File input_bnd_vcf_gz
+    String output_vcf_basename
+    Int preemptible_tries
+  }
 
   command {
     zcat ${input_dup_vcf_gz} \
@@ -977,9 +1033,11 @@ task Concat_VCF {
 }
   
 task Sort_Index_VCF {
-  File input_vcf_gz
-  String output_vcf_name
-  Int preemptible_tries
+  input {
+    File input_vcf_gz
+    String output_vcf_name
+    Int preemptible_tries
+  }
 
   command {
     zcat ${input_vcf_gz} \

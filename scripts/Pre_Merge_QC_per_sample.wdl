@@ -1,16 +1,19 @@
+version 1.0
 import "SV_Tasks.wdl" as SV
 
 workflow Pre_Merge_QC_Per_Sample {
-  # data inputs
-  File manta_vcf
-  File lumpy_vcf
-  File cnvnator_vcf
-  String cohort
-  String center
+  input {
+    # data inputs
+    File manta_vcf
+    File lumpy_vcf
+    File cnvnator_vcf
+    String cohort
+    String center
 
-  # system inputs
-  Int preemptible_tries
-  String basename = sub(sub(lumpy_vcf, "^.*/", ""), ".vcf.gz" + "$", "")
+    # system inputs
+    Int preemptible_tries
+    String basename = sub(sub(lumpy_vcf, "^.*/", ""), ".vcf.gz" + "$", "")
+  }
 
   call SV.Count_Lumpy {
     input:

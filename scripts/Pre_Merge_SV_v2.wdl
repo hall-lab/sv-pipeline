@@ -1,22 +1,26 @@
+version 1.0
 import "Pre_Merge_SV_per_sample.wdl" as per_sample
 import "Pre_Merge_QC_per_sample.wdl" as qc
 
 workflow Pre_Merge_SV_v2 {
-  File cram_list
-  String aligned_cram_suffix
+  input {
+    File cram_list
+    String aligned_cram_suffix
 
-  # reference inputs
-  File ref_fasta
-  File ref_fasta_index
-  File ref_cache
-  File? call_regions_bed
-  File? call_regions_bed_index
-  File exclude_regions
-  String cohort
-  String center
+    # reference inputs
+    File ref_fasta
+    File ref_fasta_index
+    File ref_cache
+    File? call_regions_bed
+    File? call_regions_bed_index
+    File exclude_regions
+    String cohort
+    String center
 
-  # system inputs
-  Int preemptible_tries
+    # system inputs
+    Int preemptible_tries
+  }
+
   Array[File] aligned_crams = read_lines(cram_list)
 
   scatter (i in range(length(aligned_crams))) {
