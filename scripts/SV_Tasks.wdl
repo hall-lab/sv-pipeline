@@ -873,6 +873,32 @@ task Filter_Del {
   }
 }
 
+task Filter_Pass {
+  input {
+    File input_vcf_gz
+    String output_vcf_basename
+    Int disk_size
+    Int preemptible_tries
+  }
+
+  command <<<
+    set -eo pipefail
+
+    bcftools view -f .,PASS ${input_vcf_gz}  | bgzip -c >  ${output_vcf_basename}.vcf.gz
+  >>>
+
+  runtime {
+    docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
+    cpu: "1"
+    memory: "3.75 GB"
+    disks: "local-disk " + disk_size + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
+  }
+}
 task Paste_VCF {
   input {
     Array[File] input_vcfs
