@@ -803,7 +803,38 @@ task L_Merge_VCF_Variants {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
+    docker: "apregier/svtools@sha256:e2d1c58b8dbf2f2bae4ece921095a0e796c4fa5fc4c05db3860dcb62aa21cd69"
+    cpu: "1"
+    memory: "3.75 GB"
+    disks: "local-disk " + disk_size + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
+  }
+}
+
+task L_Merge_VCF_Variants_weighted {
+  input {
+    File input_vcf_gz
+    String output_vcf_basename
+    Int disk_size
+    Int preemptible_tries
+  }
+
+  command {
+    zcat ${input_vcf_gz} \
+      | svtools lmerge \
+      -i /dev/stdin \
+      -f 20 \
+      -w carrier_wt \
+      | bgzip -c \
+      > ${output_vcf_basename}.vcf.gz
+  }
+
+  runtime {
+    docker: "apregier/svtools@sha256:e2d1c58b8dbf2f2bae4ece921095a0e796c4fa5fc4c05db3860dcb62aa21cd69"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + disk_size + " HDD"
