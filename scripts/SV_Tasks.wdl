@@ -7,6 +7,7 @@ task Get_Sample_Name {
   }
 
   command {
+    set -eo pipefail
     samtools view -H ${input_cram} \
       | grep -m 1 '^@RG' | tr '\t' '\n' \
       | grep '^SM:' | sed 's/^SM://g'
@@ -34,6 +35,7 @@ task Get_Sex {
   }
 
   command <<<
+    set -eo pipefail
     cat ${ref_fasta_index} \
       | awk '$1=="chrX" { print $1":0-"$2 } END { print "exit"}' \
       | cnvnator -root ${input_cn_hist_root} -genotype 100 \
@@ -64,6 +66,7 @@ task Make_Pedigree_File {
   }
 
   command <<<
+    set -eo pipefail
     paste ${write_lines(sample_array)} ${write_lines(sex_array)} \
       | awk '{ print $1,$1,-9,-9,$2,-9 }' OFS='\t' \
       > ${output_ped_basename}.ped
@@ -91,6 +94,7 @@ task Extract_Reads {
     Int preemptible_tries
   }
   command {
+    set -eo pipefail
     ln -s ${input_cram} ${basename}.cram
 
     # build the reference sequence cache
@@ -138,6 +142,7 @@ task Index_Cram {
   }
 
   command {
+    set -eo pipefail
     ln -s ${input_cram} ${basename}.cram
 
     # build the reference sequence cache
@@ -312,6 +317,7 @@ task Flagstat {
   }
 
   command {
+    set -eo pipefail
     ln -s ${input_cram} ${basename}.cram
     ln -s ${input_cram_index} ${basename}.cram.crai
 
@@ -350,6 +356,7 @@ task Lumpy {
   }
 
   command {
+    set -eo pipefail
     ln -s ${input_cram} ${basename}.cram
     ln -s ${input_cram_index} ${basename}.cram.crai
 
@@ -407,7 +414,7 @@ task Manta {
   # Note also that we are specifying an inflation factor of 4, but padding with 20GB of data. This is aimed to get us over 100GB of SSD for better performance on small samples.
 
   command {
-    set -e
+    set -eo pipefail
     ln -s ${input_cram} ${basename}.cram
     ln -s ${input_cram_index} ${basename}.cram.crai
 
@@ -461,7 +468,7 @@ task Smoove {
   }
 
   command {
-    set -e
+    set -eo pipefail
     ln -s ${input_cram} ${basename}.cram
     ln -s ${input_cram_index} ${basename}.cram.crai
 
@@ -519,6 +526,7 @@ task Genotype {
   }
 
   command {
+    set -eo pipefail
     ln -s ${input_cram} ${basename}.cram
     ln -s ${input_cram_index} ${basename}.cram.crai
 
@@ -549,49 +557,6 @@ task Genotype {
   }
 }
 
-task Genotype_Zip {
-  input {
-    String basename
-    File input_cram
-    File input_cram_index
-    File input_vcf
-    File ref_cache
-    Int preemptible_tries
-  }
-
-  command {
-    ln -s ${input_cram} ${basename}.cram
-    ln -s ${input_cram_index} ${basename}.cram.crai
-
-    # build the reference sequence cache
-    tar -zxf ${ref_cache}
-    export REF_PATH=./cache/%2s/%2s/%s
-    export REF_CACHE=./cache/%2s/%2s/%s
-
-    rm -f ${basename}.cram.json
-    zcat ${input_vcf} \
-      | svtyper \
-      -B ${basename}.cram \
-      -l ${basename}.cram.json \
-      | bgzip -c \
-      > ${basename}.gt.vcf.gz
-  }
-
-  runtime {
-    docker: "apregier/svtyper@sha256:f419102e796f5cf6e1266d0a133b9590f7e57b36c597f4b63fe7012836e99e9e"
-    #docker: "gcr.io/washu-genome-inh-dis-analysis/svtyper:v0.7.0-5fc3076"
-    cpu: "1"
-    memory: "6.5 GB"
-    disks: "local-disk " + ceil( size(input_cram, "GB") + size(ref_cache, "GB") * 5 + 20.0) + " HDD"
-    preemptible: preemptible_tries
-  }
-
-  output {
-    File output_vcf = "${basename}.gt.vcf.gz"
-    File output_lib = "${basename}.cram.json"
-  }
-}
-
 task Copy_Number {
   input {
     String basename
@@ -603,6 +568,7 @@ task Copy_Number {
   }
 
   command {
+    set -eo pipefail
     create_coordinates \
       -i ${input_vcf} \
       -o coordinates.txt
@@ -655,45 +621,6 @@ task Zip {
   }
 }
 
-task Copy_Number_Zip {
-  input {
-    String basename
-    String sample
-    File input_vcf
-    File input_cn_hist_root
-    Int preemptible_tries
-  }
-
-  command {
-    create_coordinates \
-      -i ${input_vcf} \
-      -o coordinates.txt
-
-    svtools copynumber \
-      -i ${input_vcf} \
-      -s ${sample} \
-      --cnvnator cnvnator \
-      -w 100 \
-      -r ${input_cn_hist_root} \
-      -c coordinates.txt \
-      | bgzip -c \
-      > ${basename}.cn.vcf.gz
-  }
-
-  runtime {
-   
-    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
-    cpu: "1"
-    memory: "6.5 GB"
-    disks: "local-disk " + 35 + " HDD"
-    preemptible: preemptible_tries
-  }
-
-  output {
-    File output_vcf = "${basename}.cn.vcf.gz"
-  }
-}
-
 task CNVnator_Histogram {
   input {
     String basename
@@ -710,6 +637,7 @@ task CNVnator_Histogram {
   }
 
   command <<<
+    set -eo pipefail
     ln -s ${input_cram} ${basename}.cram
     ln -s ${input_cram_index} ${basename}.cram.crai
 
@@ -758,6 +686,7 @@ task L_Sort_VCF_Variants {
   }
 
   command {
+    set -eo pipefail
     # strip the "gs://" prefix from the file paths
     cat ${input_vcfs_file} \
       | sed 's/^gs:\/\//\.\//g' \
@@ -794,6 +723,7 @@ task L_Merge_VCF_Variants {
   }
 
   command {
+    set -eo pipefail
     zcat ${input_vcf_gz} \
       | svtools lmerge \
       -i /dev/stdin \
@@ -824,6 +754,7 @@ task L_Merge_VCF_Variants_weighted {
   }
 
   command {
+    set -eo pipefail
     zcat ${input_vcf_gz} \
       | svtools lmerge \
       -i /dev/stdin \
@@ -909,6 +840,7 @@ task Paste_VCF {
   }
 
   command {
+    set -eo pipefail
     # strip the "gs://" prefix from the file paths
     cat ${input_vcfs_file} \
       | sed 's/^gs:\/\//\.\//g' \
@@ -942,6 +874,7 @@ task Remove_INS {
   }
 
   command <<<
+    set -eo pipefail
     zcat ${input_vcf_gz} \
     | awk '{if($5!="<INS>") print $0}' \
     | bgzip -c \
@@ -969,6 +902,7 @@ task Prune_VCF_Output_Bedpe {
   }
 
   command {
+    set -eo pipefail
     zcat ${input_vcf_gz} \
       | svtools afreq \
       | svtools vcftobedpe \
@@ -999,6 +933,7 @@ task Prune_VCF {
   }
 
   command {
+    set -eo pipefail
     zcat ${input_vcf_gz} \
       | svtools afreq \
       | svtools vcftobedpe \
@@ -1032,6 +967,7 @@ task Classify {
   }
 
   command {
+    set -eo pipefail
     cat ${input_ped} \
       | cut -f 2,5 \
       > sex.txt
@@ -1068,6 +1004,7 @@ task Concat_VCF {
   }
 
   command {
+    set -eo pipefail
     zcat ${input_dup_vcf_gz} \
     | grep "^##"  > header.txt
 
@@ -1097,6 +1034,7 @@ task Sort_Index_VCF {
   }
 
   command {
+    set -eo pipefail
     zcat ${input_vcf_gz} \
       | svtools vcfsort \
       | bgzip -c \
