@@ -36,9 +36,10 @@ task Get_Sex {
 
   command <<<
     set -eo pipefail
-    cat ${ref_fasta_index} \
+    echo "Root file: ~{input_cn_hist_root}"
+    cat ~{ref_fasta_index} \
       | awk '$1=="chrX" { print $1":0-"$2 } END { print "exit"}' \
-      | cnvnator -root ${input_cn_hist_root} -genotype 100 \
+      | cnvnator -root ~{input_cn_hist_root} -genotype 100 \
       | grep -v "^Assuming male" \
       | awk '{ printf("%.0f\n",$4); }'
   >>>
@@ -63,13 +64,15 @@ task Make_Pedigree_File {
     Array[String] sample_array
     Array[String] sex_array
     String output_ped_basename
+    File sample_file = write_lines(sample_array)
+    File sex_file = write_lines(sex_array)
   }
 
   command <<<
     set -eo pipefail
-    paste ${write_lines(sample_array)} ${write_lines(sex_array)} \
+    paste ~{sample_file} ~{sex_file} \
       | awk '{ print $1,$1,-9,-9,$2,-9 }' OFS='\t' \
-      > ${output_ped_basename}.ped
+      > ~{output_ped_basename}.ped
   >>>
 
   runtime {
@@ -180,7 +183,7 @@ task Count_Lumpy_VCF {
     set -eo pipefail
 
     echo -e "Cohort\tSample\tGenotype\tType\tLength"
-    bcftools query -e 'INFO/SECONDARY=1' -f "[${cohort}\t%SAMPLE\t%GT\t%INFO/SVTYPE\t%INFO/SVLEN\n]" | bgzip -c > ${basename}.counts.txt.gz
+    bcftools query -e 'INFO/SECONDARY=1' -f "[~{cohort}\t%SAMPLE\t%GT\t%INFO/SVTYPE\t%INFO/SVLEN\n]" | bgzip -c > ~{basename}.counts.txt.gz
   >>>
 
   runtime {
@@ -208,7 +211,7 @@ task Count_Lumpy {
   command <<<
     set -eo pipefail
    
-     bcftools query  -f "[%CHROM\t${cohort}\t${center}\t%FILTER\t%INFO/SVTYPE\t%INFO/SVLEN\t%INFO/SR\t%SAMPLE\t%GT\n]"  ${input_vcf} \
+     bcftools query  -f "[%CHROM\t~{cohort}\t~{center}\t%FILTER\t%INFO/SVTYPE\t%INFO/SVLEN\t%INFO/SR\t%SAMPLE\t%GT\n]"  ~{input_vcf} \
      | awk 'BEGIN{OFS="\t"}{if($1~/chr[1-9]+/ && $1!~/_/) {
        svlen=$6;
        if($6<0) svlen=-1*$6;
@@ -219,7 +222,7 @@ task Count_Lumpy {
        print $1, $2, $3, $4, $5, len_bin, $7, $8, $9;}}' \
      | sort -k1,9 \
      | uniq -c \
-     | awk 'BEGIN{OFS="\t"}{print $2, $3, $4, $5, $6, $7, $8, $9, $1}'  > ${basename}.lumpy.counts.1.txt
+     | awk 'BEGIN{OFS="\t"}{print $2, $3, $4, $5, $6, $7, $8, $9, $1}'  > ~{basename}.lumpy.counts.1.txt
   >>>
 
   runtime {
@@ -247,11 +250,11 @@ task Count_Manta {
   command <<<
     set -eo pipefail
 
-     bcftools query  -f "[%CHROM\t${cohort}\t${center}\t%FILTER\t%INFO/SVTYPE\t%SAMPLE\t%GT\n]"  ${input_vcf} \
+     bcftools query  -f "[%CHROM\t~{cohort}\t~{center}\t%FILTER\t%INFO/SVTYPE\t%SAMPLE\t%GT\n]"  ~{input_vcf} \
      | awk 'BEGIN{OFS="\t"}{if($1~/chr[1-9]+/ && $1!~/_/ && $4=="PASS") print $0;}' \
      | sort -k1,7 \
      | uniq -c \
-     | awk 'BEGIN{OGS="\t"}{print $2, $3, $4, $5, $6, $7, $8,  $1}'  > ${basename}.manta.counts.1.txt
+     | awk 'BEGIN{OGS="\t"}{print $2, $3, $4, $5, $6, $7, $8,  $1}'  > ~{basename}.manta.counts.1.txt
   >>>
 
   runtime {
@@ -280,7 +283,7 @@ task Count_Cnvnator {
     set -eo pipefail
 
      cat ${input_vcf} \
-     | awk -v bn="${basename}" -v cohort="${cohort}" -v ctr="${center}" 'BEGIN{OFS="\t"}{
+     | awk -v bn="~{basename}" -v cohort="~{cohort}" -v ctr="~{center}" 'BEGIN{OFS="\t"}{
        if($2~/chr[1-9]+/ && $2!~/_/) { 
          len_bin=">2kb";
          if($3<200) len_bin="<200bp";
@@ -291,7 +294,7 @@ task Count_Cnvnator {
      }' \
      | sort -k1,6 \
      | bedtools groupby -g 1,2,3,4,5,6 -c 7,7 -o count,sum \
-     > ${basename}.cnvnator.counts.1.txt
+     > ~{basename}.cnvnator.counts.1.txt
   >>>
 
   runtime {
@@ -604,6 +607,7 @@ task Zip {
   }
 
   command {
+    set -eo pipefail
     cat ${input_vcf} \
     | bgzip -c > ${basename}.gz
   }
@@ -638,25 +642,25 @@ task CNVnator_Histogram {
 
   command <<<
     set -eo pipefail
-    ln -s ${input_cram} ${basename}.cram
-    ln -s ${input_cram_index} ${basename}.cram.crai
+    ln -s ~{input_cram} ~{basename}.cram
+    ln -s ~{input_cram_index} ~{basename}.cram.crai
 
     # build the reference sequence cache
-    tar -zxf ${ref_cache}
+    tar -zxf ~{ref_cache}
     export REF_PATH=./cache/%2s/%2s/%s
     export REF_CACHE=./cache/%2s/%2s/%s
 
     # Create directory of chromosome FASTA files for CNVnator
-    mkdir -p ${ref_chrom_dir}
-    awk -v CHROM_DIR=${ref_chrom_dir} 'BEGIN { CHROM="" } { if ($1~"^>") CHROM=substr($1,2); print $0 > CHROM_DIR"/"CHROM".fa" }' ${ref_fasta}
+    mkdir -p ~{ref_chrom_dir}
+    awk -v CHROM_DIR=~{ref_chrom_dir} 'BEGIN { CHROM="" } { if ($1~"^>") CHROM=substr($1,2); print $0 > CHROM_DIR"/"CHROM".fa" }' ~{ref_fasta}
 
     cnvnator_wrapper.py \
       -T cnvnator.out \
-      -o ${basename}.cn \
-      -t ${threads} \
+      -o ~{basename}.cn \
+      -t ~{threads} \
       -w 100 \
-      -b ${basename}.cram \
-      -c ${ref_chrom_dir} \
+      -b ~{basename}.cram \
+      -c ~{ref_chrom_dir} \
       -g GRCh38 \
       --cnvnator cnvnator
   >>>
@@ -788,7 +792,7 @@ task Filter_Del {
   command <<<
     set -eo pipefail
 
-    bcftools view -i '(SVTYPE!="DEL" || SVLEN>1000 || SVLEN<-1000 || INFO/SR>0)' ${input_vcf_gz}  | bgzip -c >  ${output_vcf_basename}.vcf.gz
+    bcftools view -i '(SVTYPE!="DEL" || SVLEN>1000 || SVLEN<-1000 || INFO/SR>0)' ~{input_vcf_gz}  | bgzip -c >  ~{output_vcf_basename}.vcf.gz
   >>>
 
   runtime {
@@ -815,7 +819,7 @@ task Filter_Pass {
   command <<<
     set -eo pipefail
 
-    bcftools view -f .,PASS ${input_vcf_gz}  | bgzip -c >  ${output_vcf_basename}.vcf.gz
+    bcftools view -f .,PASS ~{input_vcf_gz}  | bgzip -c >  ~{output_vcf_basename}.vcf.gz
   >>>
 
   runtime {
@@ -875,10 +879,10 @@ task Remove_INS {
 
   command <<<
     set -eo pipefail
-    zcat ${input_vcf_gz} \
+    zcat ~{input_vcf_gz} \
     | awk '{if($5!="<INS>") print $0}' \
     | bgzip -c \
-    > ${output_vcf_basename}.vcf.gz
+    > ~{output_vcf_basename}.vcf.gz
   >>>
 
   runtime {
