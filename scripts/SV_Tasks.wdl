@@ -36,7 +36,6 @@ task Get_Sex {
 
   command <<<
     set -eo pipefail
-    echo "Root file: ~{input_cn_hist_root}"
     cat ~{ref_fasta_index} \
       | awk '$1=="chrX" { print $1":0-"$2 } END { print "exit"}' \
       | cnvnator -root ~{input_cn_hist_root} -genotype 100 \
