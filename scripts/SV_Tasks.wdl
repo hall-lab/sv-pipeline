@@ -1,5 +1,31 @@
 version 1.0
 # get the sample (SM) field from a CRAM file
+task Split_By_Type {
+  input {
+    File input_vcf
+    String output_vcf_prefix
+    Int preemptible_tries
+  }
+  command <<<
+    set -eo pipefail
+    zcat ~{input_vcf} | /opt/hall-lab/vawk/vawk -v svtype=BND --header '{if(I$SVTYPE==svtype) print $0;}' | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.bnd.vcf.gz
+    zcat ~{input_vcf} | /opt/hall-lab/vawk/vawk -v svtype=DEL --header '{if(I$SVTYPE==svtype) print $0;}' | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.del.vcf.gz
+    zcat ~{input_vcf} | /opt/hall-lab/vawk/vawk --header '{if(I$SVTYPE!="DEL" && I$SVTYPE!="BND") print $0;}' | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.other.vcf.gz
+  >>>
+  runtime {
+    docker: "apregier/vawk@sha256:a503b85f111af8bad3373542d3b91a2ad5368b8e65765ba1b7797be282fd6894"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + ceil( size(input_vcf, "GB") * 2) + " HDD"
+    preemptible: preemptible_tries
+  }
+  output {
+    File bnd_vcf = "${output_vcf_prefix}.bnd.vcf.gz"
+    File del_vcf = "${output_vcf_prefix}.del.vcf.gz"
+    File other_vcf = "${output_vcf_prefix}.other.vcf.gz"
+  }
+}
+
 task Get_Sample_Name {
   input {
   	File input_cram
@@ -546,9 +572,9 @@ task Genotype {
   }
 
   runtime {
-    docker: "apregier/svtyper@sha256:f419102e796f5cf6e1266d0a133b9590f7e57b36c597f4b63fe7012836e99e9e"
+    docker: "apregier/svtyper@sha256:c33375c49cec38f89721d177db2eb1b3e1bbec12353ce237c59a9c8118a77f0a"
     cpu: "1"
-    memory: "6.5 GB"
+    memory: "15 GB"
     disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_vcf, "GB") +  size(ref_cache, "GB") * 5 + 20.0) + " HDD"
     preemptible: preemptible_tries
   }
@@ -571,8 +597,8 @@ task Copy_Number {
 
   command {
     set -eo pipefail
-    create_coordinates \
-      -i ${input_vcf} \
+    zcat ${input_vcf} \
+     | create_coordinates \
       -o coordinates.txt
 
     svtools copynumber \
@@ -582,11 +608,12 @@ task Copy_Number {
       -w 100 \
       -r ${input_cn_hist_root} \
       -c coordinates.txt \
-      > ${basename}.cn.vcf
+      | bgzip -c
+      > ${basename}.cn.vcf.gz
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
+    docker: "apregier/svtools@sha256:ffa98e90495795d6925b1331c122f2d70914ffa6390a5cc899b3b6199f827249"
     cpu: "1"
     memory: "4 GB"
     disks: "local-disk " + 35 + " HDD"
@@ -612,7 +639,7 @@ task Zip {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
+    docker: "apregier/svtools@sha256:ffa98e90495795d6925b1331c122f2d70914ffa6390a5cc899b3b6199f827249"
     cpu: "1"
     memory: "4 GB"
     disks: "local-disk " +  ceil(2.0*size(input_vcf, "GB")) + " HDD"
@@ -679,7 +706,7 @@ task CNVnator_Histogram {
   }
 }
 
-task L_Sort_VCF_Variants {
+task L_Sort_VCF_Variants_local {
   input {
     Array[File] input_vcfs
     File input_vcfs_file = write_lines(input_vcfs)
@@ -693,18 +720,63 @@ task L_Sort_VCF_Variants {
     # strip the "gs://" prefix from the file paths
     cat ${input_vcfs_file} \
       | sed 's/^gs:\/\//\.\//g' \
-      > input_vcfs_file.local_map.txt
+      > ${input_vcfs_file}.local_map.txt
    sleep 1
 
     svtools lsort \
       -b 200 \
-      -f input_vcfs_file.local_map.txt \
+      -f ${input_vcfs_file}.local_map.txt \
       | bgzip -c \
       > ${output_vcf_basename}.vcf.gz
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
+    docker: "apregier/svtools@sha256:ffa98e90495795d6925b1331c122f2d70914ffa6390a5cc899b3b6199f827249"
+    cpu: "1"
+    memory: "3.75 GB"
+    disks: "local-disk " + "100" + " HDD"
+    bootDiskSizeGb: 30
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
+  }
+}
+
+task L_Sort_VCF_Variants {
+  input {
+    Array[File] input_vcfs
+    File input_vcfs_file = write_lines(input_vcfs)
+    String output_vcf_basename
+    Int disk_size
+    Int preemptible_tries
+  }
+
+  parameter_meta {
+    input_vcfs: {
+	description: "vcf files to sort together",
+        localization_optional: true
+    }
+  }
+
+  command {
+    set -eo pipefail
+    # strip the "gs://" prefix from the file paths
+    cat ${input_vcfs_file} \
+      | sed 's/^gs:\/\//\.\//g' \
+      > ${input_vcfs_file}.local_map.txt
+   sleep 1
+
+    svtools lsort \
+      -b 200 \
+      -f ${input_vcfs_file} \
+      | bgzip -c \
+      > ${output_vcf_basename}.vcf.gz
+  }
+
+  runtime {
+    docker: "apregier/svtools@sha256:ffa98e90495795d6925b1331c122f2d70914ffa6390a5cc899b3b6199f827249"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -736,7 +808,7 @@ task L_Merge_VCF_Variants {
   }
 
   runtime {
-    docker: "apregier/svtools@sha256:e2d1c58b8dbf2f2bae4ece921095a0e796c4fa5fc4c05db3860dcb62aa21cd69"
+    docker: "apregier/svtools@sha256:ffa98e90495795d6925b1331c122f2d70914ffa6390a5cc899b3b6199f827249"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -768,7 +840,7 @@ task L_Merge_VCF_Variants_weighted {
   }
 
   runtime {
-    docker: "apregier/svtools@sha256:e2d1c58b8dbf2f2bae4ece921095a0e796c4fa5fc4c05db3860dcb62aa21cd69"
+    docker: "apregier/svtools@sha256:ffa98e90495795d6925b1331c122f2d70914ffa6390a5cc899b3b6199f827249"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -833,6 +905,43 @@ task Filter_Pass {
     File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
   }
 }
+task Paste_VCF_local {
+  input {
+    Array[File] input_vcfs
+    File input_vcfs_file = write_lines(input_vcfs)
+    String output_vcf_basename
+    Int disk_size
+    Int preemptible_tries
+  }
+  parameter_meta {
+    input_vcfs: {
+	description: "vcf files to paste together",
+        localization_optional: true
+    }
+  }
+
+  command {
+    set -eo pipefail
+    svtools vcfpaste \
+      -f input_vcfs_file.txt \
+      -q \
+      | bgzip -c \
+      > ${output_vcf_basename}.vcf.gz
+  }
+
+  runtime {
+    docker: "apregier/svtools@sha256:ffa98e90495795d6925b1331c122f2d70914ffa6390a5cc899b3b6199f827249"
+    cpu: "1"
+    memory: "12 GB"
+    disks: "local-disk " + disk_size + " HDD"
+    preemptible: 0
+  }
+
+  output {
+    File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
+  }
+}
+
 task Paste_VCF {
   input {
     Array[File] input_vcfs
@@ -857,7 +966,7 @@ task Paste_VCF {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
+    docker: "apregier/svtools@sha256:ffa98e90495795d6925b1331c122f2d70914ffa6390a5cc899b3b6199f827249"
     cpu: "1"
     memory: "12 GB"
     disks: "local-disk " + disk_size + " HDD"

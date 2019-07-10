@@ -26,6 +26,13 @@ workflow Post_Merge_SV {
   Array[File] aligned_cram_indices = read_lines(index_list)
   Array[File] cn_hist_roots = read_lines(cn_hist_roots_list)
 
+  call SV.Split_By_Type {
+    input:
+    input_vcf = merged_vcf,
+    output_vcf_prefix = cohort_name + ".merged",
+    preemptible_tries = preemptible_tries
+  }
+
   # Re-genotype and call copy number for each sample on the merged SV VCF
   scatter (i in range(length(aligned_crams))) {
     
@@ -47,21 +54,51 @@ workflow Post_Merge_SV {
       preemptible_tries = preemptible_tries
     }
 
-    call SV.Genotype as Genotype_Merged {
+    call SV.Genotype as Genotype_Merged_BND {
       input:
-      basename = basename,
+      basename = basename + ".bnd",
       input_cram = aligned_cram,
       input_cram_index = aligned_cram_index,
-      input_vcf = merged_vcf,
+      input_vcf = Split_By_Type.bnd_vcf,
       ref_cache = ref_cache,
       preemptible_tries = preemptible_tries
     }
 
-    call SV.Copy_Number {
+    call SV.Genotype as Genotype_Merged_DEL {
       input:
-      basename = basename,
+      basename = basename + ".del",
+      input_cram = aligned_cram,
+      input_cram_index = aligned_cram_index,
+      input_vcf = Split_By_Type.del_vcf,
+      ref_cache = ref_cache,
+      preemptible_tries = preemptible_tries
+    }
+
+    call SV.Genotype as Genotype_Merged_OTHER {
+      input:
+      basename = basename + ".other",
+      input_cram = aligned_cram,
+      input_cram_index = aligned_cram_index,
+      input_vcf = Split_By_Type.other_vcf,
+      ref_cache = ref_cache,
+      preemptible_tries = preemptible_tries
+    }
+
+    call SV.Copy_Number as Copy_Number_DEL {
+      input:
+      basename = basename + ".del",
       sample = Get_Sample_Name.sample,
-      input_vcf = Genotype_Merged.output_vcf,
+      input_vcf = Genotype_Merged_DEL.output_vcf,
+      input_cn_hist_root = cn_hist_root,
+      ref_cache = ref_cache,
+      preemptible_tries = preemptible_tries
+    }
+
+    call SV.Copy_Number as Copy_Number_OTHER {
+      input:
+      basename = basename + ".other",
+      sample = Get_Sample_Name.sample,
+      input_vcf = Genotype_Merged_OTHER.output_vcf,
       input_cn_hist_root = cn_hist_root,
       ref_cache = ref_cache,
       preemptible_tries = preemptible_tries
@@ -75,40 +112,130 @@ workflow Post_Merge_SV {
     output_ped_basename = cohort_name,
   }
 
-  call SV.Paste_VCF {
+  call SV.Paste_VCF as Paste_VCF_BND {
     input:
-    input_vcfs = Copy_Number.output_vcf,
-    output_vcf_basename = cohort_name + ".merged.gt.cn",
+    input_vcfs = Genotype_Merged_BND.output_vcf,
+    output_vcf_basename = cohort_name + ".merged.gt.bnd",
     disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
 
-  call SV.Prune_VCF {
+  call SV.Paste_VCF as Paste_VCF_DEL {
     input:
-    input_vcf_gz = Paste_VCF.output_vcf_gz,
-    output_vcf_basename = cohort_name + ".merged.gt.cn.pruned",
+    input_vcfs = Copy_Number_DEL.output_vcf,
+    output_vcf_basename = cohort_name + ".merged.gt.cn.del",
+    disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
 
-  call SV.Classify {
+  call SV.Paste_VCF as Paste_VCF_OTHER {
     input:
-    input_vcf_gz = Prune_VCF.output_vcf_gz,
+    input_vcfs = Copy_Number_OTHER.output_vcf,
+    output_vcf_basename = cohort_name + ".merged.gt.cn.other",
+    disk_size = disk_size,
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Paste_VCF_local as Paste_VCF_BND_local {
+  input:
+  input_vcfs = Genotype_Merged_BND.output_vcf,
+  output_vcf_basename = cohort_name + ".localized.merged.cn.bnd",
+  disk_size = disk_size,
+  preemptible_tries = preemptible_tries
+  }
+
+  call SV.Paste_VCF_local as Paste_VCF_DEL_local {
+  input:
+  input_vcfs = Copy_Number_DEL.output_vcf,
+  output_vcf_basename = cohort_name + ".localized.merged.gt.cn.del",
+  disk_size = disk_size,
+  preemptible_tries = preemptible_tries
+  }
+
+  call SV.Paste_VCF_local as Paste_VCF_OTHER_local {
+  input:
+  input_vcfs = Copy_Number_OTHER.output_vcf,
+  output_vcf_basename = cohort_name + ".localized.merged.gt.cn.other",
+  disk_size = disk_size,
+  preemptible_tries = preemptible_tries
+  }
+
+  call SV.Prune_VCF as Prune_VCF_BND{
+    input:
+    input_vcf_gz = Paste_VCF_BND.output_vcf_gz,
+    output_vcf_basename = cohort_name + ".merged.gt.pruned.bnd",
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Prune_VCF as Prune_VCF_DEL{
+    input:
+    input_vcf_gz = Paste_VCF_DEL.output_vcf_gz,
+    output_vcf_basename = cohort_name + ".merged.gt.cn.pruned.del",
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Prune_VCF as Prune_VCF_OTHER{
+    input:
+    input_vcf_gz = Paste_VCF_OTHER.output_vcf_gz,
+    output_vcf_basename = cohort_name + ".merged.gt.cn.pruned.other",
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Classify as Classify_BND{
+    input:
+    input_vcf_gz = Prune_VCF_BND.output_vcf_gz,
     input_ped = Make_Pedigree_File.output_ped,
     mei_annotation_bed = mei_annotation_bed,
-    output_vcf_basename = cohort_name + ".merged.gt.cn.pruned.class",
+    output_vcf_basename = cohort_name + ".merged.gt.pruned.class.bnd",
     preemptible_tries = preemptible_tries
   }
 
-  call SV.Sort_Index_VCF {
+  call SV.Classify as Classify_DEL{
     input:
-    input_vcf_gz = Classify.output_vcf_gz,
-    output_vcf_name = final_vcf_name,
+    input_vcf_gz = Prune_VCF_DEL.output_vcf_gz,
+    input_ped = Make_Pedigree_File.output_ped,
+    mei_annotation_bed = mei_annotation_bed,
+    output_vcf_basename = cohort_name + ".merged.gt.cn.pruned.class.del",
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Classify as Classify_OTHER{
+    input:
+    input_vcf_gz = Prune_VCF_OTHER.output_vcf_gz,
+    input_ped = Make_Pedigree_File.output_ped,
+    mei_annotation_bed = mei_annotation_bed,
+    output_vcf_basename = cohort_name + ".merged.gt.cn.pruned.class.other",
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Sort_Index_VCF as Sort_Index_VCF_BND {
+    input:
+    input_vcf_gz = Classify_BND.output_vcf_gz,
+    output_vcf_name = final_vcf_name + ".bnd.vcf.gz",
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Sort_Index_VCF as Sort_Index_VCF_DEL {
+    input:
+    input_vcf_gz = Classify_DEL.output_vcf_gz,
+    output_vcf_name = final_vcf_name + ".del.vcf.gz",
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Sort_Index_VCF as Sort_Index_VCF_OTHER {
+    input:
+    input_vcf_gz = Classify_OTHER.output_vcf_gz,
+    output_vcf_name = final_vcf_name + ".other.vcf.gz",
     preemptible_tries = preemptible_tries
   }
 
   output {
     File output_ped = Make_Pedigree_File.output_ped
-    File output_vcf = Sort_Index_VCF.output_vcf_gz
-    File output_vcf_index = Sort_Index_VCF.output_vcf_gz_index
+    File output_vcf_bnd = Sort_Index_VCF_BND.output_vcf_gz
+    File output_vcf_index_bnd = Sort_Index_VCF_BND.output_vcf_gz_index
+    File output_vcf_del = Sort_Index_VCF_DEL.output_vcf_gz
+    File output_vcf_index_other = Sort_Index_VCF_OTHER.output_vcf_gz_index
+    File output_vcf_other = Sort_Index_VCF_OTHER.output_vcf_gz
+    File output_vcf_index_del = Sort_Index_VCF_DEL.output_vcf_gz_index
   }
 }
