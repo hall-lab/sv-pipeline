@@ -8,10 +8,10 @@ task Split_By_Type {
   }
   command <<<
     set -eo pipefail
-    zcat ~{input_vcf} | /opt/hall-lab/vawk/vawk -v svtype=BND --header '{if(I$SVTYPE==svtype) print $0;}' | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.bnd.vcf.gz
-    zcat ~{input_vcf} | /opt/hall-lab/vawk/vawk -v svtype=DEL --header '{if(I$SVTYPE==svtype) print $0;}' | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.del.vcf.gz
-    zcat ~{input_vcf} | /opt/hall-lab/vawk/vawk -v svtype=INS --header '{if(I$SVTYPE==svtype) print $0;}' | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.ins.vcf.gz
-    zcat ~{input_vcf} | /opt/hall-lab/vawk/vawk --header '{if(I$SVTYPE!="DEL" && I$SVTYPE!="BND" && I$SVTYPE!="INS") print $0;}' | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.other.vcf.gz
+    zcat ~{input_vcf} | grep -v "random	" | grep -v "alt	" | grep -v "decoy	" | grep -v "EBV	" | grep -v "^chrUn" | grep -v "^HLA"| /opt/hall-lab/vawk/vawk -v svtype=BND --header '{if(I$SVTYPE==svtype) print $0;}' | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.bnd.vcf.gz
+    zcat ~{input_vcf} | grep -v "random	" | grep -v "alt	" | grep -v "decoy	" | grep -v "EBV	" | grep -v "^chrUn" | grep -v "^HLA"| /opt/hall-lab/vawk/vawk -v svtype=DEL --header '{if(I$SVTYPE==svtype) print $0;}' | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.del.vcf.gz
+    zcat ~{input_vcf} | grep -v "random	" | grep -v "alt	" | grep -v "decoy	" | grep -v "EBV	" | grep -v "^chrUn" | grep -v "^HLA"| /opt/hall-lab/vawk/vawk -v svtype=INS --header '{if(I$SVTYPE==svtype) print $0;}' | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.ins.vcf.gz
+    zcat ~{input_vcf} | grep -v "random	" | grep -v "alt	" | grep -v "decoy	" | grep -v "EBV	" | grep -v "^chrUn" | grep -v "^HLA"| /opt/hall-lab/vawk/vawk --header '{if(I$SVTYPE!="DEL" && I$SVTYPE!="BND" && I$SVTYPE!="INS") print $0;}' | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.other.vcf.gz
     zcat ~{output_vcf_prefix}.ins.vcf.gz | \
     /opt/hall-lab/vawk/vawk '{ct=split(I$SNAME, spl, ","); for(ii=1; ii<=ct; ii++) print $3, spl[ii], $9}' | \
     /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.ins_split.txt.gz
@@ -650,20 +650,11 @@ task Copy_Number {
   command {
     set -eo pipefail
     zcat ${input_vcf} \
-     | grep -v "random	" \
-     | grep -v "alt	" \
-     | grep -v "decoy	" \
-     | grep -v "EBV	" \
-     | grep -v "^chrUn" \
-     | grep -v "^HLA" \
-     > temp.vcf
-     
-     cat temp.vcf
      | create_coordinates \
       -o coordinates.txt
 
     svtools copynumber \
-      -i temp.vcf \
+      -i ${input_vcf} \
       -s ${sample} \
       --cnvnator cnvnator \
       -w 100 \
