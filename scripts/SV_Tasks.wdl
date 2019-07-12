@@ -650,11 +650,20 @@ task Copy_Number {
   command {
     set -eo pipefail
     zcat ${input_vcf} \
+     | grep -v "random	" \
+     | grep -v "alt	" \
+     | grep -v "decoy	" \
+     | grep -v "EBV	" \
+     | grep -v "^chrUn" \
+     | grep -v "^HLA" \
+     > temp.vcf
+     
+     cat temp.vcf
      | create_coordinates \
       -o coordinates.txt
 
     svtools copynumber \
-      -i ${input_vcf} \
+      -i temp.vcf \
       -s ${sample} \
       --cnvnator cnvnator \
       -w 100 \
@@ -673,7 +682,7 @@ task Copy_Number {
   }
 
   output {
-    File output_vcf = "${basename}.cn.vcf"
+    File output_vcf = "${basename}.cn.vcf.gz"
   }
 }
 
