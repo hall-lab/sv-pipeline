@@ -10,10 +10,14 @@ task Split_By_Type {
     set -eo pipefail
     zcat ~{input_vcf} | /opt/hall-lab/vawk/vawk -v svtype=BND --header '{if(I$SVTYPE==svtype) print $0;}' | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.bnd.vcf.gz
     zcat ~{input_vcf} | /opt/hall-lab/vawk/vawk -v svtype=DEL --header '{if(I$SVTYPE==svtype) print $0;}' | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.del.vcf.gz
-    zcat ~{input_vcf} | /opt/hall-lab/vawk/vawk --header '{if(I$SVTYPE!="DEL" && I$SVTYPE!="BND") print $0;}' | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.other.vcf.gz
+    zcat ~{input_vcf} | /opt/hall-lab/vawk/vawk -v svtype=INS --header '{if(I$SVTYPE==svtype) print $0;}' | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.ins.vcf.gz
+    zcat ~{input_vcf} | /opt/hall-lab/vawk/vawk --header '{if(I$SVTYPE!="DEL" && I$SVTYPE!="BND" && I$SVTYPE!="INS") print $0;}' | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.other.vcf.gz
+    zcat ~{output_vcf_prefix}.ins.vcf.gz | \
+    /opt/hall-lab/vawk/vawk '{ct=split(I$SNAME, spl, ","); for(ii=1; ii<=ct; ii++) print $3, spl[ii], $9}' | \
+    /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.ins_split.txt.gz
   >>>
   runtime {
-    docker: "apregier/vawk@sha256:a503b85f111af8bad3373542d3b91a2ad5368b8e65765ba1b7797be282fd6894"
+    docker: "apregier/vawk@sha256:09c18a5827d67891792ffc110627c7fa05b2262df4b91d6967ad6e544f41e8ec"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + ceil( size(input_vcf, "GB") * 2) + " HDD"
@@ -22,7 +26,9 @@ task Split_By_Type {
   output {
     File bnd_vcf = "${output_vcf_prefix}.bnd.vcf.gz"
     File del_vcf = "${output_vcf_prefix}.del.vcf.gz"
+    File ins_vcf = "${output_vcf_prefix}.ins.vcf.gz"
     File other_vcf = "${output_vcf_prefix}.other.vcf.gz"
+    File ins_split = "${output_vcf_prefix}.ins_split.txt.gz"
   }
 }
 
@@ -582,6 +588,52 @@ task Genotype {
   output {
     File output_vcf = "${basename}.gt.vcf.gz"
     File output_lib = "${basename}.cram.json"
+  }
+}
+
+task Take_Original_Genotypes {
+  input {
+    String sample_name
+    String basename
+    File input_vcf
+    File input_variant_to_sname_mapping
+    File original_per_sample_vcf
+    Int preemptible_tries
+  }
+
+  command <<<
+    set -eo pipefail
+    zcat ~{input_variant_to_sname_mapping} \
+      | /opt/hall-lab/vawk/vawk -v sname="~{sample_name}" 'BEGIN{OFS="\t"}{ \
+    split($2, spl, ":"); \
+    if(spl[1]==sname) { \
+        print $1, spl[1], spl[2]":"spl[3]":"spl[4]":"spl[5]":"spl[6]":"spl[7]":"spl[8]; \
+        } \
+      }' \
+      | /opt/hall-lab/io/zjoin -a stdin -b <(zcat ~{original_per_sample_vcf} | grep -v "^#" | cut -f 3,9-) -1 3 -2 1 \
+      | cut -f 1,5- \
+      | awk -v sname="~{sample_name}" 'BEGIN{OFS="\t"; print "ID", "FORMAT", sname;}{ \
+           print $0; \
+        }' \
+      | /opt/hall-lab/htslib-1.9/bin/bgzip -c > temp
+
+    zcat ~{input_vcf} \
+      | /opt/hall-lab/io/zjoin -r -p "##" -a stdin -b <(zcat temp | sort -k1,1 | /opt/hall-lab/bin/bedtools groupby -g 1 -c 2,3 -o first,first ) -1 3 -2 1 \
+      | cut -f -8,10- \
+      | /opt/hall-lab/vawk/vawk --header 'BEGIN{OFS="\t"}{if($9=="NA") {$9="GT:FT:GQ:PL:PR:SR"; $10="0/0:.:.:.:.:.";} print $0;}' \
+      | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{basename}.gt.vcf.gz
+  >>> 
+
+  runtime {
+    docker: "apregier/vawk@sha256:09c18a5827d67891792ffc110627c7fa05b2262df4b91d6967ad6e544f41e8ec"
+    cpu: "1"
+    memory: "15 GB"
+    disks: "local-disk " + ceil( size(original_per_sample_vcf, "GB") + size(input_vcf, "GB") +  size(input_variant_to_sname_mapping, "GB") + 20.0) + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_vcf = "${basename}.gt.vcf.gz"
   }
 }
 
