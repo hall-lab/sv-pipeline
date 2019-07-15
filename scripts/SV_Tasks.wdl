@@ -957,7 +957,8 @@ task Filter_Pass {
     File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
   }
 }
-task Paste_VCF_local {
+
+task Paste_VCF {
   input {
     Array[File] input_vcfs
     File input_vcfs_file = write_lines(input_vcfs)
@@ -975,7 +976,7 @@ task Paste_VCF_local {
   command {
     set -eo pipefail
     svtools vcfpaste \
-      -f input_vcfs_file.txt \
+      -f ${input_vcfs_file} \
       -q \
       | bgzip -c \
       > ${output_vcf_basename}.vcf.gz
@@ -994,7 +995,7 @@ task Paste_VCF_local {
   }
 }
 
-task Paste_VCF {
+task Paste_VCF_local {
   input {
     Array[File] input_vcfs
     File input_vcfs_file = write_lines(input_vcfs)
