@@ -660,7 +660,7 @@ task Copy_Number {
       -w 100 \
       -r ${input_cn_hist_root} \
       -c coordinates.txt \
-      | bgzip -c
+      | bgzip -c \
       > ${basename}.cn.vcf.gz
   }
 
