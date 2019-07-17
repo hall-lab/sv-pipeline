@@ -216,30 +216,12 @@ workflow Post_Merge_SV {
     preemptible_tries = preemptible_tries
   }
 
-  call SV.Classify as Classify_BND{
-    input:
-    input_vcf_gz = Prune_VCF_BND.output_vcf_gz,
-    input_ped = Make_Pedigree_File.output_ped,
-    mei_annotation_bed = mei_annotation_bed,
-    output_vcf_basename = cohort_name + ".merged.gt.pruned.class.bnd",
-    preemptible_tries = preemptible_tries
-  }
-
   call SV.Classify as Classify_DEL{
     input:
     input_vcf_gz = Prune_VCF_DEL.output_vcf_gz,
     input_ped = Make_Pedigree_File.output_ped,
     mei_annotation_bed = mei_annotation_bed,
     output_vcf_basename = cohort_name + ".merged.gt.cn.pruned.class.del",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Classify as Classify_INS{
-    input:
-    input_vcf_gz = Prune_VCF_INS.output_vcf_gz,
-    input_ped = Make_Pedigree_File.output_ped,
-    mei_annotation_bed = mei_annotation_bed,
-    output_vcf_basename = cohort_name + ".merged.gt.pruned.class.ins",
     preemptible_tries = preemptible_tries
   }
 
@@ -254,7 +236,7 @@ workflow Post_Merge_SV {
 
   call SV.Sort_Index_VCF as Sort_Index_VCF_BND {
     input:
-    input_vcf_gz = Classify_BND.output_vcf_gz,
+    input_vcf_gz = Prune_VCF_BND.output_vcf_gz,
     output_vcf_name = final_vcf_name + ".bnd.vcf.gz",
     preemptible_tries = preemptible_tries
   }
@@ -268,7 +250,7 @@ workflow Post_Merge_SV {
 
   call SV.Sort_Index_VCF as Sort_Index_VCF_INS {
     input:
-    input_vcf_gz = Classify_INS.output_vcf_gz,
+    input_vcf_gz = Prune_VCF_INS.output_vcf_gz,
     output_vcf_name = final_vcf_name + ".ins.vcf.gz",
     preemptible_tries = preemptible_tries
   }
