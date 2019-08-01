@@ -262,15 +262,43 @@ workflow Post_Merge_SV {
     preemptible_tries = preemptible_tries
   }
 
+  call SV.Filter_Index as Filter_Index_BND {
+    input:
+    input_vcf_gz = Sort_Index_VCF_BND.output_vcf_gz,
+    output_vcf_name = final_vcf_name + ".bnd.vcf.gz",
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Filter_Index as Filter_Index_DEL {
+    input:
+    input_vcf_gz = Sort_Index_VCF_DEL.output_vcf_gz,
+    output_vcf_name = final_vcf_name + ".del.vcf.gz",
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Filter_Index as Filter_Index_INS {
+    input:
+    input_vcf_gz = Sort_Index_VCF_INS.output_vcf_gz,
+    output_vcf_name = final_vcf_name + ".ins.vcf.gz",
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Filter_Index as Filter_Index_OTHER {
+    input:
+    input_vcf_gz = Sort_Index_VCF_OTHER.output_vcf_gz,
+    output_vcf_name = final_vcf_name + ".other.vcf.gz",
+    preemptible_tries = preemptible_tries
+  }
+
   output {
     File output_ped = Make_Pedigree_File.output_ped
-    File output_vcf_bnd = Sort_Index_VCF_BND.output_vcf_gz
-    File output_vcf_index_bnd = Sort_Index_VCF_BND.output_vcf_gz_index
-    File output_vcf_del = Sort_Index_VCF_DEL.output_vcf_gz
-    File output_vcf_ins = Sort_Index_VCF_INS.output_vcf_gz
-    File output_vcf_index_other = Sort_Index_VCF_OTHER.output_vcf_gz_index
-    File output_vcf_other = Sort_Index_VCF_OTHER.output_vcf_gz
-    File output_vcf_index_del = Sort_Index_VCF_DEL.output_vcf_gz_index
-    File output_vcf_index_ins = Sort_Index_VCF_INS.output_vcf_gz_index
+    File output_vcf_bnd = Filter_Index_BND.output_vcf_gz
+    File output_vcf_index_bnd = Filter_Index_BND.output_vcf_gz_index
+    File output_vcf_del = Filter_Index_DEL.output_vcf_gz
+    File output_vcf_ins = Filter_Index_INS.output_vcf_gz
+    File output_vcf_index_other = Filter_Index_OTHER.output_vcf_gz_index
+    File output_vcf_other = Filter_Index_OTHER.output_vcf_gz
+    File output_vcf_index_del = Filter_Index_DEL.output_vcf_gz_index
+    File output_vcf_index_ins = Filter_Index_INS.output_vcf_gz_index
   }
 }
