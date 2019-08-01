@@ -201,6 +201,58 @@ task Index_Cram {
   }
 }
 
+task Filter_Index {
+  input {
+    File input_vcf_gz
+    String output_vcf_name
+    Int preemptible_tries
+  }
+
+  command <<<
+	set -eo pipefail
+	FILTERLINE='##FILTER=<ID=LOW,Description="Test Low quality filter">'
+	zcat ~{input_vcf_gz} | \
+		/opt/hall-lab/vawk/vawk '{ \
+		split(I$STRANDS,x,","); \
+		split(x[1],y,":"); \
+		split(x[2],z,":"); \
+		if (I$SVTYPE=="INS") { \
+		I$MSQ=QUAL/I$NSAMP; \
+		gsub("MSQ=0.00", "MSQ="I$MSQ, $8) \
+		} \
+		if ((I$SVTYPE=="DEL" || I$SVTYPE=="DUP" || I$SVTYPE=="MEI") && \
+		I$MSQ>=100 && sqrt((I$SVLEN)*(I$SVLEN))>=50){ \
+		$7="PASS"; print $0; \
+		}  else if ( I$SVTYPE=="INV" && $6>=100 && (I$SR/I$SU)>=0.1 && (I$PE/I$SU)>=0.1 && (y[2]/I$SU)>0.1 && (z[2]/I$SU)>0.1 && sqrt((I$SVLEN)*(I$SVLEN))>=50){ \
+		$7="PASS"; print $0; \
+		} else if ( I$SVTYPE=="BND" && $9 !~ /CN/ && I$MSQ>=500){ \
+		$7="PASS"; print $0; \
+		} else if ( I$SVTYPE=="BND" && $9 ~ /CN/ && I$MSQ>=250){ \
+		$7="PASS"; print $0; \
+		} else if ( I$SVTYPE=="INS" && I$MSQ>=100 && I$SVLEN >=50) { \
+		$7="PASS"; print $0; \
+		} else { \
+		$7="LOW"; print $0; \
+		} \
+	}' |  cat <(zcat ~{input_vcf_gz} | sed -n '/^#[^#]/q;p') <(echo $FILTERLINE) <(zgrep -m 1 '^#CHROM' ~{input_vcf_gz}) - | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_name}
+	/opt/hall-lab/htslib-1.9/bin/tabix -p vcf -f ~{output_vcf_name}
+  >>>
+
+  runtime {
+    docker: "apregier/vawk@sha256:09c18a5827d67891792ffc110627c7fa05b2262df4b91d6967ad6e544f41e8ec"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + ceil( size(input_vcf_gz, "GB") * 2) + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_vcf_gz = "${output_vcf_name}"
+    File output_vcf_gz_index = "${output_vcf_name}.tbi"
+  }
+  
+}
+
 task Count_Lumpy_VCF {
   input {
     File input_vcf
@@ -1019,9 +1071,9 @@ task Paste_VCF_local {
   }
 
   runtime {
-    docker: "apregier/svtools@sha256:ffa98e90495795d6925b1331c122f2d70914ffa6390a5cc899b3b6199f827249"
-    cpu: "1"
-    memory: "12 GB"
+    docker: "apregier/svtools@sha256:e1ed9cefe2629f65b8566673e950001fadf3e13bb765b68d6624363d226e1f85"
+    cpu: "4"
+    memory: "50 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: 0
   }
@@ -1110,7 +1162,7 @@ task Prune_VCF {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
+    docker: "apregier/svtools@sha256:d1037482b078c1819574198afe67d0dca9999fa6c2a8f2f88661cd262a54d3de"
     cpu: "1"
     memory: "3 GB"
     disks: "local-disk " +  3*ceil( size(input_vcf_gz, "GB")) + " HDD"
@@ -1150,7 +1202,7 @@ task Classify {
     docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
     cpu: "1"
     memory: "3 GB"
-    disks: "local-disk " +  3*ceil( size(input_vcf_gz, "GB")) + " HDD"
+    disks: "local-disk " +  10*ceil( size(input_vcf_gz, "GB")) + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -1212,7 +1264,7 @@ task Sort_Index_VCF {
     docker: "halllab/svtools@sha256:7571b6e9cbfeba7ebfdefd490e8315ed5742ad034ca075d1f70fc422786cdff3"
     cpu: "1"
     memory: "3 GB"
-    disks: "local-disk " + 3*ceil( size(input_vcf_gz, "GB")) + " HDD"
+    disks: "local-disk " + 20*ceil( size(input_vcf_gz, "GB")) + " HDD"
     preemptible: preemptible_tries
   }
 
