@@ -54,6 +54,8 @@ workflow Pre_Merge_SV_v2 {
     Array[File] cram_indices = Pre_Merge_SV_Per_Sample.cram_index
     Array[File] manta_vcfs = Pre_Merge_SV_Per_Sample.manta_vcf
     Array[File] manta_tbis = Pre_Merge_SV_Per_Sample.manta_tbi
+    Array[File] manta_original_vcfs = Pre_Merge_SV_Per_Sample.manta_original_vcf
+    Array[File] manta_original_tbis = Pre_Merge_SV_Per_Sample.manta_original_tbi
     Array[File] cnvnator_cn_hist_roots = Pre_Merge_SV_Per_Sample.cnvnator_cn_hist_root
     Array[File] cnvnator_output_cn_txt_files = Pre_Merge_SV_Per_Sample.cnvnator_output_cn_txt
     Array[File] cnvnator_cn_bed_files = Pre_Merge_SV_Per_Sample.cnvnator_cn_bed
