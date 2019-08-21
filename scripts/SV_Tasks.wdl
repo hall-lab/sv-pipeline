@@ -534,6 +534,8 @@ task Manta {
   output {
     File output_vcf = "${basename}.doctored.vcf.gz"
     File output_tbi = "${basename}.doctored.vcf.gz.tbi"
+    File original_vcf = "${basename}.vcf.gz"
+    File original_tbi = "${basename}.vcf.gz.tbi"
     File workflow_tgz = "${basename}.MantaWorkflow.tgz"
   }
 }
@@ -662,7 +664,7 @@ task Take_Original_Genotypes {
         print $1, spl[1], spl[2]":"spl[3]":"spl[4]":"spl[5]":"spl[6]":"spl[7]":"spl[8]; \
         } \
       }' \
-      | /opt/hall-lab/io/zjoin -a stdin -b <(zcat ~{original_per_sample_vcf} | grep -v "^#" | cut -f 3,9-) -1 3 -2 1 \
+      | /opt/hall-lab/io/zjoin -a stdin -b <(paste -d ":" <(zcat ~{original_per_sample_vcf} | grep -v "^#" | cut -f 3,9-) <(zcat ~{original_per_sample_vcf} | grep -v "^#" | cut -f 4,5 | tr "\t" ":") <(zcat ~{original_per_sample_vcf} | /opt/hall-lab/vawk/vawk '{svlen=I$SVLEN; if(svlen==""){svlen="."} print svlen}') | sed 's/:SR/:SR:OREF:OALT:OSVLEN/') -1 3 -2 1 \
       | cut -f 1,5- \
       | awk -v sname="~{sample_name}" 'BEGIN{OFS="\t"; print "ID", "FORMAT", sname;}{ \
            print $0; \
