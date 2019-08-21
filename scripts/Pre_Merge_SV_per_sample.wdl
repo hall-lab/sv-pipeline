@@ -70,6 +70,8 @@ workflow Pre_Merge_SV_Per_Sample {
     File cram_index = Index_Cram.output_cram_index
     File manta_vcf = Manta.output_vcf
     File manta_tbi = Manta.output_tbi
+    File manta_original_vcf = Manta.original_vcf
+    File manta_original_tbi = Manta.original_tbi
     File cnvnator_cn_hist_root = CNVnator_Histogram.output_cn_hist_root
     File cnvnator_output_cn_txt = CNVnator_Histogram.output_cn_txt
     File cnvnator_cn_bed = CNVnator_Histogram.output_cn_bed
