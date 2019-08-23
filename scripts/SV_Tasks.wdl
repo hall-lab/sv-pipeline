@@ -216,7 +216,7 @@ task Filter_Index {
 		split(I$STRANDS,x,","); \
 		split(x[1],y,":"); \
 		split(x[2],z,":"); \
-		if (I$SVTYPE=="INS") { \
+		if (I$SVTYPE=="INS" && I$NSAMP>0) { \
 		I$MSQ=QUAL/I$NSAMP; \
 		gsub("MSQ=0.00", "MSQ="I$MSQ, $8) \
 		} \
@@ -297,7 +297,7 @@ task Count_Lumpy {
      bcftools query  -f "[%CHROM\t~{cohort}\t~{center}\t%FILTER\t%INFO/SVTYPE\t%INFO/SVLEN\t%INFO/SR\t%SAMPLE\t%GT\n]"  ~{input_vcf} \
      | awk 'BEGIN{OFS="\t"}{if($1~/chr[1-9]+/ && $1!~/_/) {
        svlen=$6;
-       if($6<0) svlen=-1*$6;
+       if($6<0 && $6!=".") svlen=-1*$6;
        len_bin=">=1kb"
        if(svlen<1000) len_bin="<1kb";
        if($7>0) $7="SR>=1";
@@ -674,7 +674,8 @@ task Take_Original_Genotypes {
     zcat ~{input_vcf} \
       | /opt/hall-lab/io/zjoin -r -p "##" -a stdin -b <(zcat temp | sort -k1,1 | /opt/hall-lab/bin/bedtools groupby -g 1 -c 2,3 -o first,first ) -1 3 -2 1 \
       | cut -f -8,10- \
-      | /opt/hall-lab/vawk/vawk --header 'BEGIN{OFS="\t"}{if($9=="NA") {$9="GT:FT:GQ:PL:PR:SR"; $10="0/0:.:.:.:.:.";} print $0;}' \
+      | /opt/hall-lab/vawk/vawk --header 'BEGIN{OFS="\t"}{if($9=="NA") {$9="GT:FT:GQ:PL:PR:SR:OREF:OALT:OSVLEN"; $10="0/0:.:.:.:.:.:.:.:.";} print $0;}' \
+      | sed 's/^#CHROM/##FORMAT=<ID=OREF,Number=1,Type=String,Description="Original reference sequence">\n##FORMAT=<ID=OALT,Number=1,Type=String,Description="Original alt sequence">\n##FORMAT=<ID=OSVLEN,Number=1,Type=Integer,Description="Original SVLEN">\n#CHROM/' \
       | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{basename}.gt.vcf.gz
   >>> 
 
