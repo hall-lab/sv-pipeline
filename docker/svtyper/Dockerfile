@@ -19,12 +19,12 @@ RUN apt-get update -qq \
         curl \
         zlib1g-dev
 
-FROM builder-base as svtyper-0.7.0-build
+FROM builder-base as svtyper-0.7.1-build
 LABEL maintainer "Dave Larson <delarson@wustl.edu>"
 
 COPY --from=halllab/python2.7-build:v1 /opt/hall-lab/python-2.7.15 /opt/hall-lab/python-2.7.15
 ENV PATH=/opt/hall-lab/python-2.7.15/bin:${PATH}
-RUN SVTYPER_VERSION=0.7.0 \
+RUN SVTYPER_VERSION=0.7.1 \
     && git clone https://github.com/hall-lab/svtyper \
     && cd svtyper \
     && git checkout v$SVTYPER_VERSION \
@@ -37,7 +37,7 @@ RUN find /opt/hall-lab/python-2.7.15/ -depth \( -name '*.pyo' -o -name '*.pyc' -
 FROM debian:stretch-slim
 LABEL maintainer "Dave Larson <delarson@wustl.edu>"
 
-COPY --from=svtyper-0.7.0-build /opt/hall-lab/python-2.7.15 /opt/hall-lab/python-2.7.15
+COPY --from=svtyper-0.7.1-build /opt/hall-lab/python-2.7.15 /opt/hall-lab/python-2.7.15
 COPY --from=halllab/samtools-1.9-build:v1 /build/deb-build/opt/hall-lab/samtools-1.9 /opt/hall-lab/samtools-1.9
 COPY --from=halllab/htslib-1.9-build:v1 /build/deb-build/opt/hall-lab/htslib-1.9 /opt/hall-lab/htslib-1.9
 
