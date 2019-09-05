@@ -1,8 +1,9 @@
 version 1.0
 import "Pre_Merge_SV_per_sample.wdl" as per_sample
 import "Pre_Merge_QC_per_sample.wdl" as qc
+import "SV_Tasks.wdl" as SV
 
-workflow Pre_Merge_SV_v2 {
+workflow Pre_Merge_SV {
   input {
     File cram_list
     String aligned_cram_suffix
@@ -50,6 +51,14 @@ workflow Pre_Merge_SV_v2 {
     }
   }
 
+  scatter (p in [("manta", Pre_Merge_QC_Per_Sample.manta_counts), ("lumpy", Pre_Merge_QC_Per_Sample.lumpy_counts)] {
+    call SV.Make_Count_Plot {
+      input:
+        name=p.left,
+        count_files=p.right
+    }
+  }
+
   output {
     Array[File] cram_indices = Pre_Merge_SV_Per_Sample.cram_index
     Array[File] manta_vcfs = Pre_Merge_SV_Per_Sample.manta_vcf
@@ -63,5 +72,6 @@ workflow Pre_Merge_SV_v2 {
     Array[File] smoove_csis = Pre_Merge_SV_Per_Sample.smoove_csi
     Array[File] lumpy_counts = Pre_Merge_QC_Per_Sample.lumpy_counts
     Array[File] manta_counts = Pre_Merge_QC_Per_Sample.manta_counts
+    Array[File] count_plots = Make_Count_Plot.counts_plot
   }
 }
