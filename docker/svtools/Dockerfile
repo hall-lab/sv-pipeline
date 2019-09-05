@@ -27,10 +27,10 @@ LABEL maintainer "Dave Larson <delarson@wustl.edu>"
 
 COPY --from=halllab/python2.7-build:v1 /opt/hall-lab/python-2.7.15 /opt/hall-lab/python-2.7.15
 ENV PATH=/opt/hall-lab/python-2.7.15/bin:${PATH}
-RUN SVTOOLS_VERSION=0.4.0 \
+RUN SVTOOLS_VERSION=0.5.0 \
     && pip install svtools==${SVTOOLS_VERSION}
 RUN find /opt/hall-lab/python-2.7.15/ -depth \( -name '*.pyo' -o -name '*.pyc' -o -name 'test' -o -name 'tests' \) -exec rm -rf '{}' + ;
-RUN find /opt/hall-lab/python-2.7.15/lib/python2.7/site-packages/ -name '*.so' -print -exec sh -c 'file "{}" | grep -q "not stripped" && strip -s "{}"' \;
+#RUN find /opt/hall-lab/python-2.7.15/lib/python2.7/site-packages/ -name '*.so' -print -exec sh -c 'file "{}" | grep -q "not stripped" && strip -s "{}"' \;
 
 FROM debian:stretch-slim
 LABEL maintainer "Dave Larson <delarson@wustl.edu>"
