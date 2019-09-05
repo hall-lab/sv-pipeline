@@ -1,7 +1,7 @@
 {
   "Post_Merge_SV.cram_list": "gs://1000g_sv_2019/inputs/cram_list.txt",
   "Post_Merge_SV.index_list": "gs://1000g_sv_2019/inputs/index_list.txt",
-  "Post_Merge_SV.manta_vcf_list": "gs://1000g_sv_2019/inputs/manta_vcfs_list.txt",
+  "Post_Merge_SV.manta_vcf_list": "gs://1000g_sv_2019/inputs/manta_ordered.txt",
   "Post_Merge_SV.cn_hist_roots_list": "gs://1000g_sv_2019/inputs/cn_hist_roots_list.txt",
   "Post_Merge_SV.merged_vcf": "gs://1000g_sv_2019/inputs/manta_smoove.sorted.merged.vcf.gz",
   "Post_Merge_SV.cohort_name": "1000G",
