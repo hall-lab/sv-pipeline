@@ -353,46 +353,6 @@ task Count_Manta {
   }
 }
 
-task Count_Cnvnator {
-  input {
-    String basename
-    File input_vcf
-    Int preemptible_tries
-    String cohort
-    String center
-  }
-
-  command <<<
-    set -eo pipefail
-
-     cat ${input_vcf} \
-     | awk -v bn="~{basename}" -v cohort="~{cohort}" -v ctr="~{center}" 'BEGIN{OFS="\t"}{
-       if($2~/chr[1-9]+/ && $2!~/_/) { 
-         len_bin=">2kb";
-         if($3<200) len_bin="<200bp";
-         else if ($3<500) len_bin="<500bp";
-         else if ($3<1000) len_bin="<1kb";
-         else if ($3<2000) len_bin="<2kb";
-         print cohort, ctr,  bn, $1, int($4*10)/10, len_bin, $3;}
-     }' \
-     | sort -k1,6 \
-     | bedtools groupby -g 1,2,3,4,5,6 -c 7,7 -o count,sum \
-     > ~{basename}.cnvnator.counts.1.txt
-  >>>
-
-  runtime {
-    docker: "ernfrid/bedtools@sha256:be4c7bcf70ff0fec467245729251652d92842e4bd255479ae817a1ea2d696168"
-    cpu: "1"
-    memory: "1 GB"
-    disks: "local-disk " + ceil( size(input_vcf, "GB") * 2) + " HDD"
-    preemptible: preemptible_tries
-  }
-
-  output {
-    File output_counts = "${basename}.cnvnator.counts.1.txt"
-  }
-}
-
 # flagstat a CRAM
 task Flagstat {
   input {
