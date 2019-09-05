@@ -156,38 +156,6 @@ workflow Post_Merge_SV {
     preemptible_tries = preemptible_tries
   }
 
-  call SV.Paste_VCF_local as Paste_VCF_BND_local {
-  input:
-  input_vcfs = Genotype_Merged_BND.output_vcf,
-  output_vcf_basename = cohort_name + ".localized.merged.cn.bnd",
-  disk_size = disk_size,
-  preemptible_tries = preemptible_tries
-  }
-
-  call SV.Paste_VCF_local as Paste_VCF_DEL_local {
-  input:
-  input_vcfs = Copy_Number_DEL.output_vcf,
-  output_vcf_basename = cohort_name + ".localized.merged.gt.cn.del",
-  disk_size = disk_size,
-  preemptible_tries = preemptible_tries
-  }
-
-  call SV.Paste_VCF_local as Paste_VCF_INS_local {
-  input:
-  input_vcfs = Genotype_Merged_INS.output_vcf,
-  output_vcf_basename = cohort_name + ".localized.merged.gt.ins",
-  disk_size = disk_size,
-  preemptible_tries = preemptible_tries
-  }
-
-  call SV.Paste_VCF_local as Paste_VCF_OTHER_local {
-  input:
-  input_vcfs = Copy_Number_OTHER.output_vcf,
-  output_vcf_basename = cohort_name + ".localized.merged.gt.cn.other",
-  disk_size = disk_size,
-  preemptible_tries = preemptible_tries
-  }
-
   call SV.Prune_VCF as Prune_VCF_BND{
     input:
     input_vcf_gz = Paste_VCF_BND.output_vcf_gz,
