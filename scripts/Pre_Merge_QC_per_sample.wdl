@@ -32,19 +32,9 @@ workflow Pre_Merge_QC_Per_Sample {
    input_vcf = manta_vcf,
    preemptible_tries = preemptible_tries
  }
- 
- call SV.Count_Cnvnator {
-   input:
-   cohort = cohort,
-   center = center,
-   basename = basename,
-   input_vcf = cnvnator_vcf,
-   preemptible_tries = preemptible_tries
- }   
 
   output {
     File lumpy_counts = Count_Lumpy.output_counts
     File manta_counts = Count_Manta.output_counts
-    File cnvnator_counts = Count_Cnvnator.output_counts
   }
 }
