@@ -1,15 +1,17 @@
 {
-  "Pre_Merge_SV.cram_list": "gs://1000g_sv_2019/inputs/cram_list.txt",
+  "Pre_Merge_SV.aligned_crams": [
+    "gs://fc-56ac46ea-efc4-4683-b6d5-6d95bed41c5e/CCDG_13607/Project_CCDG_13607_B01_GRM_WGS.cram.2019-02-06/Sample_NA12878/analysis/NA12878.final.cram",
+    "gs://fc-56ac46ea-efc4-4683-b6d5-6d95bed41c5e/CCDG_13607/Project_CCDG_13607_B01_GRM_WGS.cram.2019-02-06/Sample_NA19238/analysis/NA19238.final.cram"
+  ],
   "Pre_Merge_SV.aligned_cram_suffix": ".cram",
-  "Pre_Merge_SV.cohort": "1000G",
-  "Pre_Merge_SV.center": "NYGC",
+  "Pre_Merge_SV.cohort": "Cohort",
+  "Pre_Merge_SV.center": "WashU",
 
   "Pre_Merge_SV.ref_fasta": "gs://human-b38/GRCh38DH/all_sequences.fa",
   "Pre_Merge_SV.ref_fasta_index": "gs://human-b38/GRCh38DH/all_sequences.fa.fai",
   "Pre_Merge_SV.ref_cache": "gs://human-b38/cache.tar.gz",
   "Pre_Merge_SV.exclude_regions": "gs://human-b38/GRCh38DH/annotations/exclude.cnvnator_100bp.GRCh38.20170403.bed",
-  "Pre_Merge_SV.mei_annotation_bed": "gs://human-b38/GRCh38DH/annotations/repeatMasker.recent.lt200millidiv.LINE_SINE_SVA.GRCh38.sorted.bed.gz",
-
-  "Pre_Merge_SV.disk_size": 60,
+  "Pre_Merge_SV.call_regions_bed": "gs://human-b38/GRCh38DH/annotations/canonical_chromosome.bed.gz",
+  "Pre_Merge_SV.call_regions_bed_index": "gs://human-b38/GRCh38DH/annotations/canonical_chromosome.bed.gz.tbi",
   "Pre_Merge_SV.preemptible_tries": 3
 }
