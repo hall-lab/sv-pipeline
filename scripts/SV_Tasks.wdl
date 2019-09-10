@@ -485,7 +485,7 @@ task Manta {
     tar -czvf ${basename}.MantaWorkflow.tgz MantaWorkflow
   }
   runtime {
-    docker: "halllab/manta_samtools@sha256:cdaf55d96ebb8473383d2190d1a762991c54ca85a851e473a5b1538cb0c3fed1"
+    docker: "halllab/manta_samtools@sha256:d39fac59a2c06f808d115c65b9c191baf5f249769d317263ae3cd19e2c74d20e"
     cpu: "8"
     memory: "16 GiB"
     disks: "local-disk " + ceil( size(input_cram, "GB") * 4 + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB") * 5 + 20.0) + " SSD"
