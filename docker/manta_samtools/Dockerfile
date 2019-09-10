@@ -11,10 +11,13 @@ RUN apt-get update -qq \
         zlib1g-dev \
         curl \
         ca-certificates \
-	tabix \
+        tabix \
+        libbz2-dev \
+        liblzma-dev \
     && pip install pandas \
     && pip install scipy \
-    && pip install pysam
+    && pip install pysam \
+    && pip install svtools
 RUN curl -O -L https://github.com/Illumina/manta/releases/download/v${MANTA_VERSION}/manta-${MANTA_VERSION}.release_src.tar.bz2 \
     && tar -xjf manta-${MANTA_VERSION}.release_src.tar.bz2 \
     && mkdir build \
