@@ -4,8 +4,8 @@ import "SV_Tasks.wdl" as SV
 workflow Merge_SV {
   input {
     # data inputs
-    File manta_input_vcfs_list
-    File smoove_input_vcfs_list
+    Array[File] manta_input_vcfs
+    Array[File] smoove_input_vcfs
     String cohort_name
 
     # system inputs
@@ -13,8 +13,6 @@ workflow Merge_SV {
     Int preemptible_tries
   }
 
-  Array[File] manta_input_vcfs = read_lines(manta_input_vcfs_list)
-  Array[File] smoove_input_vcfs = read_lines(smoove_input_vcfs_list)
   
   call SV.L_Sort_VCF_Variants as lsort_manta {
     input:
