@@ -773,44 +773,6 @@ task CNVnator_Histogram {
   }
 }
 
-task L_Sort_VCF_Variants_local {
-  input {
-    Array[File] input_vcfs
-    File input_vcfs_file = write_lines(input_vcfs)
-    String output_vcf_basename
-    Int disk_size
-    Int preemptible_tries
-  }
-
-  command {
-    set -eo pipefail
-    # strip the "gs://" prefix from the file paths
-    cat ${input_vcfs_file} \
-      | sed 's/^gs:\/\//\.\//g' \
-      > ${input_vcfs_file}.local_map.txt
-   sleep 1
-
-    svtools lsort \
-      -b 200 \
-      -f ${input_vcfs_file}.local_map.txt \
-      | bgzip -c \
-      > ${output_vcf_basename}.vcf.gz
-  }
-
-  runtime {
-    docker: "halllab/svtools@sha256:db0d9eb9d72fff05b63ae3bc61bc300e104e8ad366bbe3020ea8b45f3eed4842"
-    cpu: "1"
-    memory: "3.75 GB"
-    disks: "local-disk " + "100" + " HDD"
-    bootDiskSizeGb: 30
-    preemptible: preemptible_tries
-  }
-
-  output {
-    File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
-  }
-}
-
 task L_Sort_VCF_Variants {
   input {
     Array[File] input_vcfs
@@ -1002,42 +964,6 @@ task Paste_VCF {
     docker: "halllab/svtools@sha256:db0d9eb9d72fff05b63ae3bc61bc300e104e8ad366bbe3020ea8b45f3eed4842"
     cpu: "1"
     memory: "12 GB"
-    disks: "local-disk " + disk_size + " HDD"
-    preemptible: 0
-  }
-
-  output {
-    File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
-  }
-}
-
-task Paste_VCF_local {
-  input {
-    Array[File] input_vcfs
-    File input_vcfs_file = write_lines(input_vcfs)
-    String output_vcf_basename
-    Int disk_size
-    Int preemptible_tries
-  }
-
-  command {
-    set -eo pipefail
-    # strip the "gs://" prefix from the file paths
-    cat ${input_vcfs_file} \
-      | sed 's/^gs:\/\//\.\//g' \
-      > input_vcfs_file.local_map.txt
-
-    svtools vcfpaste \
-      -f input_vcfs_file.local_map.txt \
-      -q \
-      | bgzip -c \
-      > ${output_vcf_basename}.vcf.gz
-  }
-
-  runtime {
-    docker: "halllab/svtools@sha256:db0d9eb9d72fff05b63ae3bc61bc300e104e8ad366bbe3020ea8b45f3eed4842"
-    cpu: "4"
-    memory: "50 GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: 0
   }
