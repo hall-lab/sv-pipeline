@@ -1,10 +1,22 @@
 {
-  "Post_Merge_SV.cram_list": "gs://1000g_sv_2019/inputs/cram_list.txt",
-  "Post_Merge_SV.index_list": "gs://1000g_sv_2019/inputs/index_list.txt",
-  "Post_Merge_SV.manta_vcf_list": "gs://1000g_sv_2019/inputs/manta_ordered.txt",
-  "Post_Merge_SV.cn_hist_roots_list": "gs://1000g_sv_2019/inputs/cn_hist_roots_list.txt",
-  "Post_Merge_SV.merged_vcf": "gs://1000g_sv_2019/inputs/manta_smoove.sorted.merged.vcf.gz",
-  "Post_Merge_SV.cohort_name": "1000G",
+  "Post_Merge_SV.aligned_crams": [
+    "gs://fc-56ac46ea-efc4-4683-b6d5-6d95bed41c5e/CCDG_13607/Project_CCDG_13607_B01_GRM_WGS.cram.2019-02-06/Sample_NA12878/analysis/NA12878.final.cram",
+    "gs://fc-56ac46ea-efc4-4683-b6d5-6d95bed41c5e/CCDG_13607/Project_CCDG_13607_B01_GRM_WGS.cram.2019-02-06/Sample_NA19238/analysis/NA19238.final.cram"
+  ],
+  "Post_Merge_SV.aligned_cram_indices": [
+    "gs://fc-56ac46ea-efc4-4683-b6d5-6d95bed41c5e/CCDG_13607/Project_CCDG_13607_B01_GRM_WGS.cram.2019-02-06/Sample_NA12878/analysis/NA12878.final.cram.crai",
+    "gs://fc-56ac46ea-efc4-4683-b6d5-6d95bed41c5e/CCDG_13607/Project_CCDG_13607_B01_GRM_WGS.cram.2019-02-06/Sample_NA19238/analysis/NA19238.final.cram.crai"
+  ],
+  "Post_Merge_SV.manta_vcfs": [
+    "gs://mgi-wdl-test/2019-09-06/Pre_Merge_SV/1e43c1ff-befd-4bf1-834e-6aab76b976d5/call-Pre_Merge_SV_Per_Sample/shard-0/Pre_Merge_SV_Per_Sample/30546f8c-c09f-4873-b77e-641f194cacb5/call-Manta/NA12878.final.vcf.gz",
+    "gs://mgi-wdl-test/2019-09-06/Pre_Merge_SV/1e43c1ff-befd-4bf1-834e-6aab76b976d5/call-Pre_Merge_SV_Per_Sample/shard-1/Pre_Merge_SV_Per_Sample/928868b2-a748-43f6-a938-517f784eff54/call-Manta/attempt-2/NA19238.final.vcf.gz"
+  ],
+  "Post_Merge_SV.cn_hist_roots": [
+    "gs://mgi-wdl-test/2019-09-06/Pre_Merge_SV/1e43c1ff-befd-4bf1-834e-6aab76b976d5/call-Pre_Merge_SV_Per_Sample/shard-0/Pre_Merge_SV_Per_Sample/30546f8c-c09f-4873-b77e-641f194cacb5/call-CNVnator_Histogram/cnvnator.out/NA12878.final.cram.hist.root",
+    "gs://mgi-wdl-test/2019-09-06/Pre_Merge_SV/1e43c1ff-befd-4bf1-834e-6aab76b976d5/call-Pre_Merge_SV_Per_Sample/shard-1/Pre_Merge_SV_Per_Sample/928868b2-a748-43f6-a938-517f784eff54/call-CNVnator_Histogram/cnvnator.out/NA19238.final.cram.hist.root"
+  ],
+  "Post_Merge_SV.merged_vcf": "gs://mgi-wdl-test/2019-09-06/Merge_SV/39dfbd20-14df-427e-afe2-78296cf09798/call-lmerge_manta_smoove/Cohort.manta_smoove.lmerge.vcf.gz",
+  "Post_Merge_SV.cohort_name": "Cohort",
   "Post_Merge_SV.aligned_cram_suffix": ".cram",
   "Post_Merge_SV.final_vcf_name": "merged_genotyped.vcf.gz",
 

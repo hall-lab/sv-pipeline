@@ -4,14 +4,14 @@ import "SV_Tasks.wdl" as SV
 workflow Post_Merge_SV {
   # data inputs
   input {
-  	File cram_list
-  	File index_list
-  	File cn_hist_roots_list
+  	Array[File] aligned_crams
+  	Array[File] aligned_cram_indices
+  	Array[File] cn_hist_roots
+  	Array[File] manta_vcfs
   	String aligned_cram_suffix
   	File merged_vcf
   	String cohort_name
   	String final_vcf_name
-        File manta_vcf_list
 
   	# reference inputs
   	File ref_fasta
@@ -23,10 +23,6 @@ workflow Post_Merge_SV {
   	Int disk_size
   	Int preemptible_tries
   }
-  Array[File] aligned_crams = read_lines(cram_list)
-  Array[File] aligned_cram_indices = read_lines(index_list)
-  Array[File] cn_hist_roots = read_lines(cn_hist_roots_list)
-  Array[File] manta_vcfs = read_lines(manta_vcf_list)
 
   call SV.Split_By_Type {
     input:
