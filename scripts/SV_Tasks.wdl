@@ -800,6 +800,7 @@ task L_Sort_VCF_Variants {
     svtools lsort \
       -b 200 \
       -f ${input_vcfs_file} \
+      -t /cromwell_root/bulk_download \
       | bgzip -c \
       > ${output_vcf_basename}.vcf.gz
   }
