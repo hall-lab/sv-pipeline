@@ -680,7 +680,7 @@ task Copy_Number {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:db0d9eb9d72fff05b63ae3bc61bc300e104e8ad366bbe3020ea8b45f3eed4842"
+    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "4 GB"
     disks: "local-disk " + 35 + " HDD"
@@ -706,7 +706,7 @@ task Zip {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:db0d9eb9d72fff05b63ae3bc61bc300e104e8ad366bbe3020ea8b45f3eed4842"
+    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "4 GB"
     disks: "local-disk " +  ceil(2.0*size(input_vcf, "GB")) + " HDD"
@@ -806,7 +806,7 @@ task L_Sort_VCF_Variants {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:db0d9eb9d72fff05b63ae3bc61bc300e104e8ad366bbe3020ea8b45f3eed4842"
+    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -838,7 +838,7 @@ task L_Merge_VCF_Variants {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:db0d9eb9d72fff05b63ae3bc61bc300e104e8ad366bbe3020ea8b45f3eed4842"
+    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -870,7 +870,7 @@ task L_Merge_VCF_Variants_weighted {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:db0d9eb9d72fff05b63ae3bc61bc300e104e8ad366bbe3020ea8b45f3eed4842"
+    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -962,7 +962,7 @@ task Paste_VCF {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:db0d9eb9d72fff05b63ae3bc61bc300e104e8ad366bbe3020ea8b45f3eed4842"
+    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "12 GB"
     disks: "local-disk " + disk_size + " HDD"
@@ -990,7 +990,7 @@ task Remove_INS {
   >>>
 
   runtime {
-    docker: "halllab/svtools@sha256:db0d9eb9d72fff05b63ae3bc61bc300e104e8ad366bbe3020ea8b45f3eed4842"
+    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3 GB"
     disks: "local-disk " +  2*ceil( size(input_vcf_gz, "GB")) + " HDD"
@@ -1021,7 +1021,7 @@ task Prune_VCF_Output_Bedpe {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:db0d9eb9d72fff05b63ae3bc61bc300e104e8ad366bbe3020ea8b45f3eed4842"
+    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "8 GB"
     disks: "local-disk " +  4*ceil( size(input_vcf_gz, "GB")) + " HDD"
@@ -1053,7 +1053,7 @@ task Prune_VCF {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:db0d9eb9d72fff05b63ae3bc61bc300e104e8ad366bbe3020ea8b45f3eed4842"
+    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3 GB"
     disks: "local-disk " +  3*ceil( size(input_vcf_gz, "GB")) + " HDD"
@@ -1090,7 +1090,7 @@ task Classify {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:db0d9eb9d72fff05b63ae3bc61bc300e104e8ad366bbe3020ea8b45f3eed4842"
+    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3 GB"
     disks: "local-disk " +  10*ceil( size(input_vcf_gz, "GB")) + " HDD"
@@ -1122,7 +1122,7 @@ task Concat_VCF {
     | bgzip -c > ${output_vcf_basename}.vcf.gz
   }
   runtime {
-    docker: "halllab/svtools@sha256:db0d9eb9d72fff05b63ae3bc61bc300e104e8ad366bbe3020ea8b45f3eed4842"
+    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3 GB"
     disks: "local-disk " + 3*ceil( size(input_del_vcf_gz, "GB") + size(input_bnd_vcf_gz, "GB") + size(input_dup_vcf_gz, "GB")) + "  HDD"
@@ -1152,7 +1152,7 @@ task Sort_Index_VCF {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:db0d9eb9d72fff05b63ae3bc61bc300e104e8ad366bbe3020ea8b45f3eed4842"
+    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3 GB"
     disks: "local-disk " + 20*ceil( size(input_vcf_gz, "GB")) + " HDD"
