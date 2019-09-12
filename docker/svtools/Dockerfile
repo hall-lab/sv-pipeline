@@ -22,12 +22,12 @@ RUN apt-get update -qq \
         curl \
         zlib1g-dev
 
-FROM builder-base as svtools-0.4.0-build
+FROM builder-base as svtools-0.5.1-build
 LABEL maintainer "Dave Larson <delarson@wustl.edu>"
 
 COPY --from=halllab/python2.7-build:v1 /opt/hall-lab/python-2.7.15 /opt/hall-lab/python-2.7.15
 ENV PATH=/opt/hall-lab/python-2.7.15/bin:${PATH}
-RUN SVTOOLS_VERSION=0.5.0 \
+RUN SVTOOLS_VERSION=0.5.1 \
     && pip install svtools==${SVTOOLS_VERSION}
 RUN find /opt/hall-lab/python-2.7.15/ -depth \( -name '*.pyo' -o -name '*.pyc' -o -name 'test' -o -name 'tests' \) -exec rm -rf '{}' + ;
 #RUN find /opt/hall-lab/python-2.7.15/lib/python2.7/site-packages/ -name '*.so' -print -exec sh -c 'file "{}" | grep -q "not stripped" && strip -s "{}"' \;
@@ -35,7 +35,7 @@ RUN find /opt/hall-lab/python-2.7.15/ -depth \( -name '*.pyo' -o -name '*.pyc' -
 FROM debian:stretch-slim
 LABEL maintainer "Dave Larson <delarson@wustl.edu>"
 
-COPY --from=svtools-0.4.0-build /opt/hall-lab/python-2.7.15 /opt/hall-lab/python-2.7.15
+COPY --from=svtools-0.5.1-build /opt/hall-lab/python-2.7.15 /opt/hall-lab/python-2.7.15
 COPY --from=halllab/samtools-1.9-build:v1 /build/deb-build/opt/hall-lab/samtools-1.9 /opt/hall-lab/samtools-1.9
 COPY --from=halllab/cnvnator-0.3.3-build:v1 /opt/hall-lab/cnvnator-0.3.3/deb-build/opt/hall-lab/cnvnator-0.3.3 /opt/hall-lab/cnvnator-0.3.3
 COPY --from=halllab/htslib-1.9-build:v1 /build/deb-build/opt/hall-lab/htslib-1.9 /opt/hall-lab/htslib-1.9
