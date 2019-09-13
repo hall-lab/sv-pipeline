@@ -55,7 +55,7 @@ workflow SV_Pipeline_Full {
       final_vcf_name = final_vcf_name,
       ref_fasta = ref_fasta,
       ref_fasta_index = ref_fasta_index,
-      ref_fasta_cache = ref_fasta_cache,
+      ref_fasta_cache = ref_cache,
       mei_annotation_bed = mei_annotation_bed,
       preemptible_tries = preemptible_tries
   }
