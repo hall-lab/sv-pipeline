@@ -29,7 +29,7 @@ For each sample:
   - SV discovery with [Manta](https://github.com/Illumina/manta), including insertions
   - Generate [CNVnator](https://github.com/abyzovlab/CNVnator) histogram files
 
-After this step, we recommend performing quality control checks on each sample before merging them into the cohort-level VCF (step 2).
+After this step, we recommend performing quality control checks on each sample before merging them into the cohort-level VCF (step 2).  To help with this, per-sample variant counts are generated for both LUMPY and Manta outputs.
 
 ## 2. [Merge_SV.wdl](scripts/Merge_SV.wdl)
 
