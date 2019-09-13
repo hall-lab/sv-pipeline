@@ -118,54 +118,6 @@ task Make_Pedigree_File {
   }
 }
 
-# extract split/discordant reads
-task Extract_Reads {
-  input {
-    File input_cram
-    String basename
-    File ref_cache
-    Int disk_size
-    Int preemptible_tries
-  }
-  command {
-    set -eo pipefail
-    ln -s ${input_cram} ${basename}.cram
-
-    # build the reference sequence cache
-    tar -zxf ${ref_cache}
-    export REF_PATH=./cache/%2s/%2s/%s
-    export REF_CACHE=./cache/%2s/%2s/%s
-
-    # index the CRAM
-    samtools index ${basename}.cram
-
-    extract-sv-reads \
-      -e \
-      -r \
-      -i ${basename}.cram \
-      -s ${basename}.splitters.bam \
-      -d ${basename}.discordants.bam
-    samtools index ${basename}.splitters.bam
-    samtools index ${basename}.discordants.bam
-  }
-
-  runtime {
-    docker: "halllab/extract-sv-reads@sha256:192090f72afaeaaafa104d50890b2fc23935c8dc98988a9b5c80ddf4ec50f70c"
-    cpu: "1"
-    memory: "1 GB"
-    disks: "local-disk " + disk_size + " HDD"
-    preemptible: preemptible_tries
-  }
-
-  output {
-    File output_cram_index = "${basename}.cram.crai"
-    File output_splitters_bam = "${basename}.splitters.bam"
-    File output_splitters_bam_index = "${basename}.splitters.bam.bai"
-    File output_discordants_bam = "${basename}.discordants.bam"
-    File output_discordants_bam_index = "${basename}.discordants.bam.bai"
-  }
-}
-
 # index a CRAM
 task Index_Cram {
   input {
@@ -381,58 +333,6 @@ task Flagstat {
 
   output {
     File flagstat = "${basename}.flagstat"
-  }
-}
-
-# LUMPY SV discovery
-task Lumpy {
-  input {
-    String basename
-    File input_cram
-    File input_cram_index
-    File input_splitters_bam
-    File input_splitters_bam_index
-    File input_discordants_bam
-    File input_discordants_bam_index
-
-    File ref_cache
-    File exclude_regions
-    Int disk_size
-    Int preemptible_tries
-  }
-
-  command {
-    set -eo pipefail
-    ln -s ${input_cram} ${basename}.cram
-    ln -s ${input_cram_index} ${basename}.cram.crai
-
-    # build the reference sequence cache
-    tar -zxf ${ref_cache}
-    export REF_PATH=./cache/%2s/%2s/%s
-    export REF_CACHE=./cache/%2s/%2s/%s
-
-    lumpyexpress \
-      -P \
-      -T ${basename}.temp \
-      -o ${basename}.vcf \
-      -B ${input_cram} \
-      -S ${input_splitters_bam} \
-      -D ${input_discordants_bam} \
-      -x ${exclude_regions} \
-      -k \
-      -v
-  }
-
-  runtime {
-    docker: "halllab/lumpy@sha256:59ce7551307a54087e57d5cec89b17511d910d1fe9fa3651c12357f0594dcb07"
-    cpu: "1"
-    memory: "8 GB"
-    disks: "local-disk " + disk_size + " HDD"
-    preemptible: preemptible_tries
-  }
-
-  output {
-    File output_vcf = "${basename}.vcf"
   }
 }
 
@@ -730,7 +630,6 @@ task CNVnator_Histogram {
     Int preemptible_tries
     Int threads = 4
   # Add 7G of pad of the chromosome directory and ~2-3 GB of output files
-    Int disk_size = ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB") * 5 + 7.0 )
   }
 
   command <<<
@@ -762,7 +661,7 @@ task CNVnator_Histogram {
     docker: "halllab/cnvnator@sha256:8bf4fa64a288c5647a9a6b1ea90d14e76f48a3e16c5bf98c63419bb7d81c8938"
     cpu: threads
     memory: "16 GB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB") * 5 + 7.0 ) + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -778,7 +677,6 @@ task L_Sort_VCF_Variants {
     Array[File] input_vcfs
     File input_vcfs_file = write_lines(input_vcfs)
     String output_vcf_basename
-    Int disk_size
     Int preemptible_tries
   }
 
@@ -809,7 +707,7 @@ task L_Sort_VCF_Variants {
     docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3.75 GB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk " + 1.5*size(input_vcfs, "GB") + " HDD"
     bootDiskSizeGb: 30
     preemptible: preemptible_tries
   }
@@ -823,7 +721,6 @@ task L_Merge_VCF_Variants {
   input {
     File input_vcf_gz
     String output_vcf_basename
-    Int disk_size
     Int preemptible_tries
   }
 
@@ -841,7 +738,7 @@ task L_Merge_VCF_Variants {
     docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3.75 GB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk " + 2*size(input_vcf_gz, "GB")+10 + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -854,7 +751,6 @@ task L_Merge_VCF_Variants_weighted {
   input {
     File input_vcf_gz
     String output_vcf_basename
-    Int disk_size
     Int preemptible_tries
   }
 
@@ -873,7 +769,7 @@ task L_Merge_VCF_Variants_weighted {
     docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3.75 GB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk " + 2*size(input_vcf_gz, "GB")+10 + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -886,7 +782,6 @@ task Filter_Del {
   input {
     File input_vcf_gz
     String output_vcf_basename
-    Int disk_size
     Int preemptible_tries
   }
 
@@ -900,7 +795,7 @@ task Filter_Del {
     docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
     cpu: "1"
     memory: "3.75 GB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk " + 2*size(input_vcf_gz, "GB")+10 + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -913,7 +808,6 @@ task Filter_Pass {
   input {
     File input_vcf_gz
     String output_vcf_basename
-    Int disk_size
     Int preemptible_tries
   }
 
@@ -927,7 +821,7 @@ task Filter_Pass {
     docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
     cpu: "1"
     memory: "3.75 GB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk " + 2*size(input_vcf_gz, "GB")+10 + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -941,7 +835,6 @@ task Paste_VCF {
     Array[File] input_vcfs
     File input_vcfs_file = write_lines(input_vcfs)
     String output_vcf_basename
-    Int disk_size
     Int preemptible_tries
   }
   parameter_meta {
@@ -965,7 +858,7 @@ task Paste_VCF {
     docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "12 GB"
-    disks: "local-disk " + disk_size + " HDD"
+    disks: "local-disk " + 1.5*size(input_vcfs, "GB") + " HDD"
     preemptible: 0
   }
 
