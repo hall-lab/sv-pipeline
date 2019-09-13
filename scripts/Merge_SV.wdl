@@ -62,7 +62,7 @@ workflow Merge_SV {
     preemptible_tries = preemptible_tries
   }
 
-  call SV.L_Merge_VCF_Variants as lmerge_manta_smoove {
+  call SV.L_Merge_VCF_Variants_weighted as lmerge_manta_smoove {
     input:
     input_vcf_gz = lsort_manta_smoove.output_vcf_gz,
     output_vcf_basename = cohort_name + ".manta_smoove.lmerge",
