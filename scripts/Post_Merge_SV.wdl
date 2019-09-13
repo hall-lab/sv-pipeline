@@ -20,7 +20,6 @@ workflow Post_Merge_SV {
   	File mei_annotation_bed
 
   	# system inputs
-  	Int disk_size
   	Int preemptible_tries
   }
 
@@ -124,7 +123,6 @@ workflow Post_Merge_SV {
     input:
     input_vcfs = Genotype_Merged_BND.output_vcf,
     output_vcf_basename = cohort_name + ".merged.gt.bnd",
-    disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
 
@@ -132,7 +130,6 @@ workflow Post_Merge_SV {
     input:
     input_vcfs = Copy_Number_DEL.output_vcf,
     output_vcf_basename = cohort_name + ".merged.gt.cn.del",
-    disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
 
@@ -140,7 +137,6 @@ workflow Post_Merge_SV {
     input:
     input_vcfs = Genotype_Merged_INS.output_vcf,
     output_vcf_basename = cohort_name + ".merged.gt.ins",
-    disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
 
@@ -148,7 +144,6 @@ workflow Post_Merge_SV {
     input:
     input_vcfs = Copy_Number_OTHER.output_vcf,
     output_vcf_basename = cohort_name + ".merged.gt.cn.other",
-    disk_size = disk_size,
     preemptible_tries = preemptible_tries
   }
 

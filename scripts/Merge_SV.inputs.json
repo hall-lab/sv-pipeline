@@ -9,6 +9,5 @@
   ],
   "Merge_SV.cohort_name": "Cohort",
 
-  "Merge_SV.disk_size": 60,
   "Merge_SV.preemptible_tries": 3
 }

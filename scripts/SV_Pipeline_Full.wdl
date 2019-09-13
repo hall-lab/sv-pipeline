@@ -17,7 +17,6 @@ workflow SV_Pipeline_Full {
     String center
     String final_vcf_name
     Int preemptible_tries
-    Int disk_size
   }
 
   call premerge.Pre_Merge_SV {
@@ -39,7 +38,6 @@ workflow SV_Pipeline_Full {
     input {
       manta_input_vcfs = premerge.Pre_Merge_SV.manta_vcfs,
       smoove_inputs_vcfs = premerge.Pre_Merge_SV.smoove_vcfs,
-      disk_size = disk_size,
       preemptible_tries = preemptible_tries
     }
   }

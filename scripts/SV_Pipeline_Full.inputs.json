@@ -15,5 +15,4 @@
   "SV_Pipeline_Full.call_regions_bed_index": "gs://human-b38/GRCh38DH/annotations/canonical_chromosome.bed.gz.tbi",
   "SV_Pipeline_Full.preemptible_tries": 3,
   "SV_Pipeline_Full.final_vcf_name": "merged_genotyped.vcf.gz",
-  "SV_Pipeline_Full.disk_size": 60
 }
