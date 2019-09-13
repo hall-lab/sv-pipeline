@@ -1,0 +1,19 @@
+{
+  "SV_Pipeline_Full.aligned_crams": [
+    "gs://fc-56ac46ea-efc4-4683-b6d5-6d95bed41c5e/CCDG_13607/Project_CCDG_13607_B01_GRM_WGS.cram.2019-02-06/Sample_NA12878/analysis/NA12878.final.cram",
+    "gs://fc-56ac46ea-efc4-4683-b6d5-6d95bed41c5e/CCDG_13607/Project_CCDG_13607_B01_GRM_WGS.cram.2019-02-06/Sample_NA19238/analysis/NA19238.final.cram"
+  ],
+  "SV_Pipeline_Full.aligned_cram_suffix": ".cram",
+  "SV_Pipeline_Full.cohort": "Cohort",
+  "SV_Pipeline_Full.center": "WashU",
+
+  "SV_Pipeline_Full.ref_fasta": "gs://human-b38/GRCh38DH/all_sequences.fa",
+  "SV_Pipeline_Full.ref_fasta_index": "gs://human-b38/GRCh38DH/all_sequences.fa.fai",
+  "SV_Pipeline_Full.ref_cache": "gs://human-b38/cache.tar.gz",
+  "SV_Pipeline_Full.exclude_regions": "gs://human-b38/GRCh38DH/annotations/exclude.cnvnator_100bp.GRCh38.20170403.bed",
+  "SV_Pipeline_Full.call_regions_bed": "gs://human-b38/GRCh38DH/annotations/canonical_chromosome.bed.gz",
+  "SV_Pipeline_Full.call_regions_bed_index": "gs://human-b38/GRCh38DH/annotations/canonical_chromosome.bed.gz.tbi",
+  "SV_Pipeline_Full.preemptible_tries": 3,
+  "SV_Pipeline_Full.final_vcf_name": "merged_genotyped.vcf.gz",
+  "SV_Pipeline_Full.disk_size": 60
+}
