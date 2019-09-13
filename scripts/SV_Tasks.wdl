@@ -205,35 +205,6 @@ task Filter_Index {
   
 }
 
-task Count_Lumpy_VCF {
-  input {
-    File input_vcf
-    String basename
-    String cohort
-
-    Int preemptible_tries
-  }
-
-  command <<<
-    set -eo pipefail
-
-    echo -e "Cohort\tSample\tGenotype\tType\tLength"
-    bcftools query -e 'INFO/SECONDARY=1' -f "[~{cohort}\t%SAMPLE\t%GT\t%INFO/SVTYPE\t%INFO/SVLEN\n]" | bgzip -c > ~{basename}.counts.txt.gz
-  >>>
-
-  runtime {
-    docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
-    cpu: "1"
-    memory: "1 GB"
-    disks: "local-disk " + ceil( size(input_vcf, "GB") * 2) + " HDD"
-    preemptible: preemptible_tries
-  }
-
-  output {
-    File output_vcf_count = "${basename}.counts.txt.gz"
-  }
-}
-
 task Count_Lumpy {
   input {
     String basename
@@ -302,37 +273,6 @@ task Count_Manta {
 
   output {
     File output_counts = "${basename}.manta.counts.1.txt"
-  }
-}
-
-# flagstat a CRAM
-task Flagstat {
-  input {
-    File input_cram
-    File input_cram_index
-    String basename
-    Int preemptible_tries
-  }
-
-  command {
-    set -eo pipefail
-    ln -s ${input_cram} ${basename}.cram
-    ln -s ${input_cram_index} ${basename}.cram.crai
-
-    # index the CRAM
-    samtools flagstat ${basename}.cram > ${basename}.flagstat
-  }
-
-  runtime {
-    docker: "halllab/samtools@sha256:5e6b0430a7ad25f68e5c46a9fa9c0ebba0f9af8ebf5aebe94242954d812a4e68"
-    cpu: "1"
-    memory: "1 GB"
-    disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + 1.0) + " HDD"
-    preemptible: preemptible_tries
-  }
-
-  output {
-    File flagstat = "${basename}.flagstat"
   }
 }
 
@@ -589,32 +529,6 @@ task Copy_Number {
 
   output {
     File output_vcf = "${basename}.cn.vcf.gz"
-  }
-}
-
-task Zip {
-  input {
-    File input_vcf
-    String basename
-    Int preemptible_tries
-  }
-
-  command {
-    set -eo pipefail
-    cat ${input_vcf} \
-    | bgzip -c > ${basename}.gz
-  }
-
-  runtime {
-    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
-    cpu: "1"
-    memory: "4 GB"
-    disks: "local-disk " +  ceil(2.0*size(input_vcf, "GB")) + " HDD"
-    preemptible: preemptible_tries
-  }
-
-  output {
-    File output_vcf = "${basename}.gz"
   }
 }
 
@@ -895,37 +809,6 @@ task Remove_INS {
   }
 }
 
-task Prune_VCF_Output_Bedpe {
-  input {
-    File input_vcf_gz
-    String output_vcf_basename
-    Int preemptible_tries
-  }
-
-  command {
-    set -eo pipefail
-    zcat ${input_vcf_gz} \
-      | svtools afreq \
-      | svtools vcftobedpe \
-      | svtools bedpesort \
-      | svtools prune -s -d 100 -e 'AF' \
-      | bgzip -c \ 
-      > ${output_vcf_basename}.bedpe.gz
-  }
-
-  runtime {
-    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
-    cpu: "1"
-    memory: "8 GB"
-    disks: "local-disk " +  4*ceil( size(input_vcf_gz, "GB")) + " HDD"
-    preemptible: preemptible_tries
-  }
-
-  output {
-    File output_bedpe_gz = "${output_vcf_basename}.bedpe.gz"
-  }
-}
-
 task Prune_VCF {
   input {
     File input_vcf_gz
@@ -995,38 +878,6 @@ task Classify {
   }
 }
 
-task Concat_VCF {
-  input {
-    File input_del_vcf_gz
-    File input_dup_vcf_gz
-    File input_bnd_vcf_gz
-    String output_vcf_basename
-    Int preemptible_tries
-  }
-
-  command {
-    set -eo pipefail
-    zcat ${input_dup_vcf_gz} \
-    | grep "^##"  > header.txt
-
-    zcat ${input_del_vcf_gz} ${input_dup_vcf_gz} ${input_bnd_vcf_gz} \
-    | grep -v "^##" \
-    | cat header.txt - \
-    | bgzip -c > ${output_vcf_basename}.vcf.gz
-  }
-  runtime {
-    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
-    cpu: "1"
-    memory: "3 GB"
-    disks: "local-disk " + 3*ceil( size(input_del_vcf_gz, "GB") + size(input_bnd_vcf_gz, "GB") + size(input_dup_vcf_gz, "GB")) + "  HDD"
-    preemptible: preemptible_tries
-  }
-
-  output {
-    File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
-  }
-}
-  
 task Sort_Index_VCF {
   input {
     File input_vcf_gz
