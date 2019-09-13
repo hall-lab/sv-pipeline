@@ -621,7 +621,7 @@ task L_Sort_VCF_Variants {
     docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3.75 GB"
-    disks: "local-disk " + 1.5*size(input_vcfs, "GB") + " HDD"
+    disks: "local-disk " + 2*ceil(size(input_vcfs, "GB")) +10 + " HDD"
     bootDiskSizeGb: 30
     preemptible: preemptible_tries
   }
@@ -652,7 +652,7 @@ task L_Merge_VCF_Variants {
     docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3.75 GB"
-    disks: "local-disk " + 2*size(input_vcf_gz, "GB")+10 + " HDD"
+    disks: "local-disk " + 2*ceil(size(input_vcf_gz, "GB"))+10 + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -683,7 +683,7 @@ task L_Merge_VCF_Variants_weighted {
     docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3.75 GB"
-    disks: "local-disk " + 2*size(input_vcf_gz, "GB")+10 + " HDD"
+    disks: "local-disk " + 2*ceil(size(input_vcf_gz, "GB"))+10 + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -709,7 +709,7 @@ task Filter_Del {
     docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
     cpu: "1"
     memory: "3.75 GB"
-    disks: "local-disk " + 2*size(input_vcf_gz, "GB")+10 + " HDD"
+    disks: "local-disk " + 2*ceil(size(input_vcf_gz, "GB"))+10 + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -735,7 +735,7 @@ task Filter_Pass {
     docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
     cpu: "1"
     memory: "3.75 GB"
-    disks: "local-disk " + 2*size(input_vcf_gz, "GB")+10 + " HDD"
+    disks: "local-disk " + 2*ceil(size(input_vcf_gz, "GB"))+10 + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -772,7 +772,7 @@ task Paste_VCF {
     docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "12 GB"
-    disks: "local-disk " + 1.5*size(input_vcfs, "GB") + " HDD"
+    disks: "local-disk " + 2*ceil(size(input_vcfs, "GB")) + " HDD"
     preemptible: 0
   }
 
