@@ -1,0 +1,13 @@
+{
+  "Merge_SV.smoove_input_vcfs": [
+    "gs://mgi-wdl-test/2019-09-06/Pre_Merge_SV/1e43c1ff-befd-4bf1-834e-6aab76b976d5/call-Pre_Merge_SV_Per_Sample/shard-0/Pre_Merge_SV_Per_Sample/30546f8c-c09f-4873-b77e-641f194cacb5/call-Smoove/attempt-2/NA12878.final-smoove.genotyped.vcf.gz",
+    "gs://mgi-wdl-test/2019-09-06/Pre_Merge_SV/1e43c1ff-befd-4bf1-834e-6aab76b976d5/call-Pre_Merge_SV_Per_Sample/shard-1/Pre_Merge_SV_Per_Sample/928868b2-a748-43f6-a938-517f784eff54/call-Smoove/NA19238.final-smoove.genotyped.vcf.gz"
+  ],
+  "Merge_SV.manta_input_vcfs": [
+    "gs://mgi-wdl-test/2019-09-06/Pre_Merge_SV/e1715d86-4359-44ed-8115-8cd47a008311/call-Pre_Merge_SV_Per_Sample/shard-0/Pre_Merge_SV_Per_Sample/cadf1cd8-bcd8-43b7-8038-9eccf0e2f2ca/call-Manta/attempt-2/NA12878.final.doctored.vcf.gz",
+    "gs://mgi-wdl-test/2019-09-06/Pre_Merge_SV/1e43c1ff-befd-4bf1-834e-6aab76b976d5/call-Pre_Merge_SV_Per_Sample/shard-1/Pre_Merge_SV_Per_Sample/928868b2-a748-43f6-a938-517f784eff54/call-Manta/attempt-2/NA19238.final.doctored.vcf.gz"
+  ],
+  "Merge_SV.cohort_name": "Cohort",
+
+  "Merge_SV.preemptible_tries": 3
+}

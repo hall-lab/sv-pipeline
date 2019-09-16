@@ -9,7 +9,7 @@
 # Overview
 This repository contains pipeline scripts for structural variation detection in large cohorts. The pipeline is designed for Illumina paired-end whole genome sequencing data, preferably with at least 30x sequence coverage. Data inputs should be a set of sorted CRAM files, aligned with BWA-MEM.
 
-This pipeline detects structural variation based on breakpoint sequence evidence using the LUMPY algorithm. Structural variant (SV) breakpoints are then unified and merged using the [SVTools](https://github.com/hall-lab/svtools) workflow, followed by re-genotyping with [SVTyper](https://github.com/hall-lab/svtyper) and read-depth annotation with [CNVnator](https://github.com/abyzovlab/CNVnator). Finally, SV types are reclassified based on the concordance between read-depth and breakpoint genotype.
+This pipeline detects structural variation based on breakpoint sequence evidence using both the LUMPY and Manta algorithms. Structural variant (SV) breakpoints are then unified and merged using the [SVTools](https://github.com/hall-lab/svtools) workflow, followed by re-genotyping with [SVTyper](https://github.com/hall-lab/svtyper) and read-depth annotation with [CNVnator](https://github.com/abyzovlab/CNVnator). Finally, SV types are reclassified based on the concordance between read-depth and breakpoint genotype.
 
 Additional details on the SVTools pipeline are available in the [SVTools tutorial](https://github.com/hall-lab/svtools/blob/master/Tutorial.md).
 
@@ -24,12 +24,12 @@ While the SV pipeline can be run in its entirety via the [SV_Pipeline_Full.wdl](
 ## 1. [Pre_Merge_SV.wdl](scripts/Pre_Merge_SV.wdl)
 
 For each sample:
-  - Generate LUMPY inputs from an aligned and sorted CRAM file
-  - SV discovery with LUMPY
-  - Preliminary SV genotyping with SVTyper
-  - Generate CNVnator histogram files
+  - SV discovery with LUMPY using the [smoove](https://github.com/brentp/smoove) wrapper
+  - Preliminary SV genotyping with SVTyper (also done within the smoove wrapper)
+  - SV discovery with [Manta](https://github.com/Illumina/manta), including insertions
+  - Generate [CNVnator](https://github.com/abyzovlab/CNVnator) histogram files
 
-After this step, we recommend performing quality control checks on each sample before merging them into the cohort-level VCF (step 2).
+After this step, we recommend performing quality control checks on each sample before merging them into the cohort-level VCF (step 2).  To help with this, per-sample variant counts are generated for both LUMPY and Manta outputs.
 
 ## 2. [Merge_SV.wdl](scripts/Merge_SV.wdl)
 
@@ -37,10 +37,10 @@ This step merges the sample-level VCF files from step 1 using the LUMPY breakpoi
 
 ## 3. [Post_Merge_SV.wdl](scripts/Post_Merge_SV.wdl)
 
-This step re-genotypes each sample at the sites in the cohort-level VCF file from step 2, and then combines the results into the final VCF.
+This step re-genotypes each sample at the sites in the cohort-level VCF file from step 2, and then combines the results into a set of final VCFs, split by variant type for efficiency (deletions, insertions, breakends, and other:duplications+inversions).
 
 For each sample:
-  - Re-genotype each SV using SVTyper
+  - Re-genotype each SV using SVTyper (note that insertion calls from Manta are taken from the per-sample genotypes and not processed with SVTyper)
   - Annotate the read-depth at each SV using CNVnator
   - Generate a .ped file of sample names and sexes
 
