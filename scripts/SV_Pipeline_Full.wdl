@@ -1,7 +1,7 @@
 version 1.0
-import "Pre_Merge_SV.wdl" as premerge
-import "Merge_SV.wdl" as merge
-import "Post_Merge_SV.wdl" as postmerge
+import "https://raw.githubusercontent.com/hall-lab/sv-pipeline/terra-compatible/scripts/Pre_Merge_SV.wdl" as premerge
+import "https://raw.githubusercontent.com/hall-lab/sv-pipeline/terra-compatible/scripts/Merge_SV.wdl" as merge
+import "https://raw.githubusercontent.com/hall-lab/sv-pipeline/terra-compatible/scripts/Post_Merge_SV.wdl" as postmerge
 
 workflow SV_Pipeline_Full {
   input {

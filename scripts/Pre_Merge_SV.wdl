@@ -1,7 +1,7 @@
 version 1.0
-import "Pre_Merge_SV_per_sample.wdl" as per_sample
-import "Pre_Merge_QC_per_sample.wdl" as qc
-import "SV_Tasks.wdl" as SV
+import "https://raw.githubusercontent.com/hall-lab/sv-pipeline/terra-compatible/scripts/Pre_Merge_SV_per_sample.wdl" as per_sample
+import "https://raw.githubusercontent.com/hall-lab/sv-pipeline/terra-compatible/scripts/Pre_Merge_QC_per_sample.wdl" as qc
+import "https://raw.githubusercontent.com/hall-lab/sv-pipeline/terra-compatible/scripts/SV_Tasks.wdl" as SV
 
 workflow Pre_Merge_SV {
   input {
