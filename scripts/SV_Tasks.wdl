@@ -386,8 +386,10 @@ task Smoove {
   runtime {
     docker: "brentp/smoove@sha256:c839ed223462a1c1ae26e7acc27f28f0f67b4581d80a06823895f295ad2bdaf4"
     cpu: "1"
-    memory: "2.5 GiB"
-    disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(exclude_regions, "GB") + size(input_cram, "GB") * 0.30 + size(ref_cache, "GB") * 5) + " HDD"
+    #memory: "2.5 GiB"
+    memory: "8 GiB"
+    #disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(exclude_regions, "GB") + size(input_cram, "GB") * 0.30 + size(ref_cache, "GB") * 5) + " HDD"
+    disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(exclude_regions, "GB") + size(input_cram, "GB") * 2 + size(ref_cache, "GB") * 5) + " HDD"
     preemptible: preemptible_tries
   }
 
