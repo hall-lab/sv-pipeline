@@ -1,5 +1,5 @@
 version 1.0
-import "https://raw.githubusercontent.com/hall-lab/sv-pipeline/terra-compatible/scripts/SV_Tasks.wdl" as SV
+import "https://raw.githubusercontent.com/hall-lab/sv-pipeline/terra-compatible-hja/scripts/SV_Tasks.wdl" as SV
 
 workflow Merge_SV {
   input {
