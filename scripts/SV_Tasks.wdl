@@ -622,7 +622,7 @@ task L_Sort_VCF_Variants {
   runtime {
     docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
-    memory: "3.75 GB"
+    memory: "8 GB"
     disks: "local-disk " + 2*ceil(size(input_vcfs, "GB")) +10 + " HDD"
     bootDiskSizeGb: 30
     preemptible: preemptible_tries
@@ -653,7 +653,7 @@ task L_Merge_VCF_Variants {
   runtime {
     docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
-    memory: "3.75 GB"
+    memory: "16 GB"
     disks: "local-disk " + 2*ceil(size(input_vcf_gz, "GB"))+10 + " HDD"
     preemptible: preemptible_tries
   }
