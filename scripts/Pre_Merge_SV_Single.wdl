@@ -80,7 +80,7 @@ workflow Pre_Merge_SV_Per_Sample {
    cohort = cohort,
    center = center,
    basename = basename,
-   input_vcf = Manta.output__vcf,
+   input_vcf = Manta.output_vcf,
    preemptible_tries = preemptible_tries
  }
 
