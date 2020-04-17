@@ -66,12 +66,12 @@ workflow Pre_Merge_SV_Per_Sample {
     preemptible_tries = preemptible_tries
   }
 
-call SV.Count_Lumpy {
+  call SV.Count_Lumpy {
     input:
     cohort = cohort,
     center = center,
     basename = basename,
-    input_vcf = lumpy_vcf, 
+    input_vcf = Smoove.output_vcf, 
     preemptible_tries = preemptible_tries
   }
 
@@ -80,7 +80,7 @@ call SV.Count_Lumpy {
    cohort = cohort,
    center = center,
    basename = basename,
-   input_vcf = manta_vcf,
+   input_vcf = Manta.output__vcf,
    preemptible_tries = preemptible_tries
  }
 
