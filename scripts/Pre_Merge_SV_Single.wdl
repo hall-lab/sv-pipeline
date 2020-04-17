@@ -1,7 +1,7 @@
 version 1.0
 import "https://raw.githubusercontent.com/hall-lab/sv-pipeline/terra-compatible-hja/scripts/SV_Tasks.wdl" as SV
 
-workflow Pre_Merge_SV_Per_Sample {
+workflow Pre_Merge_SV_Single {
   input {
     # data inputs
     File aligned_cram
