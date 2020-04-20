@@ -251,29 +251,29 @@ workflow Post_Merge_SV {
  
   call SV.Count_Final as Count_Final_BND {
     input:
-    input_vcf_gz = Filter_Index_BND.output_vcf_gz
-    output_name = final_vcf_name + ".bnd.counts.txt"
+    input_vcf_gz = Filter_Index_BND.output_vcf_gz,
+    output_name = final_vcf_name + ".bnd.counts.txt",
     preemptible_tries = preemptible_tries
   }
 
   call SV.Count_Final as Count_Final_DEL {
     input:
-    input_vcf_gz = Filter_Index_DEL.output_vcf_gz
-    output_name = final_vcf_name + ".del.counts.txt"
+    input_vcf_gz = Filter_Index_DEL.output_vcf_gz,
+    output_name = final_vcf_name + ".del.counts.txt",
     preemptible_tries = preemptible_tries
   }
 
   call SV.Count_Final as Count_Final_INS {
     input:
-    input_vcf_gz = Filter_Index_INS.output_vcf_gz
-    output_name = final_vcf_name + ".ins.counts.txt"
+    input_vcf_gz = Filter_Index_INS.output_vcf_gz,
+    output_name = final_vcf_name + ".ins.counts.txt",
     preemptible_tries = preemptible_tries
   }
 
   call SV.Count_Final as Count_Final_OTHER {
     input:
-    input_vcf_gz = Filter_Index_OTHER.output_vcf_gz
-    output_name = final_vcf_name + ".other.counts.txt"
+    input_vcf_gz = Filter_Index_OTHER.output_vcf_gz,
+    output_name = final_vcf_name + ".other.counts.txt",
     preemptible_tries = preemptible_tries
   }
 
