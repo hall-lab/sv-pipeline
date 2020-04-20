@@ -248,6 +248,35 @@ workflow Post_Merge_SV {
     output_vcf_name = final_vcf_name + ".other.vcf.gz",
     preemptible_tries = preemptible_tries
   }
+ 
+  call SV.Count_Final as Count_Final_BND {
+    input:
+    input_vcf_gz = Filter_Index_BND.output_vcf_gz
+    output_name = final_vcf_name + ".bnd.counts.txt"
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Count_Final as Count_Final_DEL {
+    input:
+    input_vcf_gz = Filter_Index_DEL.output_vcf_gz
+    output_name = final_vcf_name + ".del.counts.txt"
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Count_Final as Count_Final_INS {
+    input:
+    input_vcf_gz = Filter_Index_INS.output_vcf_gz
+    output_name = final_vcf_name + ".ins.counts.txt"
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Count_Final as Count_Final_OTHER {
+    input:
+    input_vcf_gz = Filter_Index_OTHER.output_vcf_gz
+    output_name = final_vcf_name + ".other.counts.txt"
+    preemptible_tries = preemptible_tries
+  }
+
 
   output {
     File output_ped = Make_Pedigree_File.output_ped
@@ -259,5 +288,9 @@ workflow Post_Merge_SV {
     File output_vcf_other = Filter_Index_OTHER.output_vcf_gz
     File output_vcf_index_del = Filter_Index_DEL.output_vcf_gz_index
     File output_vcf_index_ins = Filter_Index_INS.output_vcf_gz_index
+    File output_counts_bnd = Count_Final_BND.output_txt
+    File output_counts_del = Count_Final_DEL.output_txt
+    File output_counts_ins = Count_Final_INS.output_txt
+    File output_counts_other = Count_Final_OTHER.output_txt
   }
 }

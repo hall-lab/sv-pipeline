@@ -276,6 +276,41 @@ task Count_Manta {
   }
 }
 
+task Count_Final {
+  input {
+    File input_vcf
+    Int preemptible_tries
+    File output_name
+  }
+
+  command <<<
+    set -eo pipefail
+   
+     bcftools query  -e  'INFO/SECONDARY=1' -f "[%CHROM\t%FILTER\t%INFO/SVTYPE\t%INFO/SVLEN\t%INFO/AC\t%INFO/AN\t%SAMPLE\t%GT\n]"  ~{input_vcf} \
+     | awk 'BEGIN{OFS="\t"}{if($1~/chr[1-9]+/ && $1!~/_/) {
+       svlen=$4;
+       if($4<0 && $4!=".") svlen=-1*$4;
+       len_bin=">=1kb"
+       if(svlen<1000) len_bin="<1kb";
+       print $1, $2, $3, len_bin, $5, $6, $7, $8;}}' \
+     | sort -k1,8 \
+     | uniq -c \
+     | awk 'BEGIN{OFS="\t"}{print $2, $3, $4, $5, $6, $7, $8, $1}'  > ~{output_name}
+  >>>
+
+  runtime {
+    docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + ceil( size(input_vcf, "GB") * 2) + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_counts = "${output_name}
+  }
+}
+
 task Manta {    
   input {
     File input_cram
