@@ -288,9 +288,9 @@ workflow Post_Merge_SV {
     File output_vcf_other = Filter_Index_OTHER.output_vcf_gz
     File output_vcf_index_del = Filter_Index_DEL.output_vcf_gz_index
     File output_vcf_index_ins = Filter_Index_INS.output_vcf_gz_index
-    File output_counts_bnd = Count_Final_BND.output_txt
-    File output_counts_del = Count_Final_DEL.output_txt
-    File output_counts_ins = Count_Final_INS.output_txt
-    File output_counts_other = Count_Final_OTHER.output_txt
+    File output_counts_bnd = Count_Final_BND.output_counts
+    File output_counts_del = Count_Final_DEL.output_counts
+    File output_counts_ins = Count_Final_INS.output_counts
+    File output_counts_other = Count_Final_OTHER.output_counts
   }
 }
