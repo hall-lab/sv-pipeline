@@ -307,7 +307,7 @@ task Count_Final {
   }
 
   output {
-    File output_counts = "${output_name}
+    File output_counts = "${output_name}"
   }
 }
 
