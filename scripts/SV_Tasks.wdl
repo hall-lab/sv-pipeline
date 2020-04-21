@@ -302,7 +302,7 @@ task Count_Final {
     docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
     cpu: "1"
     memory: "1 GB"
-    disks: "local-disk " + ceil( size(input_vcf, "GB") * 2) + " HDD"
+    disks: "local-disk " + ceil( size(input_vcf_gz, "GB") * 2) + " HDD"
     preemptible: preemptible_tries
   }
 
