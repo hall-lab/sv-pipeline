@@ -278,7 +278,7 @@ task Count_Manta {
 
 task Count_Final {
   input {
-    File input_vcf
+    File input_vcf_gz
     Int preemptible_tries
     File output_name
   }
@@ -286,7 +286,7 @@ task Count_Final {
   command <<<
     set -eo pipefail
    
-     bcftools query  -e  'INFO/SECONDARY=1' -f "[%CHROM\t%FILTER\t%INFO/SVTYPE\t%INFO/SVLEN\t%INFO/AC\t%INFO/AN\t%SAMPLE\t%GT\n]"  ~{input_vcf} \
+     bcftools query  -e  'INFO/SECONDARY=1' -f "[%CHROM\t%FILTER\t%INFO/SVTYPE\t%INFO/SVLEN\t%INFO/AC\t%INFO/AN\t%SAMPLE\t%GT\n]"  ~{input_vcf_gz} \
      | awk 'BEGIN{OFS="\t"}{if($1~/chr[1-9]+/ && $1!~/_/) {
        svlen=$4;
        if($4<0 && $4!=".") svlen=-1*$4;
