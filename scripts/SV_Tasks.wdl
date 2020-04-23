@@ -280,7 +280,7 @@ task Count_Final {
   input {
     File input_vcf_gz
     Int preemptible_tries
-    File output_name
+    String output_name
   }
 
   command <<<
