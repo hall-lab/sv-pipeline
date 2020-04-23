@@ -249,31 +249,59 @@ workflow Post_Merge_SV {
     preemptible_tries = preemptible_tries
   }
  
-  call SV.Count_Final as Count_Final_BND {
+  call SV.Count_Final_Variant as Count_Final_Variant_BND {
     input:
     input_vcf_gz = Filter_Index_BND.output_vcf_gz,
-    output_name = final_vcf_name + ".bnd.counts.txt",
+    output_name = final_vcf_name + ".variants.bnd.txt.gz",
     preemptible_tries = preemptible_tries
   }
 
-  call SV.Count_Final as Count_Final_DEL {
+  call SV.Count_Final_Sample as Count_Final_Sample_BND {
     input:
-    input_vcf_gz = Filter_Index_DEL.output_vcf_gz,
-    output_name = final_vcf_name + ".del.counts.txt",
+    input_vcf_gz = Filter_Index_BND.output_vcf_gz,
+    output_name = final_vcf_name + ".samples.bnd.txt.gz",
     preemptible_tries = preemptible_tries
   }
 
-  call SV.Count_Final as Count_Final_INS {
-    input:
-    input_vcf_gz = Filter_Index_INS.output_vcf_gz,
-    output_name = final_vcf_name + ".ins.counts.txt",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Count_Final as Count_Final_OTHER {
+  call SV.Count_Final_Variant as Count_Final_Variant_OTHER {
     input:
     input_vcf_gz = Filter_Index_OTHER.output_vcf_gz,
-    output_name = final_vcf_name + ".other.counts.txt",
+    output_name = final_vcf_name + ".variants.other.txt.gz",
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Count_Final_Sample as Count_Final_Sample_OTHER {
+    input:
+    input_vcf_gz = Filter_Index_OTHER.output_vcf_gz,
+    output_name = final_vcf_name + ".samples.other.txt.gz",
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Count_Final_Variant as Count_Final_Variant_DEL {
+    input:
+    input_vcf_gz = Filter_Index_DEL.output_vcf_gz,
+    output_name = final_vcf_name + ".variants.del.txt.gz",
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Count_Final_Sample as Count_Final_Sample_DEL {
+    input:
+    input_vcf_gz = Filter_Index_DEL.output_vcf_gz,
+    output_name = final_vcf_name + ".samples.del.txt.gz",
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Count_Final_Variant as Count_Final_Variant_INS {
+    input:
+    input_vcf_gz = Filter_Index_INS.output_vcf_gz,
+    output_name = final_vcf_name + ".variants.ins.txt.gz",
+    preemptible_tries = preemptible_tries
+  }
+
+  call SV.Count_Final_Sample as Count_Final_Sample_INS {
+    input:
+    input_vcf_gz = Filter_Index_INS.output_vcf_gz,
+    output_name = final_vcf_name + ".samples.ins.txt.gz",
     preemptible_tries = preemptible_tries
   }
 
@@ -288,9 +316,14 @@ workflow Post_Merge_SV {
     File output_vcf_other = Filter_Index_OTHER.output_vcf_gz
     File output_vcf_index_del = Filter_Index_DEL.output_vcf_gz_index
     File output_vcf_index_ins = Filter_Index_INS.output_vcf_gz_index
-    File output_counts_bnd = Count_Final_BND.output_counts
-    File output_counts_del = Count_Final_DEL.output_counts
-    File output_counts_ins = Count_Final_INS.output_counts
-    File output_counts_other = Count_Final_OTHER.output_counts
+    File output_counts_variant_ins = Count_Final_Variant_INS.output_counts
+    File output_counts_sample_ins = Count_Final_Sample_INS.output_counts
+    File output_counts_variant_bnd = Count_Final_Variant_BND.output_counts
+    File output_counts_sample_bnd = Count_Final_Sample_BND.output_counts
+    File output_counts_variant_other = Count_Final_Variant_OTHER.output_counts
+    File output_counts_sample_other = Count_Final_Sample_OTHER.output_counts
+    File output_counts_variant_del = Count_Final_Variant_DEL.output_counts
+    File output_counts_sample_del = Count_Final_Sample_DEL.output_counts
+
   }
 }
