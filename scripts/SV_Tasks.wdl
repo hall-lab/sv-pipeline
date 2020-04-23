@@ -312,7 +312,7 @@ task Count_Final_Variant {
 
   command <<<
        
-     bcftools query  -e  'INFO/SECONDARY=1' -f "%CHROM\t%ID\t%ALT\t%FILTER\t%INFO/SVTYPE\t%INFO/SVLEN\t%INFO/AC\t%INFO/AN\n"  ~{input_vcf_gz} \
+     bcftools query  -e  'INFO/SECONDARY=1' -f "%CHROM\t%ID\t%ALT\t%FILTER\t%INFO/SVTYPE\t%INFO/SVLEN\t%INFO/AF\n"  ~{input_vcf_gz} \
      | bgzip -c   > ~{output_name}
 
 
