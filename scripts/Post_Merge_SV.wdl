@@ -307,7 +307,7 @@ workflow Post_Merge_SV {
 
   call SV.Summarize_Variant_Counts as Summarize_Variant_Counts_BND {
     input:
-      input_counts_txt_gz = Count_Final_Variant_BND.variant_counts,
+      input_counts_txt_gz = Count_Final_Variant_BND.output_counts,
       output_name = final_vcf_name + ".variants.summary.bnd.txt.gz",
       preemptible_tries = preemptible_tries
   }
