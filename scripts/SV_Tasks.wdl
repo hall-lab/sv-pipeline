@@ -407,7 +407,7 @@ task Per_Sample_Count_Summary {
     docker: "halllab/vcf_bed_utils@sha256:09c18a5827d67891792ffc110627c7fa05b2262df4b91d6967ad6e544f41e8ec"
     cpu: "1"
     memory: "1 GB"
-    disks: "local-disk " + ceil( size(input_counts_txt_gz, "GB") * 2) + " HDD"
+    disks: "local-disk " + ceil( size(samples_txt_gz, "GB") * 4) + " HDD"
     preemptible: preemptible_tries
   }
 
