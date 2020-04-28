@@ -4,20 +4,9 @@ import "https://raw.githubusercontent.com/hall-lab/sv-pipeline/terra-compatible-
 workflow Post_Merge_SV {
   # data inputs
   input {
-  	Array[File] aligned_crams
-  	Array[File] aligned_cram_indices
-  	Array[File] cn_hist_roots
-  	Array[File] manta_vcfs
-  	String aligned_cram_suffix
-  	File merged_vcf
-  	String cohort_name
-  	String final_vcf_name
 
-  	# reference inputs
-  	File ref_fasta
-  	File ref_fasta_index
-  	File ref_cache
-  	File mei_annotation_bed
+  	String final_vcf_name
+        String cohort_name
 
   	# system inputs
   	Int preemptible_tries

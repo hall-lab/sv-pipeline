@@ -331,6 +331,92 @@ task Count_Final_Variant {
   }
 }
 
+task Summarize_Variant_Counts {
+  input {
+    File input_counts_txt_gz
+    Int preemptimble_tries
+    String output_name
+  }
+
+  command <<<
+
+    zcat ~{input_counts_txt_gz}   \
+    | awk 'BEGIN{OFS="\t"}{split($4, spl, /[\[\]:]/); print $1, $2, spl[2], spl[3], $5, $0; }'   \
+    | cut -f -4,8,10-   \
+    | awk 'BEGIN{OFS="\t"}{
+       svlen=$8;
+      freq=$9;
+      if ($9>0) {
+        if ($7=="BND") {
+          if($1==$3) {
+            svlen=$4-$2;
+            if (svlen<0) svlen=-1*svlen;
+          } else svlen="interchromosomal";
+        }
+        else {
+          if (svlen<0) svlen=-1*svlen;
+        }
+        freq_bin="common";
+        if (freq<0.01) freq_bin="rare";
+        else if (freq<0.05) freq_bin="low";
+        if (svlen=="interchromosomal") len_bin="inter";
+        else if (svlen<50) len_bin="<50bp";
+        else if (svlen<250) len_bin="<250bp";
+        else if (svlen<1000) len_bin="<1kb";
+        else if (svlen<1000000) len_bin="<1Mb";
+        else len_bin=">1Mb";
+        print $1, $3, $5, $6, $7, $9, svlen, len_bin, freq, freq_bin;
+       }
+     }' | gzip -c >  ~{output_name}
+
+
+  >>>
+
+  runtime {
+    docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + ceil( size(input_counts_txt_gz, "GB") * 2) + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_counts = "${output_name}"
+  }
+}
+
+task Per_Sample_Count_Summary {
+  input {
+    File variants_txt_gz
+    File samples_txt_gz
+    String output_name
+    Int preemptible_tries
+  }
+  
+  command <<<
+
+    zcat  ~{samples_txt_gz} \
+    | opt/hall-lab/io/zjoin -a stdin -b <(zcat ~{variants_txt_gz} | cut -f -5,8,10 ) -1 1 -2 3 \
+    | cut -f 2- \
+    | awk 'BEGIN{OFS="\t"}{if ($3~/chr[1-9]/ && $4~/chr[1-9]/) print $0;}' \
+    | cut -f -2,5- \
+    | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_name}
+  >>>
+
+  runtime {
+    docker: "halllab/vcf_bed_utils@sha256:09c18a5827d67891792ffc110627c7fa05b2262df4b91d6967ad6e544f41e8ec"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + ceil( size(input_counts_txt_gz, "GB") * 2) + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File output_counts = "${output_name}"
+  }
+}
+
+
 task Manta {    
   input {
     File input_cram

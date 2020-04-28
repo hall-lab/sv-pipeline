@@ -305,6 +305,65 @@ workflow Post_Merge_SV {
     preemptible_tries = preemptible_tries
   }
 
+  call SV.Summarize_Variant_Counts as Summarize_Variant_Counts_BND {
+    input:
+      input_counts_txt_gz = Count_Final_Variant_BND.variant_counts,
+      output_name = final_vcf_name + ".variants.summary.bnd.txt.gz",
+      preemptible_tries = preemptible_tries
+  }
+  
+  call SV.Per_Sample_Count_Summary as Per_Sample_Count_Summary_BND {
+    input:
+      variants_txt_gz = Summarize_Variant_Counts_BND.output_counts,
+      samples_txt_gz = Count_Final_Sample_BND.output_counts,
+      output_name = final_vcf_name + ".per_sample.summary.bnd.txt.gz",
+      preemptible_tries = preemptible_tries
+  }
+
+  call SV.Summarize_Variant_Counts as Summarize_Variant_Counts_DEL {
+    input:
+      input_counts_txt_gz = Count_Final_Variant_DEL.variant_counts,
+      output_name = final_vcf_name + ".variants.summary.del.txt.gz",
+      preemptible_tries = preemptible_tries
+  }
+  
+  call SV.Per_Sample_Count_Summary as Per_Sample_Count_Summary_DEL {
+    input:
+      variants_txt_gz = Summarize_Variant_Counts_DEL.output_counts,
+      samples_txt_gz = Count_Final_Sample_DEL.output_counts,
+      output_name = final_vcf_name + ".per_sample.summary.del.txt.gz",
+      preemptible_tries = preemptible_tries
+  }
+
+  call SV.Summarize_Variant_Counts as Summarize_Variant_Counts_OTHER {
+    input:
+      input_counts_txt_gz = Count_Final_Variant_OTHER.variant_counts,
+      output_name = final_vcf_name + ".variants.summary.other.txt.gz",
+      preemptible_tries = preemptible_tries
+  }
+  
+  call SV.Per_Sample_Count_Summary as Per_Sample_Count_Summary_OTHER {
+    input:
+      variants_txt_gz = Summarize_Variant_Counts_OTHER.output_counts,
+      samples_txt_gz = Count_Final_Sample_OTHER.output_counts,
+      output_name = final_vcf_name + ".per_sample.summary.other.txt.gz",
+      preemptible_tries = preemptible_tries
+  }
+
+  call SV.Summarize_Variant_Counts as Summarize_Variant_Counts_INS {
+    input:
+      input_counts_txt_gz = Count_Final_Variant_INS.variant_counts,
+      output_name = final_vcf_name + ".variants.summary.ins.txt.gz",
+      preemptible_tries = preemptible_tries
+  }
+  
+  call SV.Per_Sample_Count_Summary as Per_Sample_Count_Summary_INS {
+    input:
+      variants_txt_gz = Summarize_Variant_Counts_INS.output_counts,
+      samples_txt_gz = Count_Final_Sample_INS.output_counts,
+      output_name = final_vcf_name + ".per_sample.summary.ins.txt.gz",
+      preemptible_tries = preemptible_tries
+  }
 
   output {
     File output_ped = Make_Pedigree_File.output_ped
@@ -324,6 +383,14 @@ workflow Post_Merge_SV {
     File output_counts_sample_other = Count_Final_Sample_OTHER.output_counts
     File output_counts_variant_del = Count_Final_Variant_DEL.output_counts
     File output_counts_sample_del = Count_Final_Sample_DEL.output_counts
+    File variant_summary_ins = Summarize_Variant_Counts_INS.output_counts
+    File sample_summary_ins = Per_Sample_Count_Summary_INS.output_counts
+    File variant_summary_del = Summarize_Variant_Counts_DEL.output_counts
+    File sample_summary_del = Per_Sample_Count_Summary_DEL.output_counts
+    File variant_summary_other = Summarize_Variant_Counts_OTHER.output_counts
+    File sample_summary_other = Per_Sample_Count_Summary_OTHER.output_counts
+    File variant_summary_bnd = Summarize_Variant_Counts_BND.output_counts
+    File sample_summary_bnd = Per_Sample_Count_Summary_BND.output_counts
 
   }
 }
