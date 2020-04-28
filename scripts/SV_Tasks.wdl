@@ -401,6 +401,7 @@ task Per_Sample_Count_Summary {
     | awk 'BEGIN{OFS="\t"}{if ($3~/chr[1-9]/ && $4~/chr[1-9]/) print $0;}' \
     | cut -f -2,5- \
     | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_name}
+
   >>>
 
   runtime {
