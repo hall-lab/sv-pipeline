@@ -334,7 +334,7 @@ task Count_Final_Variant {
 task Summarize_Variant_Counts {
   input {
     File input_counts_txt_gz
-    Int preemptimble_tries
+    Int preemptible_tries
     String output_name
   }
 
