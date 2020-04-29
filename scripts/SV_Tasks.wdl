@@ -403,7 +403,8 @@ task Per_Sample_Count_Summary {
     | awk 'BEGIN{OFS="\t"}{print $0, $3}' \
     | cut -f -2,4- \
     | sort -k1,6 \
-    | /opt/hall-lab/bin/bedtools groupby -g 1,2,3,4,5,6 -c 7 -o count | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_name}
+    | /opt/hall-lab/bin/bedtools groupby -g 1,2,3,4,5,6 -c 7 -o count \
+    | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_name}
 
   >>>
 

@@ -331,7 +331,7 @@ workflow Post_Merge_SV {
     input:
       variants_txt_gz = Summarize_Variant_Counts_DEL.output_counts,
       samples_txt_gz = Count_Final_Sample_DEL.output_counts,
-      output_name = final_vcf_name + ".per_sample.summary.del.txt.gz",,
+      output_name = final_vcf_name + ".per_sample.summary.del.txt.gz",
       preemptible_tries = preemptible_tries
   }
 
