@@ -343,7 +343,7 @@ task Summarize_Variant_Counts {
     zcat ~{input_counts_txt_gz}   \
     | awk 'BEGIN{OFS="\t"}{split($4, spl, /[\[\]:]/); print $1, $2, spl[2], spl[3], $5, $0; }'   \
     | cut -f -4,8,10-   \
-    | awk 'BEGIN{OFS="\t"}{
+    | awk 'BEGIN{OFS="\t"; FS="\t"}{
        svlen=$8;
       freq=$9;
       if ($9>0) {
