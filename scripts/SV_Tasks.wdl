@@ -396,7 +396,7 @@ task Per_Sample_Count_Summary {
   command <<<
 
     zcat  ~{samples_txt_gz} \
-    | opt/hall-lab/io/zjoin -a stdin -b <(zcat ~{variants_txt_gz} | cut -f -5,8,10 ) -1 1 -2 3 \
+    | /opt/hall-lab/io/zjoin -a stdin -b <(zcat ~{variants_txt_gz} | cut -f -5,8,10 ) -1 1 -2 3 \
     | cut -f 2- \
     | awk 'BEGIN{OFS="\t"}{if ($3~/chr[1-9]/ && $4~/chr[1-9]/) print $0;}' \
     | cut -f -2,5- \
