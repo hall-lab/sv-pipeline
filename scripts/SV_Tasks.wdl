@@ -398,9 +398,9 @@ task Per_Sample_Count_Summary {
     zcat  ~{samples_txt_gz} \
     | /opt/hall-lab/io/zjoin -a stdin -b <(zcat ~{variants_txt_gz} | cut -f -5,8,10 ) -1 1 -2 3 \
     | cut -f 2- \
-    | awk 'BEGIN{OFS="\t"}{if ($3~/chr[1-9]/ && $4~/chr[1-9]/) print $0;}' \
+    | awk 'BEGIN{OFS="\t"; FS="\t"}{if ($3~/chr[1-9]/ && ($4=="" || $4~/chr[1-9]/)) print $0;}' \
     | cut -f -2,5- \
-    | awk 'BEGIN{OFS="\t"}{print $0, $3}' \
+    | awk 'BEGIN{OFS="\t"; FS="\t"}{print $0, $3}' \
     | cut -f -2,4- \
     | sort -k1,6 \
     | /opt/hall-lab/bin/bedtools groupby -g 1,2,3,4,5,6 -c 7 -o count \
