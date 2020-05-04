@@ -3,7 +3,7 @@ import "https://raw.githubusercontent.com/hall-lab/sv-pipeline/terra-compatible-
 import "https://raw.githubusercontent.com/hall-lab/sv-pipeline/terra-compatible-hja/scripts/Pre_Merge_QC_per_sample.wdl" as qc
 import "https://raw.githubusercontent.com/hall-lab/sv-pipeline/terra-compatible-hja/scripts/SV_Tasks.wdl" as SV
 
-workflow Pre_Merge_SV_Single1 {
+workflow Pre_Merge_SV_Single {
   input {
     File aligned_cram
     String aligned_cram_suffix
