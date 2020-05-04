@@ -172,8 +172,7 @@ task Filter_Index {
 		I$MSQ=QUAL/I$NSAMP; \
 		gsub("MSQ=0.00", "MSQ="I$MSQ, $8) \
 		} \
-		if ((I$SVTYPE=="DEL" || I$SVTYPE=="DUP" || I$SVTYPE=="MEI") && \
-		I$MSQ>=100 && sqrt((I$SVLEN)*(I$SVLEN))>=50){ \
+		if ((I$SVTYPE=="DEL" || I$SVTYPE=="DUP" || I$SVTYPE=="MEI") && sqrt((I$SVLEN)*(I$SVLEN))>=50){ \
 		$7="PASS"; print $0; \
 		}  else if ( I$SVTYPE=="INV" && $6>=100 && (I$SR/I$SU)>=0.1 && (I$PE/I$SU)>=0.1 && (y[2]/I$SU)>0.1 && (z[2]/I$SU)>0.1 && sqrt((I$SVLEN)*(I$SVLEN))>=50){ \
 		$7="PASS"; print $0; \
