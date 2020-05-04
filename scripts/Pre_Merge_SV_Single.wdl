@@ -1,10 +1,12 @@
 version 1.0
+import "https://raw.githubusercontent.com/hall-lab/sv-pipeline/terra-compatible-hja/scripts/Pre_Merge_SV_per_sample.wdl" as per_sample
+import "https://raw.githubusercontent.com/hall-lab/sv-pipeline/terra-compatible-hja/scripts/Pre_Merge_QC_per_sample.wdl" as qc
 import "https://raw.githubusercontent.com/hall-lab/sv-pipeline/terra-compatible-hja/scripts/SV_Tasks.wdl" as SV
 
-workflow Pre_Merge_SV_Single {
+workflow Pre_Merge_SV_Single1 {
   input {
-    # data inputs
     File aligned_cram
+    String aligned_cram_suffix
 
     # reference inputs
     File ref_fasta
@@ -13,90 +15,50 @@ workflow Pre_Merge_SV_Single {
     File? call_regions_bed
     File? call_regions_bed_index
     File exclude_regions
-  
-    String aligned_cram_suffix
+    String cohort
+    String center
 
     # system inputs
     Int preemptible_tries
-
-    String basename = sub(sub(aligned_cram, "^.*/", ""), aligned_cram_suffix + "$", "")
   }
 
-  call SV.Index_Cram {
+
+  call per_sample.Pre_Merge_SV_Per_Sample {
     input:
-    basename = basename,
-    input_cram = aligned_cram,
-    ref_cache = ref_cache,
-    preemptible_tries = preemptible_tries
+      aligned_cram = aligned_cram,
+      aligned_cram_suffix = aligned_cram_suffix,
+	    ref_fasta = ref_fasta,
+	    ref_fasta_index = ref_fasta_index,
+      call_regions_bed = call_regions_bed,
+      call_regions_bed_index = call_regions_bed_index,
+	    ref_cache = ref_cache,
+	    exclude_regions = exclude_regions,
+	    preemptible_tries = preemptible_tries
   }
-
-  call SV.Manta {
+  
+  call qc.Pre_Merge_QC_Per_Sample {
     input:
-    basename = basename,
-    input_cram = aligned_cram,
-    input_cram_index = Index_Cram.output_cram_index,
-    ref_fasta = ref_fasta,
-    ref_fasta_index = ref_fasta_index,
-    call_regions_bed = call_regions_bed,
-    call_regions_bed_index = call_regions_bed_index,
-    ref_cache = ref_cache,
-    preemptible_tries = preemptible_tries
+      manta_vcf = Pre_Merge_SV_Per_Sample.manta_vcf,
+      lumpy_vcf = Pre_Merge_SV_Per_Sample.smoove_vcf,
+      cnvnator_vcf = Pre_Merge_SV_Per_Sample.cnvnator_output_cn_txt,
+      cohort = cohort,
+      center = center,
+	preemptible_tries = preemptible_tries
   }
-
-  call SV.CNVnator_Histogram {
-    input:
-    basename = basename,
-    input_cram = aligned_cram,
-    input_cram_index = Index_Cram.output_cram_index,
-    ref_fasta = ref_fasta,
-    ref_fasta_index = ref_fasta_index,
-    ref_cache = ref_cache,
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Smoove {
-    input:
-    basename = basename,
-    input_cram = aligned_cram,
-    input_cram_index = Index_Cram.output_cram_index,
-    ref_fasta = ref_fasta,
-    ref_fasta_index = ref_fasta_index,
-    ref_cache = ref_cache,
-    exclude_regions = exclude_regions,
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Count_Lumpy {
-    input:
-    cohort = cohort,
-    center = center,
-    basename = basename,
-    input_vcf = Smoove.output_vcf, 
-    preemptible_tries = preemptible_tries
-  }
-
- call SV.Count_Manta {
-   input:
-   cohort = cohort,
-   center = center,
-   basename = basename,
-   input_vcf = Manta.output_vcf,
-   preemptible_tries = preemptible_tries
- }
 
 
   output {
-    File cram_index = Index_Cram.output_cram_index
-    File manta_vcf = Manta.output_vcf
-    File manta_tbi = Manta.output_tbi
-    File manta_original_vcf = Manta.original_vcf
-    File manta_original_tbi = Manta.original_tbi
-    File cnvnator_cn_hist_root = CNVnator_Histogram.output_cn_hist_root
-    File cnvnator_output_cn_txt = CNVnator_Histogram.output_cn_txt
-    File cnvnator_cn_bed = CNVnator_Histogram.output_cn_bed
-    File smoove_vcf = Smoove.output_vcf
-    File smoove_csi = Smoove.output_csi
-    File lumpy_counts = Count_Lumpy.output_counts
-    File manta_counts = Count_Manta.output_counts
+    File cram_index = Pre_Merge_SV_Per_Sample.cram_index
+    File manta_vcf = Pre_Merge_SV_Per_Sample.manta_vcf
+    File manta_tbi = Pre_Merge_SV_Per_Sample.manta_tbi
+    File manta_original_vcf = Pre_Merge_SV_Per_Sample.manta_original_vcf
+    File manta_original_tbi = Pre_Merge_SV_Per_Sample.manta_original_tbi
+    File cnvnator_cn_hist_root = Pre_Merge_SV_Per_Sample.cnvnator_cn_hist_root
+    File cnvnator_output_cn_txt_file = Pre_Merge_SV_Per_Sample.cnvnator_output_cn_txt
+    File cnvnator_cn_bed_file = Pre_Merge_SV_Per_Sample.cnvnator_cn_bed
+    File smoove_vcf = Pre_Merge_SV_Per_Sample.smoove_vcf
+    File smoove_csi = Pre_Merge_SV_Per_Sample.smoove_csi
+    File lumpy_count = Pre_Merge_QC_Per_Sample.lumpy_counts
+    File manta_count = Pre_Merge_QC_Per_Sample.manta_counts
   }
 }
