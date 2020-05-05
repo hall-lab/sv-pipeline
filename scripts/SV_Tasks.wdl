@@ -168,9 +168,10 @@ task Filter_Index {
 		split(I$STRANDS,x,","); \
 		split(x[1],y,":"); \
 		split(x[2],z,":"); \
+                MSQ_INS=0.00;
 		if (I$SVTYPE=="INS" && I$NSAMP>0) { \
-		I$MSQ=QUAL/I$NSAMP; \
-		gsub("MSQ=0.00", "MSQ="I$MSQ, $8) \
+		  MSQ_INS=$6/I$NSAMP; \
+		  gsub("MSQ=0", "MSQ="MSQ_INS, $8) \
 		} \
 		if ((I$SVTYPE=="DEL" || I$SVTYPE=="DUP" || I$SVTYPE=="MEI") && sqrt((I$SVLEN)*(I$SVLEN))>=50){ \
 		$7="PASS"; print $0; \
@@ -180,7 +181,7 @@ task Filter_Index {
 		$7="PASS"; print $0; \
 		} else if ( I$SVTYPE=="BND" && $9 ~ /CN/ && I$MSQ>=250){ \
 		$7="PASS"; print $0; \
-		} else if ( I$SVTYPE=="INS" && I$MSQ>=100 && I$SVLEN >=50) { \
+		} else if ( I$SVTYPE=="INS" && MSQ_INS>=100 && I$SVLEN >=50) { \
 		$7="PASS"; print $0; \
 		} else { \
 		$7="LOW"; print $0; \
