@@ -168,7 +168,7 @@ task Filter_Index {
 		split(I$STRANDS,x,","); \
 		split(x[1],y,":"); \
 		split(x[2],z,":"); \
-                MSQ_INS=0.00;
+                MSQ_INS=0.00; \
 		if (I$SVTYPE=="INS" && I$NSAMP>0) { \
 		  MSQ_INS=$6/I$NSAMP; \
 		  gsub("MSQ=0", "MSQ="MSQ_INS, $8) \
