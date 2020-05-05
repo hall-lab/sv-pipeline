@@ -164,7 +164,7 @@ task Filter_Index {
 	set -eo pipefail
 	FILTERLINE='##FILTER=<ID=LOW,Description="Test Low quality filter">'
 	zcat ~{input_vcf_gz} | \
-		/opt/hall-lab/vawk '{ \
+		/opt/hall-lab/vawk/vawk '{ \
 		split(I$STRANDS,x,","); \
 		split(x[1],y,":"); \
 		split(x[2],z,":"); \
