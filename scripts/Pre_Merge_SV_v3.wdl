@@ -1,6 +1,6 @@
 import "Pre_Merge_SV_per_sample.wdl" as per_sample
 
-workflow Pre_Merge_SV_v2 {
+workflow Pre_Merge_SV_v3 {
   Array[File] aligned_crams
   String aligned_cram_suffix
 
@@ -11,8 +11,6 @@ workflow Pre_Merge_SV_v2 {
   File? call_regions_bed
   File? call_regions_bed_index
   File exclude_regions
-  String cohort
-  String center
 
   # system inputs
   Int preemptible_tries
@@ -20,10 +18,8 @@ workflow Pre_Merge_SV_v2 {
   scatter (i in range(length(aligned_crams))) {
     File aligned_cram = aligned_crams[i]
 
-    call per_sample.Pre_Merge_SV_Per_Sample {
+    call per_sample.Pre_Merge_SV_Per_Sample_v2 {
       input:
-        cohort = cohort,
-        center = center,
         aligned_cram = aligned_cram,
         aligned_cram_suffix = aligned_cram_suffix,
 	    ref_fasta = ref_fasta,
@@ -45,5 +41,9 @@ workflow Pre_Merge_SV_v2 {
     Array[File] cnvnator_cn_bed_files = Pre_Merge_SV_Per_Sample.cnvnator_cn_bed
     Array[File] smoove_vcfs = Pre_Merge_SV_Per_Sample.smoove_vcf
     Array[File] smoove_csis = Pre_Merge_SV_Per_Sample.smoove_csi
+    Array[File] lumpy_counts = Pre_Merge_SV_Per_Sample.lumpy_counts
+    Array[File] manta_counts = Pre_Merge_SV_Per_Sample.manta_counts
+    Array[File] cnvnator_counts = Pre_Merge_SV_Per_Sample.cnvnator_counts
   }
 }
+

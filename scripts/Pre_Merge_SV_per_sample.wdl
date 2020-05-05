@@ -1,4 +1,4 @@
-import "SV_Tasks.wdl" as SV
+import "SV_Tasks_v2.wdl" as SV
 
 workflow Pre_Merge_SV_Per_Sample {
   # data inputs
@@ -11,6 +11,8 @@ workflow Pre_Merge_SV_Per_Sample {
   File? call_regions_bed
   File? call_regions_bed_index
   File exclude_regions
+  String cohort
+  String center
   
   String aligned_cram_suffix
 
@@ -26,7 +28,7 @@ workflow Pre_Merge_SV_Per_Sample {
     ref_cache = ref_cache,
     preemptible_tries = preemptible_tries
   }
-
+  
   call SV.Manta {
     input:
     basename = basename,
@@ -39,7 +41,7 @@ workflow Pre_Merge_SV_Per_Sample {
     ref_cache = ref_cache,
     preemptible_tries = preemptible_tries
   }
-
+  
   call SV.CNVnator_Histogram {
     input:
     basename = basename,
@@ -63,6 +65,33 @@ workflow Pre_Merge_SV_Per_Sample {
     preemptible_tries = preemptible_tries
   }
 
+  call SV.Count_Lumpy {
+    input:
+    basename = basename,
+    cohort = cohort,
+    center = center,
+    input_vcf = Smoove.output_vcf, 
+    preemptible_tries = preemptible_tries
+  }
+
+ call SV.Count_Manta {
+   input:
+   basename = basename,
+   cohort = cohort,
+   center = center,
+   input_vcf = Manta.output_vcf,
+   preemptible_tries = preemptible_tries
+ }
+ 
+ call SV.Count_Cnvnator {
+   input:
+   basename = basename,
+   cohort = cohort,
+   center = center,
+   input_vcf = CNVnator_Histogram.output_cn_txt,
+   preemptible_tries = preemptible_tries
+ }   
+
   output {
     File cram_index = Index_Cram.output_cram_index
     File manta_vcf = Manta.output_vcf
@@ -72,5 +101,9 @@ workflow Pre_Merge_SV_Per_Sample {
     File cnvnator_cn_bed = CNVnator_Histogram.output_cn_bed
     File smoove_vcf = Smoove.output_vcf
     File smoove_csi = Smoove.output_csi
+    File lumpy_counts = Count_Lumpy.output_counts
+    File manta_counts = Count_Manta.output_counts
+    File cnvnator_counts = Count_Cnvnator.output_counts
   }
 }
+
