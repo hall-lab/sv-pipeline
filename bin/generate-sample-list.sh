@@ -13,7 +13,7 @@ gzcat master-gvcf-list.tsv.gz \
         cohort=$(basename $(dirname $(dirname ${gvcf})))
         printf "%s\t%s\t%s\n" ${cohort} ${sample}
     done \
-    | perl -lane '$_ =~ s/^Sample_\w+/new-1000G/g; print $_'
+    | perl -lane '$_ =~ s/^Sample_\w+/new-1000G/g; print $_' \
     | tee data/20200225-gatk-callset-sample-data.tsv
 
 # rm master-gvcf-list.tsv.gz
