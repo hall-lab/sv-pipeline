@@ -126,3 +126,6 @@ def main(json_type, sample_map, bucket, cohort):
 
 if __name__ == "__main__":
     main()
+
+# python bin/make-json.py --json-type="input" --sample-map=./foo.list --cohort=testy
+# python bin/make-json.py --json-type="option" --cohort=testy
