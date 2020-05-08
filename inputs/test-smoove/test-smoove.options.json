@@ -9,7 +9,7 @@
     "zones": "us-central1-a us-central1-b us-central1-c us-central1-f"
   },
   "google_labels":{
-    "user": "idas",
+    "user": "abelhj",
     "project": "sv-pre-merge-2020-05-08",
     "cohort": "test-smoove",
     "pipeline": "sv-pipeline"
