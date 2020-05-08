@@ -110,7 +110,7 @@ def create_option_json(cohort, bucket):
 @click.option('--sample-map', default=None, type=click.Path(exists=True),
               help="The input sample map containing samples/crams to process")
 @click.option('--bucket', default="eocad-sv-052020", type=click.STRING,
-              help="The bucket name to place cromwell inputs/outputs to")
+              help="The bucket name to place cromwell inputs/outputs to [default='eocad-sv-052020']")
 @click.option('--cohort', required=True, type=click.STRING,
               help="The cohort to create the input/option json file for")
 def main(json_type, sample_map, bucket, cohort):
