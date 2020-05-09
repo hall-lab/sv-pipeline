@@ -60,6 +60,7 @@ Run the following commands on the box:
     # install cromshell
     cd /opt
     git clone https://github.com/broadinstitute/cromshell
+    cd cromshell
     ./cromshell -h
 
 ## Workflow Submissions
