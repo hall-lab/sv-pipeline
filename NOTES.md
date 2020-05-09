@@ -30,7 +30,7 @@ Once the compute instance is available, in this case `cromwell-sv-20200508`, go 
 
     gcloud compute ssh --zone us-central1-c cromwell-sv-20200508
 
-When in the box run the following commands:
+Run the following commands on the box:
 
     # the location where we'll install all the custom software needed for the sv-pipeline
     cd /opt
@@ -89,7 +89,7 @@ When in the box run the following commands:
     COHORT=afib
     bash bin/submit-workflow.sh ${COHORT} 2>&1 | tee logs/client/submit-job.log.${USER}.$(date "+%Y.%m.%d.%H.%M")
 
-Afterwards, note the output workflow.
+Afterwards, note the output workflow id.  You'll need the workflow id to monitor status and progress.
 
 ## Monitoring
 
