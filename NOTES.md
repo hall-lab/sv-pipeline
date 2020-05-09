@@ -45,7 +45,7 @@ When in the box run the following commands:
     sudo apt-get -y install hall-lab-python-3.7.0
 
     # install some other dependencies needed to run other useful programs
-    sudo apt-get -y install zip tmux git jq mailutils bsdmainutils curl libcurl4-openssl-dev
+    sudo apt-get -y install zip tmux git jq mailutils bsdmainutils curl libcurl4-openssl-dev gnupg
 
     # obtain the relevant sv-pipeline code
     git clone https://github.com/hall-lab/sv-pipeline
