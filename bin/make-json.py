@@ -8,14 +8,12 @@ import jinja2
 def input_json_template():
     text = '''\
     {
-      "##_COMMENT1": "DATA INPUTS",
       "Pre_Merge_SV.aligned_crams": [
           {% for cram in cramList -%}
           "{{ cram }}" {{ "," if not loop.last }}
           {% endfor -%}
       ],
       "Pre_Merge_SV.aligned_cram_suffix": ".cram",
-      "##_COMMENT2": "REFERENCE FILES",
       "Pre_Merge_SV.ref_fasta": "gs://human-b38/GRCh38DH/all_sequences.fa",
       "Pre_Merge_SV.ref_fasta_index": "gs://human-b38/GRCh38DH/all_sequences.fa.fai",
       "Pre_Merge_SV.call_regions_bed": "gs://human-b38/GRCh38DH/annotations/canonical_chromosome.bed.gz",
@@ -24,7 +22,6 @@ def input_json_template():
       "Pre_Merge_SV.exclude_regions": "gs://human-b38/GRCh38DH/annotations/exclude.cnvnator_100bp.GRCh38.20170403.bed",
       "Pre_Merge_SV.center":  "washu",
       "Pre_Merge_SV.cohort":  "{{ cohort }}",
-      "##_COMMENT3": "SYSTEM PARAMETERS",
       "Pre_Merge_SV.preemptible_tries": 5
     }
     '''
