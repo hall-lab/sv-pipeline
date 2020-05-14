@@ -894,16 +894,14 @@ task Filter_Pass {
 
 task Paste_VCF {
   input {
-    #Array[File] input_vcfs
-    #File input_vcfs_file = write_lines(input_vcfs)
     File input_vcfs_file
     String output_vcf_basename
     Int preemptible_tries
   }
 
-
   command {
     set -eo pipefail
+
     svtools vcfpaste \
       -f ${input_vcfs_file} \
       -q \
@@ -917,7 +915,8 @@ task Paste_VCF {
     cpu: "1"
     memory: "12 GB"
     #disks: "local-disk " + 2*ceil(size(input_vcfs, "GB")) + " HDD"
-    disks:  "local-disk 60  HDD"
+    disks: "local-disk " + 2*ceil(size(write_lines(input_vcfs_file), "GB")) + " HDD"
+    #disks:  "local-disk 60  HDD"
     preemptible: 0
   }
 
@@ -940,9 +939,7 @@ task Pre_Paste {
   }
 
   command {
-
     cat ${write_lines(input_vcfs)}
-
   }
 
   runtime {
