@@ -900,12 +900,7 @@ task Paste_VCF {
     String output_vcf_basename
     Int preemptible_tries
   }
-  #parameter_meta {
-  #  input_vcfs: {
-  #	description: "vcf files to paste together",
-  #      localization_optional: true
-  #  }
-  #}
+
 
   command {
     set -eo pipefail
@@ -937,8 +932,15 @@ task Pre_Paste {
     Int preemptible_tries
   }
 
+  parameter_meta {
+    input_vcfs: {
+  	description: "vcf files to paste together",
+        localization_optional: true
+    }
+  }
 
   command {
+
     cat write_lines(input_vcfs)
 
   }
