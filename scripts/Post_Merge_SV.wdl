@@ -160,7 +160,7 @@ workflow Post_Merge_SV {
  
   call SV.Pre_Paste as Pre_Paste_OTHER {
     input:
-    input_vcfs_file = Copy_Number_OTHER.output_vcf,
+    input_vcfs = Copy_Number_OTHER.output_vcf,
     preemptible_tries = preemptible_tries
   }
  
