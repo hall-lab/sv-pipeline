@@ -939,7 +939,7 @@ task Pre_Paste {
 
 
   command {
-    write_lines(input_vcfs)
+    cat write_lines(input_vcfs)
 
   }
 
@@ -952,7 +952,7 @@ task Pre_Paste {
   }
 
   output {
-    File input_vcfs_file=stdout()
+    File input_vcfs_file = stdout()
   }
 }
 

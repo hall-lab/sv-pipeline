@@ -171,7 +171,7 @@ workflow Post_Merge_SV {
     preemptible_tries = preemptible_tries
   }
  
-  call SV.Prune_VCF as Prune_VCF_BND{
+  call SV.Prune_VCF as Prune_VCF_BND {
     input:
     input_vcf_gz = Paste_VCF_BND.output_vcf_gz,
     output_vcf_basename = cohort_name + ".merged.gt.pruned.bnd",
