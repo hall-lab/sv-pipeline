@@ -915,7 +915,7 @@ task Paste_VCF {
     cpu: "1"
     memory: "12 GB"
     #disks: "local-disk " + 2*ceil(size(input_vcfs, "GB")) + " HDD"
-    disks: "local-disk " + 2*ceil(size(write_lines(input_vcfs_file), "GB")) + " HDD"
+    disks: "local-disk " + 2*ceil(size(read_lines(input_vcfs_file), "GB")) + " HDD"
     #disks:  "local-disk 60  HDD"
     preemptible: 0
   }
