@@ -941,7 +941,7 @@ task Pre_Paste {
 
   command {
 
-    cat write_lines(input_vcfs)
+    cat ${write_lines(input_vcfs)}
 
   }
 
