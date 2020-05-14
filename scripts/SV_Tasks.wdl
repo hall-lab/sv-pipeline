@@ -921,7 +921,8 @@ task Paste_VCF {
     docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "12 GB"
-    disks: "local-disk " + 2*ceil(size(input_vcfs, "GB")) + " HDD"
+    #disks: "local-disk " + 2*ceil(size(input_vcfs, "GB")) + " HDD"
+    disks:  "local-disk 60  HDD"
     preemptible: 0
   }
 
