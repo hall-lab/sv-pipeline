@@ -894,17 +894,18 @@ task Filter_Pass {
 
 task Paste_VCF {
   input {
-    Array[File] input_vcfs
-    File input_vcfs_file = write_lines(input_vcfs)
+    #Array[File] input_vcfs
+    #File input_vcfs_file = write_lines(input_vcfs)
+    File input_vcfs_file
     String output_vcf_basename
     Int preemptible_tries
   }
-  parameter_meta {
-    input_vcfs: {
-	description: "vcf files to paste together",
-        localization_optional: true
-    }
-  }
+  #parameter_meta {
+  #  input_vcfs: {
+  #	description: "vcf files to paste together",
+  #      localization_optional: true
+  #  }
+  #}
 
   command {
     set -eo pipefail
@@ -926,6 +927,31 @@ task Paste_VCF {
 
   output {
     File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
+  }
+}
+
+task Pre_Paste {
+  input {
+    Array[File] input_vcfs
+    Int preemptible_tries
+  }
+
+
+  command {
+    write_lines(input_vcfs)
+
+  }
+
+  runtime {
+    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
+    cpu: "1"
+    memory: "12 GB"
+    disks: "local-disk " + 2*ceil(size(input_vcfs, "GB")) + " HDD"
+    preemptible: 0
+  }
+
+  output {
+    File input_vcfs_file=stdout()
   }
 }
 

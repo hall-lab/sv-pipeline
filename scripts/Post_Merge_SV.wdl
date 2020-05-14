@@ -119,251 +119,264 @@ workflow Post_Merge_SV {
     output_ped_basename = cohort_name,
   }
 
-  call SV.Paste_VCF as Paste_VCF_BND {
+  call SV.Pre_Paste as Pre_Paste_INS {
     input:
-    input_vcfs = Genotype_Merged_BND.output_vcf,
-    output_vcf_basename = cohort_name + ".merged.gt.bnd",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Paste_VCF as Paste_VCF_DEL {
-    input:
-    input_vcfs = Copy_Number_DEL.output_vcf,
-    output_vcf_basename = cohort_name + ".merged.gt.cn.del",
+    input_vcfs = Genotype_Merged_INS.output_vcf,
     preemptible_tries = preemptible_tries
   }
 
   call SV.Paste_VCF as Paste_VCF_INS {
     input:
-    input_vcfs = Genotype_Merged_INS.output_vcf,
+    input_vcfs_file = Pre_Paste_INS.input_vcfs_file,
     output_vcf_basename = cohort_name + ".merged.gt.ins",
     preemptible_tries = preemptible_tries
   }
 
-  call SV.Paste_VCF as Paste_VCF_OTHER {
-    input:
-    input_vcfs = Copy_Number_OTHER.output_vcf,
-    output_vcf_basename = cohort_name + ".merged.gt.cn.other",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Prune_VCF as Prune_VCF_BND{
-    input:
-    input_vcf_gz = Paste_VCF_BND.output_vcf_gz,
-    output_vcf_basename = cohort_name + ".merged.gt.pruned.bnd",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Prune_VCF as Prune_VCF_DEL{
-    input:
-    input_vcf_gz = Paste_VCF_DEL.output_vcf_gz,
-    output_vcf_basename = cohort_name + ".merged.gt.cn.pruned.del",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Prune_VCF as Prune_VCF_INS{
-    input:
-    input_vcf_gz = Paste_VCF_INS.output_vcf_gz,
-    output_vcf_basename = cohort_name + ".merged.gt.pruned.ins",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Prune_VCF as Prune_VCF_OTHER{
-    input:
-    input_vcf_gz = Paste_VCF_OTHER.output_vcf_gz,
-    output_vcf_basename = cohort_name + ".merged.gt.cn.pruned.other",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Classify as Classify_DEL{
-    input:
-    input_vcf_gz = Prune_VCF_DEL.output_vcf_gz,
-    input_ped = Make_Pedigree_File.output_ped,
-    mei_annotation_bed = mei_annotation_bed,
-    output_vcf_basename = cohort_name + ".merged.gt.cn.pruned.class.del",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Classify as Classify_OTHER{
-    input:
-    input_vcf_gz = Prune_VCF_OTHER.output_vcf_gz,
-    input_ped = Make_Pedigree_File.output_ped,
-    mei_annotation_bed = mei_annotation_bed,
-    output_vcf_basename = cohort_name + ".merged.gt.cn.pruned.class.other",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Sort_Index_VCF as Sort_Index_VCF_BND {
-    input:
-    input_vcf_gz = Prune_VCF_BND.output_vcf_gz,
-    output_vcf_name = final_vcf_name + ".bnd.vcf.gz",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Sort_Index_VCF as Sort_Index_VCF_DEL {
-    input:
-    input_vcf_gz = Classify_DEL.output_vcf_gz,
-    output_vcf_name = final_vcf_name + ".del.vcf.gz",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Sort_Index_VCF as Sort_Index_VCF_INS {
-    input:
-    input_vcf_gz = Prune_VCF_INS.output_vcf_gz,
-    output_vcf_name = final_vcf_name + ".ins.vcf.gz",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Sort_Index_VCF as Sort_Index_VCF_OTHER {
-    input:
-    input_vcf_gz = Classify_OTHER.output_vcf_gz,
-    output_vcf_name = final_vcf_name + ".other.vcf.gz",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Filter_Index as Filter_Index_BND {
-    input:
-    input_vcf_gz = Sort_Index_VCF_BND.output_vcf_gz,
-    output_vcf_name = final_vcf_name + ".bnd.vcf.gz",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Filter_Index as Filter_Index_DEL {
-    input:
-    input_vcf_gz = Sort_Index_VCF_DEL.output_vcf_gz,
-    output_vcf_name = final_vcf_name + ".del.vcf.gz",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Filter_Index as Filter_Index_INS {
-    input:
-    input_vcf_gz = Sort_Index_VCF_INS.output_vcf_gz,
-    output_vcf_name = final_vcf_name + ".ins.vcf.gz",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Filter_Index as Filter_Index_OTHER {
-    input:
-    input_vcf_gz = Sort_Index_VCF_OTHER.output_vcf_gz,
-    output_vcf_name = final_vcf_name + ".other.vcf.gz",
-    preemptible_tries = preemptible_tries
-  }
- 
-  call SV.Count_Final_Variant as Count_Final_Variant_BND {
-    input:
-    input_vcf_gz = Filter_Index_BND.output_vcf_gz,
-    output_name = final_vcf_name + ".variants.bnd.txt.gz",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Count_Final_Sample as Count_Final_Sample_BND {
-    input:
-    input_vcf_gz = Filter_Index_BND.output_vcf_gz,
-    output_name = final_vcf_name + ".samples.bnd.txt.gz",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Count_Final_Variant as Count_Final_Variant_OTHER {
-    input:
-    input_vcf_gz = Filter_Index_OTHER.output_vcf_gz,
-    output_name = final_vcf_name + ".variants.other.txt.gz",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Count_Final_Sample as Count_Final_Sample_OTHER {
-    input:
-    input_vcf_gz = Filter_Index_OTHER.output_vcf_gz,
-    output_name = final_vcf_name + ".samples.other.txt.gz",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Count_Final_Variant as Count_Final_Variant_DEL {
-    input:
-    input_vcf_gz = Filter_Index_DEL.output_vcf_gz,
-    output_name = final_vcf_name + ".variants.del.txt.gz",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Count_Final_Sample as Count_Final_Sample_DEL {
-    input:
-    input_vcf_gz = Filter_Index_DEL.output_vcf_gz,
-    output_name = final_vcf_name + ".samples.del.txt.gz",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Count_Final_Variant as Count_Final_Variant_INS {
-    input:
-    input_vcf_gz = Filter_Index_INS.output_vcf_gz,
-    output_name = final_vcf_name + ".variants.ins.txt.gz",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Count_Final_Sample as Count_Final_Sample_INS {
-    input:
-    input_vcf_gz = Filter_Index_INS.output_vcf_gz,
-    output_name = final_vcf_name + ".samples.ins.txt.gz",
-    preemptible_tries = preemptible_tries
-  }
-
-  call SV.Summarize_Variant_Counts as Summarize_Variant_Counts_BND {
-    input:
-      input_counts_txt_gz = Count_Final_Variant_BND.output_counts,
-      output_name = final_vcf_name + ".variants.summary.bnd.txt.gz",
-      preemptible_tries = preemptible_tries
-  }
-  
-  call SV.Per_Sample_Count_Summary as Per_Sample_Count_Summary_BND {
-    input:
-      variants_txt_gz = Summarize_Variant_Counts_BND.output_counts,
-      samples_txt_gz = Count_Final_Sample_BND.output_counts,
-      output_name = final_vcf_name + ".per_sample.summary.bnd.txt.gz",
-      preemptible_tries = preemptible_tries
-  }
-
-  call SV.Summarize_Variant_Counts as Summarize_Variant_Counts_DEL {
-    input:
-      input_counts_txt_gz = Count_Final_Variant_DEL.output_counts,
-      output_name = final_vcf_name + ".variants.summary.del.txt.gz",
-      preemptible_tries = preemptible_tries
-  }
-  
-  call SV.Per_Sample_Count_Summary as Per_Sample_Count_Summary_DEL {
-    input:
-      variants_txt_gz = Summarize_Variant_Counts_DEL.output_counts,
-      samples_txt_gz = Count_Final_Sample_DEL.output_counts,
-      output_name = final_vcf_name + ".per_sample.summary.del.txt.gz",
-      preemptible_tries = preemptible_tries
-  }
-
-  call SV.Summarize_Variant_Counts as Summarize_Variant_Counts_OTHER {
-    input:
-      input_counts_txt_gz = Count_Final_Variant_OTHER.output_counts,
-      output_name = final_vcf_name + ".variants.summary.other.txt.gz",
-      preemptible_tries = preemptible_tries
-  }
-  
-  call SV.Per_Sample_Count_Summary as Per_Sample_Count_Summary_OTHER {
-    input:
-      variants_txt_gz = Summarize_Variant_Counts_OTHER.output_counts,
-      samples_txt_gz = Count_Final_Sample_OTHER.output_counts,
-      output_name = final_vcf_name + ".per_sample.summary.other.txt.gz",
-      preemptible_tries = preemptible_tries
-  }
-
-  call SV.Summarize_Variant_Counts as Summarize_Variant_Counts_INS {
-    input:
-      input_counts_txt_gz = Count_Final_Variant_INS.output_counts,
-      output_name = final_vcf_name + ".variants.summary.ins.txt.gz",
-      preemptible_tries = preemptible_tries
-  }
-  
-  call SV.Per_Sample_Count_Summary as Per_Sample_Count_Summary_INS {
-    input:
-      variants_txt_gz = Summarize_Variant_Counts_INS.output_counts,
-      samples_txt_gz = Count_Final_Sample_INS.output_counts,
-      output_name = final_vcf_name + ".per_sample.summary.ins.txt.gz",
-      preemptible_tries = preemptible_tries
-  }
+  #call SV.Paste_VCF as Paste_VCF_BND {
+  #  input:
+  #  input_vcfs = Genotype_Merged_BND.output_vcf,
+  #  output_vcf_basename = cohort_name + ".merged.gt.bnd",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Paste_VCF as Paste_VCF_DEL {
+  #  input:
+  #  input_vcfs = Copy_Number_DEL.output_vcf,
+  #  output_vcf_basename = cohort_name + ".merged.gt.cn.del",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Paste_VCF as Paste_VCF_INS {
+  #  input:
+  #  input_vcfs = Genotype_Merged_INS.output_vcf,
+  #  output_vcf_basename = cohort_name + ".merged.gt.ins",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Paste_VCF as Paste_VCF_OTHER {
+  #  input:
+  #  input_vcfs = Copy_Number_OTHER.output_vcf,
+  #  output_vcf_basename = cohort_name + ".merged.gt.cn.other",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Prune_VCF as Prune_VCF_BND{
+  #  input:
+  #  input_vcf_gz = Paste_VCF_BND.output_vcf_gz,
+  #  output_vcf_basename = cohort_name + ".merged.gt.pruned.bnd",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Prune_VCF as Prune_VCF_DEL{
+  #  input:
+  #  input_vcf_gz = Paste_VCF_DEL.output_vcf_gz,
+  #  output_vcf_basename = cohort_name + ".merged.gt.cn.pruned.del",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Prune_VCF as Prune_VCF_INS{
+  #  input:
+  #  input_vcf_gz = Paste_VCF_INS.output_vcf_gz,
+  #  output_vcf_basename = cohort_name + ".merged.gt.pruned.ins",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Prune_VCF as Prune_VCF_OTHER{
+  #  input:
+  #  input_vcf_gz = Paste_VCF_OTHER.output_vcf_gz,
+  #  output_vcf_basename = cohort_name + ".merged.gt.cn.pruned.other",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Classify as Classify_DEL{
+  #  input:
+  #  input_vcf_gz = Prune_VCF_DEL.output_vcf_gz,
+  #  input_ped = Make_Pedigree_File.output_ped,
+  #  mei_annotation_bed = mei_annotation_bed,
+  #  output_vcf_basename = cohort_name + ".merged.gt.cn.pruned.class.del",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Classify as Classify_OTHER{
+  #  input:
+  #  input_vcf_gz = Prune_VCF_OTHER.output_vcf_gz,
+  #  input_ped = Make_Pedigree_File.output_ped,
+  #  mei_annotation_bed = mei_annotation_bed,
+  #  output_vcf_basename = cohort_name + ".merged.gt.cn.pruned.class.other",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Sort_Index_VCF as Sort_Index_VCF_BND {
+  #  input:
+  #  input_vcf_gz = Prune_VCF_BND.output_vcf_gz,
+  #  output_vcf_name = final_vcf_name + ".bnd.vcf.gz",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Sort_Index_VCF as Sort_Index_VCF_DEL {
+  #  input:
+  #  input_vcf_gz = Classify_DEL.output_vcf_gz,
+  #  output_vcf_name = final_vcf_name + ".del.vcf.gz",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Sort_Index_VCF as Sort_Index_VCF_INS {
+  #  input:
+  #  input_vcf_gz = Prune_VCF_INS.output_vcf_gz,
+  #  output_vcf_name = final_vcf_name + ".ins.vcf.gz",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Sort_Index_VCF as Sort_Index_VCF_OTHER {
+  #  input:
+  #  input_vcf_gz = Classify_OTHER.output_vcf_gz,
+  #  output_vcf_name = final_vcf_name + ".other.vcf.gz",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Filter_Index as Filter_Index_BND {
+  #  input:
+  #  input_vcf_gz = Sort_Index_VCF_BND.output_vcf_gz,
+  #  output_vcf_name = final_vcf_name + ".bnd.vcf.gz",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Filter_Index as Filter_Index_DEL {
+  #  input:
+  #  input_vcf_gz = Sort_Index_VCF_DEL.output_vcf_gz,
+  #  output_vcf_name = final_vcf_name + ".del.vcf.gz",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Filter_Index as Filter_Index_INS {
+  #  input:
+  #  input_vcf_gz = Sort_Index_VCF_INS.output_vcf_gz,
+  #  output_vcf_name = final_vcf_name + ".ins.vcf.gz",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Filter_Index as Filter_Index_OTHER {
+  #  input:
+  #  input_vcf_gz = Sort_Index_VCF_OTHER.output_vcf_gz,
+  #  output_vcf_name = final_vcf_name + ".other.vcf.gz",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Count_Final_Variant as Count_Final_Variant_BND {
+  #  input:
+  #  input_vcf_gz = Filter_Index_BND.output_vcf_gz,
+  #  output_name = final_vcf_name + ".variants.bnd.txt.gz",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Count_Final_Sample as Count_Final_Sample_BND {
+  #  input:
+  #  input_vcf_gz = Filter_Index_BND.output_vcf_gz,
+  #  output_name = final_vcf_name + ".samples.bnd.txt.gz",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Count_Final_Variant as Count_Final_Variant_OTHER {
+  #  input:
+  #  input_vcf_gz = Filter_Index_OTHER.output_vcf_gz,
+  #  output_name = final_vcf_name + ".variants.other.txt.gz",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Count_Final_Sample as Count_Final_Sample_OTHER {
+  #  input:
+  #  input_vcf_gz = Filter_Index_OTHER.output_vcf_gz,
+  #  output_name = final_vcf_name + ".samples.other.txt.gz",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Count_Final_Variant as Count_Final_Variant_DEL {
+  #  input:
+  #  input_vcf_gz = Filter_Index_DEL.output_vcf_gz,
+  #  output_name = final_vcf_name + ".variants.del.txt.gz",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Count_Final_Sample as Count_Final_Sample_DEL {
+  #  input:
+  #  input_vcf_gz = Filter_Index_DEL.output_vcf_gz,
+  #  output_name = final_vcf_name + ".samples.del.txt.gz",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Count_Final_Variant as Count_Final_Variant_INS {
+  #  input:
+  #  input_vcf_gz = Filter_Index_INS.output_vcf_gz,
+  #  output_name = final_vcf_name + ".variants.ins.txt.gz",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Count_Final_Sample as Count_Final_Sample_INS {
+  #  input:
+  #  input_vcf_gz = Filter_Index_INS.output_vcf_gz,
+  #  output_name = final_vcf_name + ".samples.ins.txt.gz",
+  #  preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Summarize_Variant_Counts as Summarize_Variant_Counts_BND {
+  #  input:
+  #    input_counts_txt_gz = Count_Final_Variant_BND.output_counts,
+  #    output_name = final_vcf_name + ".variants.summary.bnd.txt.gz",
+  #    preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Per_Sample_Count_Summary as Per_Sample_Count_Summary_BND {
+  #  input:
+  #    variants_txt_gz = Summarize_Variant_Counts_BND.output_counts,
+  #    samples_txt_gz = Count_Final_Sample_BND.output_counts,
+  #    output_name = final_vcf_name + ".per_sample.summary.bnd.txt.gz",
+  #    preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Summarize_Variant_Counts as Summarize_Variant_Counts_DEL {
+  #  input:
+  #    input_counts_txt_gz = Count_Final_Variant_DEL.output_counts,
+  #    output_name = final_vcf_name + ".variants.summary.del.txt.gz",
+  #    preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Per_Sample_Count_Summary as Per_Sample_Count_Summary_DEL {
+  #  input:
+  #    variants_txt_gz = Summarize_Variant_Counts_DEL.output_counts,
+  #    samples_txt_gz = Count_Final_Sample_DEL.output_counts,
+  #    output_name = final_vcf_name + ".per_sample.summary.del.txt.gz",
+  #    preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Summarize_Variant_Counts as Summarize_Variant_Counts_OTHER {
+  #  input:
+  #    input_counts_txt_gz = Count_Final_Variant_OTHER.output_counts,
+  #    output_name = final_vcf_name + ".variants.summary.other.txt.gz",
+  #    preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Per_Sample_Count_Summary as Per_Sample_Count_Summary_OTHER {
+  #  input:
+  #    variants_txt_gz = Summarize_Variant_Counts_OTHER.output_counts,
+  #    samples_txt_gz = Count_Final_Sample_OTHER.output_counts,
+  #    output_name = final_vcf_name + ".per_sample.summary.other.txt.gz",
+  #    preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Summarize_Variant_Counts as Summarize_Variant_Counts_INS {
+  #  input:
+  #    input_counts_txt_gz = Count_Final_Variant_INS.output_counts,
+  #    output_name = final_vcf_name + ".variants.summary.ins.txt.gz",
+  #    preemptible_tries = preemptible_tries
+  #}
+  #
+  #call SV.Per_Sample_Count_Summary as Per_Sample_Count_Summary_INS {
+  #  input:
+  #    variants_txt_gz = Summarize_Variant_Counts_INS.output_counts,
+  #    samples_txt_gz = Count_Final_Sample_INS.output_counts,
+  #    output_name = final_vcf_name + ".per_sample.summary.ins.txt.gz",
+  #    preemptible_tries = preemptible_tries
+  #}
 
   output {
     File output_ped = Make_Pedigree_File.output_ped
