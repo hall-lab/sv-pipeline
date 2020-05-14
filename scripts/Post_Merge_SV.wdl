@@ -380,30 +380,30 @@ workflow Post_Merge_SV {
 
   output {
     File output_ped = Make_Pedigree_File.output_ped
-    File output_vcf_bnd = Filter_Index_BND.output_vcf_gz
-    File output_vcf_index_bnd = Filter_Index_BND.output_vcf_gz_index
-    File output_vcf_del = Filter_Index_DEL.output_vcf_gz
-    File output_vcf_ins = Filter_Index_INS.output_vcf_gz
-    File output_vcf_index_other = Filter_Index_OTHER.output_vcf_gz_index
-    File output_vcf_other = Filter_Index_OTHER.output_vcf_gz
-    File output_vcf_index_del = Filter_Index_DEL.output_vcf_gz_index
-    File output_vcf_index_ins = Filter_Index_INS.output_vcf_gz_index
-    File output_counts_variant_ins = Count_Final_Variant_INS.output_counts
-    File output_counts_sample_ins = Count_Final_Sample_INS.output_counts
-    File output_counts_variant_bnd = Count_Final_Variant_BND.output_counts
-    File output_counts_sample_bnd = Count_Final_Sample_BND.output_counts
-    File output_counts_variant_other = Count_Final_Variant_OTHER.output_counts
-    File output_counts_sample_other = Count_Final_Sample_OTHER.output_counts
-    File output_counts_variant_del = Count_Final_Variant_DEL.output_counts
-    File output_counts_sample_del = Count_Final_Sample_DEL.output_counts
-    File variant_summary_ins = Summarize_Variant_Counts_INS.output_counts
-    File sample_summary_ins = Per_Sample_Count_Summary_INS.output_counts
-    File variant_summary_del = Summarize_Variant_Counts_DEL.output_counts
-    File sample_summary_del = Per_Sample_Count_Summary_DEL.output_counts
-    File variant_summary_other = Summarize_Variant_Counts_OTHER.output_counts
-    File sample_summary_other = Per_Sample_Count_Summary_OTHER.output_counts
-    File variant_summary_bnd = Summarize_Variant_Counts_BND.output_counts
-    File sample_summary_bnd = Per_Sample_Count_Summary_BND.output_counts
+#    File output_vcf_bnd = Filter_Index_BND.output_vcf_gz
+#    File output_vcf_index_bnd = Filter_Index_BND.output_vcf_gz_index
+#    File output_vcf_del = Filter_Index_DEL.output_vcf_gz
+#    File output_vcf_ins = Filter_Index_INS.output_vcf_gz
+#    File output_vcf_index_other = Filter_Index_OTHER.output_vcf_gz_index
+#    File output_vcf_other = Filter_Index_OTHER.output_vcf_gz
+#    File output_vcf_index_del = Filter_Index_DEL.output_vcf_gz_index
+#    File output_vcf_index_ins = Filter_Index_INS.output_vcf_gz_index
+#    File output_counts_variant_ins = Count_Final_Variant_INS.output_counts
+#    File output_counts_sample_ins = Count_Final_Sample_INS.output_counts
+#    File output_counts_variant_bnd = Count_Final_Variant_BND.output_counts
+#    File output_counts_sample_bnd = Count_Final_Sample_BND.output_counts
+#    File output_counts_variant_other = Count_Final_Variant_OTHER.output_counts
+#    File output_counts_sample_other = Count_Final_Sample_OTHER.output_counts
+#    File output_counts_variant_del = Count_Final_Variant_DEL.output_counts
+#    File output_counts_sample_del = Count_Final_Sample_DEL.output_counts
+#    File variant_summary_ins = Summarize_Variant_Counts_INS.output_counts
+#    File sample_summary_ins = Per_Sample_Count_Summary_INS.output_counts
+#    File variant_summary_del = Summarize_Variant_Counts_DEL.output_counts
+#    File sample_summary_del = Per_Sample_Count_Summary_DEL.output_counts
+#    File variant_summary_other = Summarize_Variant_Counts_OTHER.output_counts
+#    File sample_summary_other = Per_Sample_Count_Summary_OTHER.output_counts
+#    File variant_summary_bnd = Summarize_Variant_Counts_BND.output_counts
+#    File sample_summary_bnd = Per_Sample_Count_Summary_BND.output_counts
 
   }
 }
