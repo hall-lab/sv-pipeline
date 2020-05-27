@@ -53,8 +53,8 @@ Run the following commands on the box:
     git checkout -b post-freeze-2-2020-05-08 origin/post-freeze-2-2020-05-08
 
     # setup a virtualenv for running certain python scripts
-    /opt/hall-lab/python-3.7.0/bin/virtualenv venv
-    source venv/bin/activate
+    /opt/hall-lab/python-3.7.0/bin/virtualenv venv37
+    source venv37/bin/activate
     pip install -r requirements.txt
 
     # install cromshell
@@ -73,8 +73,8 @@ Run the following commands on the box:
     chgrp google-sudoers .    # set directory group to GROUPNAME (google-sudoers)
     chmod g+s .               # files created in directory will be in group GROUPNAME (google-sudoers)
     cd /opt/sv-pipeline
-    source venv/bin/activate
-    python bin/make-json.py --json-type="input" --sample-map=data/foo.list --cohort=afib
+    source venv37/bin/activate
+    python bin/make-json.py --json-type="input" --sample-map=data/foo.tsv --cohort=afib
     python bin/make-json.py --json-type="option" --cohort=afib
     # you should see the json files inside the input/<cohort> directory of the repository
 
