@@ -49,15 +49,12 @@ def option_json_template():
     '''
     return textwrap.dedent(text)
 
-def derive_cram_list(sample_map, cohort):
+def derive_cram_list(sample_map):
     cram_list = []
-    columns = [0, 2]
     with open(sample_map, 'r') as f:
         for line in f:
-            items = line.rstrip().split("\t")
-            (cohort_label, cram_path) = [ items[c] for c in columns ]
-            if cohort_label == cohort:
-                cram_list.append(cram_path)
+            cram = line.rstrip()
+            cram_list.append(cram)
     return cram_list
 
 def derive_cohort_input_path(cohort):
@@ -82,7 +79,7 @@ def create_option_json_file_path(cohort):
     return option_json
 
 def create_input_json(cohort, sample_map):
-    cram_list = derive_cram_list(sample_map, cohort)
+    cram_list = derive_cram_list(sample_map)
     if not cram_list:
         sys.exit("[err] Found no crams for cohort: {}".format(cohort))
 
