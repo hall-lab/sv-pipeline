@@ -70,8 +70,8 @@ Run the following commands on the box:
     gcloud compute ssh --zone us-central1-c cromwell-sv-20200508
     cd /opt
     umask 002                 # allow group write; everyone must do this
-    chgrp google-sudoers .    # set directory group to GROUPNAME (google-sudoers)
-    chmod g+s .               # files created in directory will be in group GROUPNAME (google-sudoers)
+    sudo chgrp google-sudoers .    # set directory group to GROUPNAME (google-sudoers)
+    sudo chmod g+s .               # files created in directory will be in group GROUPNAME (google-sudoers)
     cd /opt/sv-pipeline
     source venv37/bin/activate
     python bin/make-json.py --json-type="input" --sample-map=data/foo.tsv --cohort=afib
@@ -83,8 +83,8 @@ Run the following commands on the box:
     gcloud compute ssh --zone us-central1-c cromwell-sv-20200508
     cd /opt
     umask 002                 # allow group write; everyone must do this
-    chgrp google-sudoers .    # set directory group to GROUPNAME (google-sudoers)
-    chmod g+s .               # files created in directory will be in group GROUPNAME (google-sudoers)
+    sudo chgrp google-sudoers .    # set directory group to GROUPNAME (google-sudoers)
+    sudo chmod g+s .               # files created in directory will be in group GROUPNAME (google-sudoers)
     cd /opt/sv-pipeline
     mkdir -p logs/client # if the logs/client direct doesn't exist in the repo workspace yet
     COHORT=afib
