@@ -102,6 +102,18 @@ To get the detailed status information try:
 
     glcoud compute ssh --zone us-central1-c cromwell-sv-20200508 --command="/opt/cromshell/cromshell execution-status-count -p -x <workflow-id>"
 
+## Failure Debugging
+
+    gcloud compute ssh --zone us-central1-c cromwell-sv-20200508
+    cd /opt
+    umask 002                      # allow group write; everyone must do this
+    sudo chgrp google-sudoers .    # set directory group to GROUPNAME (google-sudoers)
+    sudo chmod g+s .               # files created in directory will be in group GROUPNAME (google-sudoers)
+    cd /opt/sv-pipeline
+    source venv37/bin/activate
+    cromulent metadata <wf-id>     # Search for the "Failed" lines and look at the neighboring lines to ascertain what is going on
+
+
 [0]:  https://github.com/hall-lab/cromwell-deployment
 [1]:  https://github.com/hall-lab/sv-pipeline/tree/post-freeze-2-2020-05-08/config/cromwell-server
 [2]:  https://github.com/hall-lab/sv-pipeline/blob/post-freeze-2-2020-05-08/config/cromwell-server/encryption-note.md
