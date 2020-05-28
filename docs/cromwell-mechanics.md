@@ -69,7 +69,7 @@ Run the following commands on the box:
 
     gcloud compute ssh --zone us-central1-c cromwell-sv-20200508
     cd /opt
-    umask 002                 # allow group write; everyone must do this
+    umask 002                      # allow group write; everyone must do this
     sudo chgrp google-sudoers .    # set directory group to GROUPNAME (google-sudoers)
     sudo chmod g+s .               # files created in directory will be in group GROUPNAME (google-sudoers)
     cd /opt/sv-pipeline
@@ -82,7 +82,7 @@ Run the following commands on the box:
 
     gcloud compute ssh --zone us-central1-c cromwell-sv-20200508
     cd /opt
-    umask 002                 # allow group write; everyone must do this
+    umask 002                      # allow group write; everyone must do this
     sudo chgrp google-sudoers .    # set directory group to GROUPNAME (google-sudoers)
     sudo chmod g+s .               # files created in directory will be in group GROUPNAME (google-sudoers)
     cd /opt/sv-pipeline
