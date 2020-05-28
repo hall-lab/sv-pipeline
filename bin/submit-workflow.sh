@@ -104,4 +104,4 @@ main ${COHORT};
 
 ## mkdir -p logs/client # if the logs/client direct doesn't exist in the repo workspace yet
 ## COHORT=afib
-## bash bin/submit-workflow.sh ${COHORT} 2>&1 | tee logs/client/submit-job.log.$(date "+%Y.%m.%d.%H.%M")
+## bash bin/submit-workflow.sh ${COHORT} 2>&1 | tee logs/client/submit-job.log.${COHORT}.$(date "+%Y.%m.%d.%H.%M")
