@@ -38,4 +38,34 @@ Dyslipidemia -7
 SCCS -1
 Brazilian -2
 Afib -4
-Finrisk -4 
+Finrisk -4
+
+### 1000G cram generation list
+
+This was the command used to generate the 1000G parent cram tsv list:
+
+      BUCKET_PATH="gs://fc-56ac46ea-efc4-4683-b6d5-6d95bed41c5e/CCDG_13607/Project_CCDG_13607_B01_GRM_WGS.cram.2019-02-06"
+      for p in $(gsutil -u washu-genome-inh-dis-analysis ls ${BUCKET_PATH}); do 
+          sample=$(basename ${p} | awk -F_ '{print $2;}' );
+          echo "${p}analysis/${sample}.final.cram";
+      done >data/external/cram-list/1000G.parents.cramlist.tsv
+
+This was the command used to generate the 1000G children cram tsv list:
+
+      BUCKET_PATH="gs://fc-56ac46ea-efc4-4683-b6d5-6d95bed41c5e/CCDG_14151/Project_CCDG_14151_B01_GRM_WGS.cram.2020-02-12/"
+      for p in $(gsutil -u washu-genome-inh-dis-analysis ls ${BUCKET_PATH}); do
+          sample=$(basename ${p} | awk -F_ '{print $2;}' );
+          echo "${p}analysis/${sample}.final.cram";
+      done >data/external/cram-list/1000G.children.cramlist.tsv
+
+### Metsim downsample cram generation list
+
+This was the command used to generate the Metsim downsampled cram tsv list:
+
+     BUCKET_PATH="gs://wustl-ccdg-cram-data/METSIM_downsample_crams/"
+     for p in $(gsutil -u washu-genome-inh-dis-analysis ls ${BUCKET_PATH}); do
+         sample=$(basename ${p});
+         echo "${p}${sample}.cram";
+     done >data/external/cram-list/Metsim.downsample.cram.persamplesv.tsv
+
+The actual downsampling was handled by @tmooney.
