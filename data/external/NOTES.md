@@ -20,3 +20,22 @@ This is a set of crams identified by @kkanchi to run the pre-merge pipeline on. 
       2817 Metsim.cram.persamplesv.tsv
        517 SCCS.cramlist.persamplesv.tsv
      15606 total
+
+
+Removed 9 Costarican samples, since they failed GATK QC and also causing error completing the premerge-SV due to lots of 'Abnormal range' in the CNVnator_Histogram.log file and also low coverage
+H_WX-1001-1001
+H_WX-1087-1087
+H_WX-1115-1115
+H_WX-1119-1119
+H_WX-1152-1152
+H_WX-1176-1176
+H_WX-1220-1220
+H_WX-705-705
+H_WX-903-903
+
+Corogene- 5 samples
+Dyslipidemia -7
+SCCS -1
+Brazilian -2
+Afib -4
+Finrisk -4 
