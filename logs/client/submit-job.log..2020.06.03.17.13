@@ -1,0 +1,40 @@
+---> [ 2020-06-03 17:13:48 ] Creating tmp workspace: /opt/sv-pipeline/bin/../tmp
+'/opt/sv-pipeline/bin/../scripts/Pre_Merge_SV.wdl' -> '/opt/sv-pipeline/bin/../tmp/Pre_Merge_SV.wdl'
+'/opt/sv-pipeline/bin/../scripts/Pre_Merge_SV_per_sample.wdl' -> '/opt/sv-pipeline/bin/../tmp/Pre_Merge_SV_per_sample.wdl'
+'/opt/sv-pipeline/bin/../scripts/Pre_Merge_QC_per_sample.wdl' -> '/opt/sv-pipeline/bin/../tmp/Pre_Merge_QC_per_sample.wdl'
+'/opt/sv-pipeline/bin/../scripts/SV_Tasks.wdl' -> '/opt/sv-pipeline/bin/../tmp/SV_Tasks.wdl'
+---> [ 2020-06-03 17:13:48 ] Creating dependency zip: tasks.zip
+  adding: Pre_Merge_QC_per_sample.wdl (deflated 59%)
+  adding: Pre_Merge_SV_per_sample.wdl (deflated 77%)
+  adding: SV_Tasks.wdl (deflated 78%)
++ curl -v localhost:8000/api/workflows/v1 -F workflowSource=@/opt/sv-pipeline/bin/../scripts/Pre_Merge_SV.wdl -F workflowInputs=@/opt/sv-pipeline/bin/../inputs/corogene-cad/corogene-cad.input.json -F workflowOptions=@/opt/sv-pipeline/bin/../inputs/corogene-cad/corogene-cad.options.json -F workflowDependencies=@tasks.zip
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying ::1...
+* TCP_NODELAY set
+* Connected to localhost (::1) port 8000 (#0)
+> POST /api/workflows/v1 HTTP/1.1
+> Host: localhost:8000
+> User-Agent: curl/7.52.1
+> Accept: */*
+> Content-Length: 47034
+> Expect: 100-continue
+> Content-Type: multipart/form-data; boundary=------------------------b4457e7fcb181a14
+> 
+< HTTP/1.1 100 Continue
+< Server: akka-http/10.1.9
+< Date: Wed, 03 Jun 2020 17:13:49 GMT
+} [170 bytes data]
+< HTTP/1.1 201 Created
+< Server: akka-http/10.1.9
+< Date: Wed, 03 Jun 2020 17:13:49 GMT
+< Content-Type: application/json
+< Content-Length: 66
+< 
+{ [66 bytes data]
+* Curl_http_done: called premature == 0
+100 47100  100    66  100 47034   1727  1202k --:--:-- --:--:-- --:--:-- 1208k
+* Connection #0 to host localhost left intact
+{"id":"d5b97cfd-25db-4bd8-beaf-b007a2148005","status":"Submitted"}+ set +o xtrace
+---> [ 2020-06-03 17:13:49 ] Nuking out dependency zip: tasks.zip
+---> [ 2020-06-03 17:13:49 ] Nuking out tmp workspace: /opt/sv-pipeline/bin/../tmp
