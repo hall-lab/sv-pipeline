@@ -11,7 +11,7 @@
   "google_labels":{
     "user": "idas",
     "project": "sv-pre-merge-2020-05-08",
-    "cohort": "1000G-parents",
+    "cohort": "onekg-parents",
     "pipeline": "sv-pipeline"
   }
 }
