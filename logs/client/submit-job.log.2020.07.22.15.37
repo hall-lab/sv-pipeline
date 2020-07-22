@@ -1,0 +1,40 @@
+---> [ 2020-07-22 15:37:35 ] Creating tmp workspace: /opt/sv-pipeline/bin/../tmp
+'/opt/sv-pipeline/bin/../scripts/Pre_Merge_SV.wdl' -> '/opt/sv-pipeline/bin/../tmp/Pre_Merge_SV.wdl'
+'/opt/sv-pipeline/bin/../scripts/Pre_Merge_SV_per_sample.wdl' -> '/opt/sv-pipeline/bin/../tmp/Pre_Merge_SV_per_sample.wdl'
+'/opt/sv-pipeline/bin/../scripts/Pre_Merge_QC_per_sample.wdl' -> '/opt/sv-pipeline/bin/../tmp/Pre_Merge_QC_per_sample.wdl'
+'/opt/sv-pipeline/bin/../scripts/SV_Tasks.wdl' -> '/opt/sv-pipeline/bin/../tmp/SV_Tasks.wdl'
+---> [ 2020-07-22 15:37:35 ] Creating dependency zip: tasks.zip
+  adding: Pre_Merge_QC_per_sample.wdl (deflated 59%)
+  adding: Pre_Merge_SV_per_sample.wdl (deflated 77%)
+  adding: SV_Tasks.wdl (deflated 78%)
++ curl -v localhost:8000/api/workflows/v1 -F workflowSource=@/opt/sv-pipeline/bin/../scripts/Pre_Merge_SV.wdl -F workflowInputs=@/opt/sv-pipeline/bin/../inputs/afib-secondattempt/afib-secondattempt.input.json -F workflowOptions=@/opt/sv-pipeline/bin/../inputs/afib-secondattempt/afib-secondattempt.options.json -F workflowDependencies=@tasks.zip
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying ::1...
+* TCP_NODELAY set
+* Connected to localhost (::1) port 8000 (#0)
+> POST /api/workflows/v1 HTTP/1.1
+> Host: localhost:8000
+> User-Agent: curl/7.52.1
+> Accept: */*
+> Content-Length: 11945
+> Expect: 100-continue
+> Content-Type: multipart/form-data; boundary=------------------------4999a5525fbf2cfd
+> 
+< HTTP/1.1 100 Continue
+< Server: akka-http/10.1.9
+< Date: Wed, 22 Jul 2020 15:37:35 GMT
+} [170 bytes data]
+< HTTP/1.1 201 Created
+< Server: akka-http/10.1.9
+< Date: Wed, 22 Jul 2020 15:37:35 GMT
+< Content-Type: application/json
+< Content-Length: 66
+< 
+{ [66 bytes data]
+* Curl_http_done: called premature == 0
+100 12011  100    66  100 11945   1898   335k --:--:-- --:--:-- --:--:--  343k
+* Connection #0 to host localhost left intact
+{"id":"b5b56833-7c0b-47f0-b3ea-eea6b592848a","status":"Submitted"}+ set +o xtrace
+---> [ 2020-07-22 15:37:35 ] Nuking out dependency zip: tasks.zip
+---> [ 2020-07-22 15:37:35 ] Nuking out tmp workspace: /opt/sv-pipeline/bin/../tmp
