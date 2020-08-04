@@ -1,12 +1,9 @@
 {
   "Pre_Merge_SV.aligned_crams": [
       "gs://wustl-ccdg-cram-data/Dyslipidemia/H_QQ-100330-100292.cram" ,
-      "gs://wustl-ccdg-cram-data/Dyslipidemia/H_QQ-101359-101220.cram" ,
       "gs://wustl-ccdg-cram-data/Dyslipidemia/H_QQ-101453-100884.cram" ,
       "gs://wustl-ccdg-cram-data/Dyslipidemia/H_QQ-104083-104069.cram" ,
-      "gs://wustl-ccdg-cram-data/Dyslipidemia/H_QQ-141712-141040.cram" ,
-      "gs://wustl-ccdg-cram-data/Dyslipidemia/H_QQ-141766-141004.cram" ,
-      "gs://wustl-ccdg-cram-data/Dyslipidemia/H_QQ-142548-142542.cram" 
+      "gs://wustl-ccdg-cram-data/Dyslipidemia/H_QQ-141712-141040.cram"  
       ],
   "Pre_Merge_SV.aligned_cram_suffix": ".cram",
   "Pre_Merge_SV.ref_fasta": "gs://human-b38/GRCh38DH/all_sequences.fa",
