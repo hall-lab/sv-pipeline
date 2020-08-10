@@ -260,7 +260,7 @@ task Count_Manta {
      | awk 'BEGIN{OFS="\t"}{if($1~/chr[1-9]+/ && $1!~/_/ && $4=="PASS") print $0;}' \
      | sort -k1,7 \
      | uniq -c \
-     | awk 'BEGIN{OGS="\t"}{print $2, $3, $4, $5, $6, $7, $8,  $1}'  > ~{basename}.manta.counts.1.txt
+     | awk 'BEGIN{OFS="\t"}{print $2, $3, $4, $5, $6, $7, $8,  $1}'  > ~{basename}.manta.counts.1.txt
   >>>
 
   runtime {
