@@ -421,7 +421,33 @@ task Per_Sample_Count_Summary {
   }
 }
 
+task Concat {
+  input {
+     File bnd_vcf_gz
+     File del_vcf_gz
+     File ins_vcf_gz
+     File other_vcf_gz
+     String output_vcf_name
+     Int preemptible_tries
+  }
+  command {
+    set -eo pipefail
+    bcftools concat -a ${bnd_vcf_gz} ${del_vcf_gz} ${ins_vcf_gz} ${other_vcf_gz} -o ${output_vcf_name} -O z
+  }
+   
+  runtime {
+    docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
+    cpu: "1"
+    memory: "3.75 GB"
+    disks: "local-disk " + 2*ceil(size(bnd_vcf_gz, "GB")+size(del_vcf_gz, "GB")+size(ins_vcf_gz, "GB")+size(other_vcf_gz))+10 + " HDD"
+    preemptible: preemptible_tries
+  }
 
+  output {
+    File output_vcf_gz = "${output_vcf_name}.vcf.gz"
+  }
+
+}
 task Manta {    
   input {
     File input_cram
