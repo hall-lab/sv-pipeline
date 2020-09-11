@@ -42,6 +42,13 @@ workflow Pre_Merge_SV_Per_Sample {
     ref_cache = ref_cache,
     preemptible_tries = preemptible_tries
   }
+  
+  call SV.Filter_Pass {
+    input:
+    input_vcf_gz = Manta.output_vcf
+    output_vcf_basename = basename + '.filtered'
+    preemptible_tries = preemptible_tries
+  }
 
   call SV.CNVnator_Histogram {
     input:
@@ -68,8 +75,8 @@ workflow Pre_Merge_SV_Per_Sample {
 
   output {
     File cram_index = Index_Cram.output_cram_index
-    File manta_vcf = Manta.output_vcf
-    File manta_tbi = Manta.output_tbi
+    File manta_vcf = Filter_Pass.output_vcf_gz
+    File manta_tbi = Filter_Pass.output_vcf_gz_tbi
     File manta_original_vcf = Manta.original_vcf
     File manta_original_tbi = Manta.original_tbi
     File cnvnator_cn_hist_root = CNVnator_Histogram.output_cn_hist_root

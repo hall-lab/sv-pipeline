@@ -902,6 +902,7 @@ task Filter_Pass {
     set -eo pipefail
 
     bcftools view -f .,PASS ~{input_vcf_gz}  | bgzip -c >  ~{output_vcf_basename}.vcf.gz
+    tabix -p vcf ~{output_vcf_basename}.vcf.gz
   >>>
 
   runtime {
@@ -914,6 +915,7 @@ task Filter_Pass {
 
   output {
     File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
+    File output_vcf_gz_tbi = "${output_vcf_basename}.vcf.gz.tbi"
   }
 }
 
