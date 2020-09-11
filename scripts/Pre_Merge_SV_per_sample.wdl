@@ -45,8 +45,8 @@ workflow Pre_Merge_SV_Per_Sample {
   
   call SV.Filter_Pass {
     input:
-    input_vcf_gz = Manta.output_vcf
-    output_vcf_basename = basename + '.filtered'
+    input_vcf_gz = Manta.output_vcf,
+    output_vcf_basename = basename + '.filtered',
     preemptible_tries = preemptible_tries
   }
 
