@@ -915,7 +915,7 @@ task Filter_Pass {
 
   output {
     File output_vcf_gz = "${output_vcf_basename}.vcf.gz"
-    File output_vcf_gz_tbi = "${output_vcf_basename}.vcf.gz.tbi"
+    #File output_vcf_gz_tbi = "${output_vcf_basename}.vcf.gz.tbi"
   }
 }
 
