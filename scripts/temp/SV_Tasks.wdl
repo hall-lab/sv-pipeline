@@ -211,91 +211,6 @@ task Filter_Index {
   
 }
 
-task Cat_Files {
-  input {
-    Array[File] input_peds
-    String basename
-    Int preemptible_tries
-  }
-  command {
-    cat ${sep = ' ' input_peds} > ~{basename}.ped 
-  }
-  runtime {
-    docker: "gcr.io/washu-genome-inh-dis-analysis/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
-    cpu: "1"
-    memory: "1 GB"
-    disks: "local-disk 1  HDD"
-    preemptible: preemptible_tries
-  }
-  output {
-    File output_ped = "${basename}.ped"
-  }
-}
-
-task Append_Cohort_Pedigree_File {
-  input {
-     File ped
-     String cohort
-     String basename
-     Int preemptible_tries
-  }
-  command <<<
-    set -eo pipefail
-    cat ~{ped} \
-    | awk -v cohort="~{cohort}" 'BEGIN{OFS="\t"}{
-      $1=cohort"-"$1;
-      $2=cohort"-"$2;
-      print $0;}' > ~{basename}.reheadered.ped
-  >>>
-  
-  runtime {
-    docker: "gcr.io/washu-genome-inh-dis-analysis/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
-    cpu: "1"
-    memory: "1 GB"
-    disks: "local-disk " + ceil( size(ped, "GB") * 3) + " HDD"
-    preemptible: preemptible_tries
-  }
-
-  output {
-    File reheadered_ped = "${basename}.reheadered.ped"
-  }
-}
- 
-
-task Append_Cohort {
-  input {
-    String cohort
-    File input_vcf
-    String basename
-    Int preemptible_tries
-  }
-
-  command <<<
-    set -eo pipefail
-     bcftools view -h ~{input_vcf} \
-     | tail -n 1 \
-     | tr '\t' '\n' \
-     | tail -n +10 \
-     | awk -v cohort="~{cohort}" 'BEGIN{OFS="\t"}{print $1, cohort"-"$1;}' > new_samples.txt
-     bcftools reheader -s new_samples.txt ~{input_vcf} > ~{basename}.reheadered.vcf.gz
-  >>>
-
-  runtime {
-    docker: "gcr.io/washu-genome-inh-dis-analysis/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
-    cpu: "1"
-    memory: "1 GB"
-    disks: "local-disk " + ceil( size(input_vcf, "GB") * 3) + " HDD"
-    preemptible: preemptible_tries
-  }
-
-  output {
-    File reheadered_vcf = "${basename}.reheadered.vcf.gz"
-  }
-}
-
-
-
-
 task Count_Lumpy {
   input {
     String basename
@@ -557,7 +472,7 @@ task Genotype {
   runtime {
     docker: "gcr.io/washu-genome-inh-dis-analysis/svtyper@sha256:8ebb0508bc63a2a32d22b4a3e55453222560daa30b7cc14a4f1189cb311d5922"
     cpu: "1"
-    memory: "15 GB" #15
+    memory: "80 GB" #15
     disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_vcf, "GB") +  size(ref_cache, "GB") * 5 + 20.0) + " HDD"
     #disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_vcf, "GB") +  size(ref_cache, "GB") * 20 + 20.0) + " HDD"
     preemptible: preemptible_tries
@@ -895,8 +810,8 @@ task Paste_VCF {
   runtime {
     docker: "gcr.io/washu-genome-inh-dis-analysis/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
-    memory: "48 GB"
-    disks: "local-disk " + 4*ceil(size(input_vcfs, "GB")) + " HDD"
+    memory: "32 GB"
+    disks: "local-disk " + 2*ceil(size(input_vcfs, "GB")) + " HDD"
     preemptible: 0
   }
 
