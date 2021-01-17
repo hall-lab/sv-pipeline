@@ -17,7 +17,7 @@ task Split_By_Type {
     /opt/hall-lab/htslib-1.9/bin/bgzip -c > ~{output_vcf_prefix}.ins_split.txt.gz
   >>>
   runtime {
-    docker: "halllab/vcf_bed_utils@sha256:09c18a5827d67891792ffc110627c7fa05b2262df4b91d6967ad6e544f41e8ec"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/vcf_bed_utils@sha256:09c18a5827d67891792ffc110627c7fa05b2262df4b91d6967ad6e544f41e8ec"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + ceil( size(input_vcf, "GB") * 2) + " HDD"
@@ -32,6 +32,7 @@ task Split_By_Type {
   }
 }
 
+
 task Get_Sample_Name {
   input {
   	File input_cram
@@ -41,12 +42,14 @@ task Get_Sample_Name {
   command {
     set -eo pipefail
     samtools view -H ${input_cram} \
-      | grep -m 1 '^@RG' | tr '\t' '\n' \
+      | grep  '^@RG' \
+      | head -n 1 \
+      | tr '\t' '\n' \
       | grep '^SM:' | sed 's/^SM://g'
   }
 
   runtime {
-    docker: "halllab/extract-sv-reads@sha256:192090f72afaeaaafa104d50890b2fc23935c8dc98988a9b5c80ddf4ec50f70c"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/extract-sv-reads@sha256:f5025bfa3c8aba859d29d968e28386159f3d77d6bc22d7cc5f753066bffa9c19"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + ceil( size(input_cram, "GB") + 2.0) + " HDD"
@@ -54,6 +57,7 @@ task Get_Sample_Name {
   }
 
   output {
+    File sample_name_file = stdout()
     String sample = read_string(stdout())
   }
 }
@@ -76,7 +80,7 @@ task Get_Sex {
   >>>
 
   runtime {
-    docker: "halllab/cnvnator@sha256:8bf4fa64a288c5647a9a6b1ea90d14e76f48a3e16c5bf98c63419bb7d81c8938"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/cnvnator@sha256:8bf4fa64a288c5647a9a6b1ea90d14e76f48a3e16c5bf98c63419bb7d81c8938"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk 4 HDD"
@@ -107,7 +111,7 @@ task Make_Pedigree_File {
   >>>
 
   runtime {
-    docker: "ubuntu@sha256:edf05697d8ea17028a69726b4b450ad48da8b29884cd640fec950c904bfb50ce"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/ubuntu@sha256:6bf76a9556b3d2499d099acb2df684c747f6e010c541da54abf117b815fcfdaa"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk 4 HDD"
@@ -141,7 +145,7 @@ task Index_Cram {
   }
 
   runtime {
-    docker: "halllab/samtools@sha256:5e6b0430a7ad25f68e5c46a9fa9c0ebba0f9af8ebf5aebe94242954d812a4e68"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/samtools@sha256:5e6b0430a7ad25f68e5c46a9fa9c0ebba0f9af8ebf5aebe94242954d812a4e68"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + ceil( size(input_cram, "GB") + size(ref_cache, "GB") * 5 + 1.0) + " HDD"
@@ -191,7 +195,7 @@ task Filter_Index {
   >>>
 
   runtime {
-    docker: "halllab/vcf_bed_utils@sha256:09c18a5827d67891792ffc110627c7fa05b2262df4b91d6967ad6e544f41e8ec"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/vcf_bed_utils@sha256:09c18a5827d67891792ffc110627c7fa05b2262df4b91d6967ad6e544f41e8ec"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + ceil( size(input_vcf_gz, "GB") * 2) + " HDD"
@@ -204,6 +208,91 @@ task Filter_Index {
   }
   
 }
+
+task Cat_Files {
+  input {
+    Array[File] input_peds
+    String basename
+    Int preemptible_tries
+  }
+  command {
+    cat ${sep = ' ' input_peds} > ~{basename}.ped 
+  }
+  runtime {
+    docker: "gcr.io/washu-genome-inh-dis-analysis/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk 1  HDD"
+    preemptible: preemptible_tries
+  }
+  output {
+    File output_ped = "${basename}.ped"
+  }
+}
+
+task Append_Cohort_Pedigree_File {
+  input {
+     File ped
+     String cohort
+     String basename
+     Int preemptible_tries
+  }
+  command <<<
+    set -eo pipefail
+    cat ~{ped} \
+    | awk -v cohort="~{cohort}" 'BEGIN{OFS="\t"}{
+      $1=cohort"-"$1;
+      $2=cohort"-"$2;
+      print $0;}' > ~{basename}.reheadered.ped
+  >>>
+  
+  runtime {
+    docker: "gcr.io/washu-genome-inh-dis-analysis/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + ceil( size(ped, "GB") * 3) + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File reheadered_ped = "${basename}.reheadered.ped"
+  }
+}
+ 
+
+task Append_Cohort {
+  input {
+    String cohort
+    File input_vcf
+    String basename
+    Int preemptible_tries
+  }
+
+  command <<<
+    set -eo pipefail
+     bcftools view -h ~{input_vcf} \
+     | tail -n 1 \
+     | tr '\t' '\n' \
+     | tail -n +10 \
+     | awk -v cohort="~{cohort}" 'BEGIN{OFS="\t"}{print $1, cohort"-"$1;}' > new_samples.txt
+     bcftools reheader -s new_samples.txt ~{input_vcf} > ~{basename}.reheadered.vcf.gz
+  >>>
+
+  runtime {
+    docker: "gcr.io/washu-genome-inh-dis-analysis/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
+    cpu: "1"
+    memory: "1 GB"
+    disks: "local-disk " + ceil( size(input_vcf, "GB") * 3) + " HDD"
+    preemptible: preemptible_tries
+  }
+
+  output {
+    File reheadered_vcf = "${basename}.reheadered.vcf.gz"
+  }
+}
+
+
+
 
 task Count_Lumpy {
   input {
@@ -232,7 +321,7 @@ task Count_Lumpy {
   >>>
 
   runtime {
-    docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + ceil( size(input_vcf, "GB") * 2) + " HDD"
@@ -264,7 +353,7 @@ task Count_Manta {
   >>>
 
   runtime {
-    docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
     cpu: "1"
     memory: "1 GB"
     disks: "local-disk " + ceil( size(input_vcf, "GB") * 2) + " HDD"
@@ -320,12 +409,13 @@ task Manta {
     MantaWorkflow/runWorkflow.py -m local -g "unlimited"
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz ${basename}.vcf.gz
     mv MantaWorkflow/results/variants/diploidSV.vcf.gz.tbi ${basename}.vcf.gz.tbi
-    zcat ${basename}.vcf.gz | /opt/hall-lab/python-2.7.15/bin/python /opt/hall-lab/doctor_manta.1.py -m 700 | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ${basename}.doctored.vcf.gz
+    zcat ${basename}.vcf.gz | /opt/hall-lab/python-2.7.15/bin/python /opt/hall-lab/doctor_manta.1.py -m 700 \
+    | /opt/hall-lab/htslib-1.9/bin/bgzip -c > ${basename}.doctored.vcf.gz
     /opt/hall-lab/htslib-1.9/bin/tabix -p vcf ${basename}.doctored.vcf.gz
     tar -czvf ${basename}.MantaWorkflow.tgz MantaWorkflow
   }
   runtime {
-    docker: "halllab/manta_samtools@sha256:d39fac59a2c06f808d115c65b9c191baf5f249769d317263ae3cd19e2c74d20e"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/manta_samtools@sha256:d39fac59a2c06f808d115c65b9c191baf5f249769d317263ae3cd19e2c74d20e"
     cpu: "8"
     memory: "16 GiB"
     disks: "local-disk " + ceil( size(input_cram, "GB") * 4 + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB") * 5 + 20.0) + " SSD"
@@ -384,7 +474,7 @@ task Smoove {
   }
 
   runtime {
-    docker: "halllab/smoove@sha256:50dc501efb2443aa8261ceefbb8ab1f3d2ec792767f4893f796ea9c9357705e2"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/smoove@sha256:50dc501efb2443aa8261ceefbb8ab1f3d2ec792767f4893f796ea9c9357705e2"
     cpu: "1"
     memory: "2.5 GiB"
     disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(exclude_regions, "GB") + size(input_cram, "GB") * 0.30 + size(ref_cache, "GB") * 5) + " HDD"
@@ -402,6 +492,37 @@ task Smoove {
     File discordants_index = "${basename}.disc.bam.bai"
   }
 }
+
+task Remove_Sname {
+  input {
+    String basename
+    File input_vcf
+    Int preemptible_tries
+  }
+
+  command <<<
+
+    zcat ~{input_vcf} \
+    | sed 's/SNAME1*=[^;\t]*\(;\)\{0,1\}\(\t\)\{0,1\}/\2/g' - \
+    | sed 's/PRPOS=[^;\t]*\(;\)\{0,1\}\(\t\)\{0,1\}/\2/g' - \
+    | sed 's/PREND=[^;\t]*\(;\)\{0,1\}\(\t\)\{0,1\}/\2/g' - \
+    | sed 's/;\(\t\|$\)/\1/g' - \
+    | bgzip -c > ~{basename}.rm_sname.vcf.gz
+    
+  >>>
+
+  runtime {
+    docker: "gcr.io/washu-genome-inh-dis-analysis/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
+    cpu: "1"
+    memory: "3.75 GB"
+    disks: "local-disk " + 2*ceil(size(input_vcf, "GB"))+10 + " HDD"
+    preemptible: preemptible_tries
+  }
+  output {
+    File output_vcf_gz = "${basename}.rm_sname.vcf.gz"
+  }
+}
+  
 
 task Genotype {
   input {
@@ -432,10 +553,11 @@ task Genotype {
   }
 
   runtime {
-    docker: "halllab/svtyper@sha256:8ebb0508bc63a2a32d22b4a3e55453222560daa30b7cc14a4f1189cb311d5922"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/svtyper@sha256:8ebb0508bc63a2a32d22b4a3e55453222560daa30b7cc14a4f1189cb311d5922"
     cpu: "1"
-    memory: "15 GB"
+    memory: "15 GB" #15
     disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_vcf, "GB") +  size(ref_cache, "GB") * 5 + 20.0) + " HDD"
+    #disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_vcf, "GB") +  size(ref_cache, "GB") * 20 + 20.0) + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -480,7 +602,7 @@ task Take_Original_Genotypes {
   >>> 
 
   runtime {
-    docker: "halllab/vcf_bed_utils@sha256:09c18a5827d67891792ffc110627c7fa05b2262df4b91d6967ad6e544f41e8ec"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/vcf_bed_utils@sha256:09c18a5827d67891792ffc110627c7fa05b2262df4b91d6967ad6e544f41e8ec"
     cpu: "1"
     memory: "15 GB"
     disks: "local-disk " + ceil( size(original_per_sample_vcf, "GB") + size(input_vcf, "GB") +  size(input_variant_to_sname_mapping, "GB") + 20.0) + " HDD"
@@ -520,7 +642,7 @@ task Copy_Number {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "4 GB"
     disks: "local-disk " + 35 + " HDD"
@@ -572,7 +694,7 @@ task CNVnator_Histogram {
   >>>
 
   runtime {
-    docker: "halllab/cnvnator@sha256:8bf4fa64a288c5647a9a6b1ea90d14e76f48a3e16c5bf98c63419bb7d81c8938"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/cnvnator@sha256:8bf4fa64a288c5647a9a6b1ea90d14e76f48a3e16c5bf98c63419bb7d81c8938"
     cpu: threads
     memory: "16 GB"
     disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_cram_index, "GB") + size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_cache, "GB") * 5 + 7.0 ) + " HDD"
@@ -618,7 +740,7 @@ task L_Sort_VCF_Variants {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + 2*ceil(size(input_vcfs, "GB")) +10 + " HDD"
@@ -649,7 +771,7 @@ task L_Merge_VCF_Variants {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + 2*ceil(size(input_vcf_gz, "GB"))+10 + " HDD"
@@ -680,7 +802,7 @@ task L_Merge_VCF_Variants_weighted {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + 2*ceil(size(input_vcf_gz, "GB"))+10 + " HDD"
@@ -706,7 +828,7 @@ task Filter_Del {
   >>>
 
   runtime {
-    docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + 2*ceil(size(input_vcf_gz, "GB"))+10 + " HDD"
@@ -732,7 +854,7 @@ task Filter_Pass {
   >>>
 
   runtime {
-    docker: "halllab/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/bcftools@sha256:955cbf93e35e5ee6fdb60e34bb404b7433f816e03a202dfed9ceda542e0d8906"
     cpu: "1"
     memory: "3.75 GB"
     disks: "local-disk " + 2*ceil(size(input_vcf_gz, "GB"))+10 + " HDD"
@@ -769,10 +891,10 @@ task Paste_VCF {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
-    memory: "12 GB"
-    disks: "local-disk " + 2*ceil(size(input_vcfs, "GB")) + " HDD"
+    memory: "48 GB"
+    disks: "local-disk " + 4*ceil(size(input_vcfs, "GB")) + " HDD"
     preemptible: 0
   }
 
@@ -797,7 +919,7 @@ task Remove_INS {
   >>>
 
   runtime {
-    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3 GB"
     disks: "local-disk " +  2*ceil( size(input_vcf_gz, "GB")) + " HDD"
@@ -829,7 +951,7 @@ task Prune_VCF {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3 GB"
     disks: "local-disk " +  3*ceil( size(input_vcf_gz, "GB")) + " HDD"
@@ -866,7 +988,7 @@ task Classify {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3 GB"
     disks: "local-disk " +  10*ceil( size(input_vcf_gz, "GB")) + " HDD"
@@ -896,7 +1018,7 @@ task Sort_Index_VCF {
   }
 
   runtime {
-    docker: "halllab/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
+    docker: "gcr.io/washu-genome-inh-dis-analysis/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
     memory: "3 GB"
     disks: "local-disk " + 20*ceil( size(input_vcf_gz, "GB")) + " HDD"
