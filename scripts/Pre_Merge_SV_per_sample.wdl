@@ -22,6 +22,12 @@ workflow Pre_Merge_SV_Per_Sample {
     String basename = sub(sub(aligned_cram, "^.*/", ""), aligned_cram_suffix + "$", "")
   }
 
+  call SV.Get_Sample_Name {
+    input:
+    input_cram = aligned_cram,
+    preemptible_tries = preemptible_tries
+  }
+
   call SV.Index_Cram {
     input:
     basename = basename,
@@ -67,6 +73,7 @@ workflow Pre_Merge_SV_Per_Sample {
   }
 
   output {
+    File sample_name = Get_Sample_Name.sample_name_file
     File cram_index = Index_Cram.output_cram_index
     File manta_vcf = Manta.output_vcf
     File manta_tbi = Manta.output_tbi

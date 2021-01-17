@@ -50,15 +50,8 @@ workflow Pre_Merge_SV {
     }
   }
 
-  #scatter (p in [("manta", Pre_Merge_QC_Per_Sample.manta_counts), ("lumpy", Pre_Merge_QC_Per_Sample.lumpy_counts)]) {
-  #  call SV.Make_Count_Plot {
-  #    input:
-  #      name=p.left,
-  #      count_files=p.right
-  #  }
-  #}
-
   output {
+    Array[File] sample_names = Pre_Merge_SV_Per_Sample.sample_name
     Array[File] cram_indices = Pre_Merge_SV_Per_Sample.cram_index
     Array[File] manta_vcfs = Pre_Merge_SV_Per_Sample.manta_vcf
     Array[File] manta_tbis = Pre_Merge_SV_Per_Sample.manta_tbi
@@ -71,6 +64,5 @@ workflow Pre_Merge_SV {
     Array[File] smoove_csis = Pre_Merge_SV_Per_Sample.smoove_csi
     Array[File] lumpy_counts = Pre_Merge_QC_Per_Sample.lumpy_counts
     Array[File] manta_counts = Pre_Merge_QC_Per_Sample.manta_counts
-    #Array[File] count_plots = Make_Count_Plot.counts_plot
   }
 }
