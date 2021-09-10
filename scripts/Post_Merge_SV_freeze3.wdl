@@ -21,6 +21,8 @@ workflow Post_Merge_SV_freeze3 {
   	String batch
 	String cohort
 	String center
+	File genotype_wrapper
+	File genotype_script
 
   	# reference inputs
   	File ref_fasta
@@ -56,6 +58,8 @@ workflow Post_Merge_SV_freeze3 {
       input_cram = aligned_cram,
       input_cram_index = aligned_cram_index,
       input_vcf = merged_vcf_1,
+      genotype_wrapper = genotype_wrapper,
+      genotype_script = genotype_script, 
       ref_cache = ref_cache,
       preemptible_tries = preemptible_tries
     }
@@ -66,6 +70,8 @@ workflow Post_Merge_SV_freeze3 {
       input_cram = aligned_cram,
       input_cram_index = aligned_cram_index,
       input_vcf = merged_vcf_2,
+      genotype_wrapper = genotype_wrapper,
+      genotype_script = genotype_script, 
       ref_cache = ref_cache,
       preemptible_tries = preemptible_tries
     }
@@ -76,6 +82,8 @@ workflow Post_Merge_SV_freeze3 {
       input_cram = aligned_cram,
       input_cram_index = aligned_cram_index,
       input_vcf = merged_vcf_3,
+      genotype_wrapper = genotype_wrapper,
+      genotype_script = genotype_script, 
       ref_cache = ref_cache,
       preemptible_tries = preemptible_tries
     }
@@ -86,6 +94,8 @@ workflow Post_Merge_SV_freeze3 {
       input_cram = aligned_cram,
       input_cram_index = aligned_cram_index,
       input_vcf = merged_vcf_4,
+      genotype_wrapper = genotype_wrapper,
+      genotype_script = genotype_script, 
       ref_cache = ref_cache,
       preemptible_tries = preemptible_tries
     }
@@ -96,6 +106,8 @@ workflow Post_Merge_SV_freeze3 {
       input_cram = aligned_cram,
       input_cram_index = aligned_cram_index,
       input_vcf = merged_vcf_5,
+      genotype_wrapper = genotype_wrapper,
+      genotype_script = genotype_script, 
       ref_cache = ref_cache,
       preemptible_tries = preemptible_tries
     }
@@ -106,6 +118,8 @@ workflow Post_Merge_SV_freeze3 {
       input_cram = aligned_cram,
       input_cram_index = aligned_cram_index,
       input_vcf = merged_vcf_6,
+      genotype_wrapper = genotype_wrapper,
+      genotype_script = genotype_script, 
       ref_cache = ref_cache,
       preemptible_tries = preemptible_tries
     }
