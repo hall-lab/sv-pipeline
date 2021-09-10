@@ -33,6 +33,7 @@ task Split_By_Type {
 }
 
 
+
 task Get_Sample_Name {
   input {
   	File input_cram
@@ -555,9 +556,9 @@ task Genotype {
   runtime {
     docker: "gcr.io/washu-genome-inh-dis-analysis/svtyper@sha256:8ebb0508bc63a2a32d22b4a3e55453222560daa30b7cc14a4f1189cb311d5922"
     cpu: "1"
-    memory: "15 GB" #15
+    memory: "6.5 GB" #15
+    maxRetries: 2
     disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_vcf, "GB") +  size(ref_cache, "GB") * 5 + 20.0) + " HDD"
-    #disks: "local-disk " + ceil( size(input_cram, "GB") + size(input_vcf, "GB") +  size(ref_cache, "GB") * 20 + 20.0) + " HDD"
     preemptible: preemptible_tries
   }
 
@@ -604,7 +605,8 @@ task Take_Original_Genotypes {
   runtime {
     docker: "gcr.io/washu-genome-inh-dis-analysis/vcf_bed_utils@sha256:09c18a5827d67891792ffc110627c7fa05b2262df4b91d6967ad6e544f41e8ec"
     cpu: "1"
-    memory: "15 GB"
+    memory: "6.5 GB"
+    maxRetries: "2"
     disks: "local-disk " + ceil( size(original_per_sample_vcf, "GB") + size(input_vcf, "GB") +  size(input_variant_to_sname_mapping, "GB") + 20.0) + " HDD"
     preemptible: preemptible_tries
   }
@@ -893,9 +895,10 @@ task Paste_VCF {
   runtime {
     docker: "gcr.io/washu-genome-inh-dis-analysis/svtools@sha256:38ac08a8685ff58329b72e2b9c366872086d41ef21da84278676e06ef7f1bfbb"
     cpu: "1"
-    memory: "48 GB"
+    memory: "16 GB"
+    maxRetries: 2
     disks: "local-disk " + 4*ceil(size(input_vcfs, "GB")) + " HDD"
-    preemptible: 0
+    preemptible: 3
   }
 
   output {
