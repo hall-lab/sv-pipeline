@@ -6,21 +6,47 @@ basename=$3
 ref_cache=$4
 input_vcf=$5
 
+function log {
+    local timestamp=$(date +"%Y-%m-%d %T")
+    echo "---> [ ${timestamp} ] $@" >&2
+}
 
-set -eo pipefail
+log "Symlinking ${input_cram} to ${basename}.cram"
 ln -s ${input_cram} ${basename}.cram
+
+log "Symlinking ${input_cram_index} to ${basename}.cram.crai"
 ln -s ${input_cram_index} ${basename}.cram.crai
 
+log "Setting up the reference sequence cache"
 # build the reference sequence cache
 tar -zxf ${ref_cache}
 export REF_PATH=./cache/%2s/%2s/%s
 export REF_CACHE=./cache/%2s/%2s/%s
 
-rm -f ${basename}.cram.json
-zcat ${input_vcf} \
-  | svtyper \
-  -B ${basename}.cram \
-  -l ${basename}.cram.json \
-  | bgzip -c > ${basename}.gt.vcf.gz
+if [[ -e "${basename}.cram.json" ]]; then
+    log "Deleting existing ${basename}.cram.json"
+    rm -f ${basename}.cram.json
+fi
 
+log "Start running svtyper command"
 
+(set -eox pipefail; \
+ zcat ${input_vcf} \
+    | svtyper \
+      -B ${basename}.cram \
+      -l ${basename}.cram.json \
+    | bgzip -c \
+    > ${basename}.gt.vcf.gz)
+
+rc=$?
+
+log "Finished running svtyper command"
+log "original svtyper command return code is: ${rc}"
+
+if [[ ${rc} == "137" ]]
+then
+  echo "OutOfMemory" >&2 ;
+  exit 1;
+else
+  exit ${rc};
+fi
