@@ -30,7 +30,7 @@ fi
 
 log "Start running svtyper command"
 
-(set -eox pipefail; \
+(set -exo pipefail; \
  zcat ${input_vcf} \
     | svtyper \
       -B ${basename}.cram \
