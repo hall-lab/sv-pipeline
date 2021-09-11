@@ -8,7 +8,7 @@ input_vcf=$5
 
 function log {
     local timestamp=$(date +"%Y-%m-%d %T")
-    echo "---> [ ${timestamp} ] $@" >&2
+    echo "---> [ ${timestamp} ] $@" >/dev/null
 }
 
 log "Symlinking ${input_cram} to ${basename}.cram"
@@ -36,7 +36,7 @@ log "Start running svtyper command"
       -B ${basename}.cram \
       -l ${basename}.cram.json \
     | bgzip -c \
-    > ${basename}.gt.vcf.gz)
+    > ${basename}.gt.vcf.gz) 2>/dev/null 1>/dev/null
 
 rc=$?
 
