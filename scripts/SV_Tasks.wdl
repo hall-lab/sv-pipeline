@@ -533,13 +533,12 @@ task Genotype {
     File input_vcf
     File ref_cache
     File genotype_script
-    File genotype_wrapper
     Int preemptible_tries
     
   }
 
   command {
-    /bin/bash ${genotype_wrapper} ${input_cram} ${input_cram_index} ${basename} ${ref_cache} ${input_vcf} ${genotype_script}
+    /bin/bash ${genotype_script} ${input_cram} ${input_cram_index} ${basename} ${ref_cache} ${input_vcf}
   }
 
   runtime {
