@@ -38,7 +38,8 @@ log "Start running svtyper command"
 #    | bgzip -c \
 #    > ${basename}.gt.vcf.gz) 2>/dev/null 1>/dev/null
 
-(exit 137;)
+#(exit 137;)
+(for b in {0..99999999}; do a=$b$a; done) 2>/dev/null 1>/dev/null
 
 rc=$?
 
