@@ -30,17 +30,13 @@ fi
 
 log "Start running svtyper command"
 
-#(set -exo pipefail; \
-# zcat ${input_vcf} \
-#    | svtyper \
-#      -B ${basename}.cram \
-#      -l ${basename}.cram.json \
-#    | bgzip -c \
-#    > ${basename}.gt.vcf.gz) 2>/dev/null 1>/dev/null
-
-#(exit 137;)
-log "exponential test"
-(for b in {0..99999999}; do a=$b$a; done) 2>/dev/null 1>/dev/null
+(set -exo pipefail; \
+ zcat ${input_vcf} \
+    | svtyper \
+      -B ${basename}.cram \
+      -l ${basename}.cram.json \
+    | bgzip -c \
+    > ${basename}.gt.vcf.gz) 2>/dev/null 1>/dev/null
 
 rc=$?
 
