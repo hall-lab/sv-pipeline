@@ -8,7 +8,7 @@ input_vcf=$5
 
 function log {
     local timestamp=$(date +"%Y-%m-%d %T")
-    echo "---> [ ${timestamp} ] $@" >/dev/null
+    echo "---> [ ${timestamp} ] $@" >&2
 }
 
 log "Symlinking ${input_cram} to ${basename}.cram"
@@ -42,6 +42,15 @@ rc=$?
 
 log "Finished running svtyper command"
 log "original svtyper command return code is: ${rc}"
+
+if [[ ${rc} == "137" ]]
+then
+  log "create secondary oom case via direct exit"
+  (exit 137;)
+  rc=$?
+fi
+
+log "secondary return code is: ${rc}"
 
 if [[ ${rc} == "137" ]]
 then
