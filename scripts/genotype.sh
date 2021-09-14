@@ -45,6 +45,15 @@ log "original svtyper command return code is: ${rc}"
 
 if [[ ${rc} == "137" ]]
 then
+  log "create secondary oom case via direct exit"
+  (exit 137;)
+  rc=$?
+fi
+
+log "secondary return code is: ${rc}"
+
+if [[ ${rc} == "137" ]]
+then
   echo "OutOfMemory" >&2 ;
   exit 1;
 else
